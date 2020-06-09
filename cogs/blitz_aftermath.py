@@ -30,11 +30,13 @@ class blitz_aftermath(commands.Cog):
         channel = message.channel.name
         attachments = message.attachments
 
-        if message.channel.id != 719875141047418962 or message.channel.id != 719831153162321981:
+        if message.channel.id != 719875141047418962:
             return
 
         nano_data = { 'urls': []}
         if attachments:
+            print('valid message')
+
             for attachment in attachments:
                 nano_data.get('urls').append(attachment.url)
 
