@@ -29,7 +29,7 @@ client = commands.Bot(command_prefix=prefix, case_insensitive=False)
 #     return settings
 
 
-# Startup 
+# Startup
 @client.event
 async def on_ready():
     logger.log(f'{client.user.name} online!')

@@ -82,7 +82,7 @@ class blitz_aftermath(commands.Cog):
             embed_allies = ('\n'.join(allies))
             embed_enemies = ('\n'.join(enemies))
             embed_stats = 'Coming soon ;)'
-            embed_footer = "This bot is made and maintained by @Vovko #0851. Let me know if something breaks :)" + f'\n{min_x}, {max_x}, {middle_line}'
+            embed_footer = "This bot is made and maintained by @Vovko #0851. Let me know if something breaks :)" + f'\n{min_x}, {max_x}, {middle_line}, {len(all_predictions)}'
 
             # Constructing Embed
             embed=discord.Embed(title="Support Blitz Aftermath", url="https://www.paypal.me/vovko", description="If you would like to support me, click the link above.")
