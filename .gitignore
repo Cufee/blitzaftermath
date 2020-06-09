@@ -1,0 +1,11 @@
+#Python cache
+cogs/__pycache__/*
+cogs/__pycache__
+__pycache__/*
+__pycache__
+
+#Settings
+settings.json
+
+#Cogs template
+cogs/template
