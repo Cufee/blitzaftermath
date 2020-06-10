@@ -46,6 +46,7 @@ class blitz_aftermath(commands.Cog):
             print('valid message')
 
             for attachment in attachments:
+                attachment_width = attachment.width
                 nano_data.get('urls').append(attachment.url)
 
             # Send image to Nanonet
@@ -77,7 +78,8 @@ class blitz_aftermath(commands.Cog):
                 if prd_min_x < min_x:
                     min_x = prd_min_x
             
-            middle_line = longest_name*1.5 + min_x
+            # middle_line = longest_name*1.5 + min_x
+            middle_line = attachment_width / 2
 
             for prediction in all_predictions:
                 prd_min_x = prediction.get('xmax')
@@ -139,13 +141,13 @@ def add_winrate(raw_list):
 
         # Check for bad request
         if raw_user_response.get('status') != 'ok':
-            user_winrate = '0.0%'
+            user_winrate = '00.0%'
             raw_list[username_index] = f'[{user_winrate}] {username}'
             continue
 
         # Get account ID from username
         if not raw_user_response.get('data'):
-            user_winrate = '0.0%'
+            user_winrate = '00.0%'
             raw_list[username_index] = f'[{user_winrate}] {username}'
             continue
         raw_user_data = raw_user_response.get('data')[0]
@@ -156,7 +158,7 @@ def add_winrate(raw_list):
 
         # Check for bad request
         if raw_user_response.get('status') != 'ok':
-            user_winrate = '0.0%'
+            user_winrate = '00.0%'
             raw_list[username_index] = f'[{user_winrate}] {username_fixed}'
             continue
                 
