@@ -3,6 +3,7 @@ import discord
 
 import rapidjson
 import requests
+import re
 
 # Nononets setup
 nano_url = 'https://app.nanonets.com/api/v2/OCR/Model/81ef3ac1-fa8f-49fc-9e02-bfc8218c7d8c/LabelUrls/'
@@ -10,6 +11,12 @@ nano_headers = {
     'accept': 'application/x-www-form-urlencoded'
 }
 
+# WG API setup
+wg_application_id = 'application_id=add73e99679dd4b7d1ed7218fe0be448'
+wg_api_base_url = 'https://api.wotblitz.com/wotb/account/'
+wg_api_addon_list = 'list/?'
+wg_api_addon_info = 'info/?'
+wg_api_realm_na = 'r_realm=na'
 
 class blitz_aftermath(commands.Cog):
 
@@ -30,6 +37,7 @@ class blitz_aftermath(commands.Cog):
         channel = message.channel.name
         attachments = message.attachments
 
+        # Verify channel
         if message.channel.id != 719875141047418962:
             return
 
@@ -79,11 +87,24 @@ class blitz_aftermath(commands.Cog):
                 if prd_min_x > middle_line:
                     enemies.append(prediction.get('ocr_text'))
 
+            # Get winrate from WG api
+            allies, ally_wr = add_winrate(allies)
+            enemies, enemy_wr = add_winrate(enemies)
+            
+            all_wr = ally_wr + enemy_wr
+
+            if len(all_wr) > 10:
+                ally_team_wr = round(sum(ally_wr) / len(ally_wr), 1)
+                enemy_team_wr = round(sum(enemy_wr) / len(enemy_wr), 1)
+                embed_stats_text = f'Your team had {ally_team_wr}% winrate\nEnemy team had {enemy_team_wr}% winrate'
+
+            if len(all_wr) < 10:
+                embed_stats_text = f"Please try a higher resolution image.\n*Not enough valid data to calculate team win rates.*"
 
             # Defining Embed
             embed_allies = ('\n'.join(allies))
             embed_enemies = ('\n'.join(enemies))
-            embed_stats = 'Coming soon ;)'
+            embed_stats = embed_stats_text
             embed_footer = "This bot is made and maintained by @Vovko #0851. Let me know if something breaks :)" + f'\n{min_x}, {max_x}, {middle_line}, {len(all_predictions)}'
 
             # Constructing Embed
@@ -97,6 +118,62 @@ class blitz_aftermath(commands.Cog):
             await message.channel.send(embed=embed)
             return
 
+
+def add_winrate(raw_list):
+    win_rates = []
+    # Gathering player stats from WG API
+    for username in raw_list:
+        username_index = raw_list.index(username)
+        username_raw = username.strip()
+        if '(' in username_raw or '[' in username_raw or '.' in username_raw:
+            print(username_raw)
+            if username_raw.startswith('(') or username_raw.startswith('['):
+                raw_list.remove(username_raw)
+                continue
+            username_raw = re.split('\(|\[\.', username_raw)
+            username_raw = username_raw[0]
+        # Find closest matching player by name
+        list_request_url = f'{wg_api_base_url}{wg_api_addon_list}{wg_application_id}&{wg_api_realm_na}&search={username_raw}'
+        request = requests.get(list_request_url)
+        raw_user_response = rapidjson.loads(request.text)
+
+        # Check for bad request
+        if raw_user_response.get('status') != 'ok':
+            user_winrate = '0.0%'
+            raw_list[username_index] = f'[{user_winrate}] {username}'
+            continue
+
+        # Get account ID from username
+        if not raw_user_response.get('data'):
+            user_winrate = '0.0%'
+            raw_list[username_index] = f'[{user_winrate}] {username}'
+            continue
+        raw_user_data = raw_user_response.get('data')[0]
+        username_fixed = raw_user_data.get('nickname')
+        account_id = raw_user_data.get('account_id')
+        info_request_url = f'{wg_api_base_url}{wg_api_addon_info}{wg_application_id}&{wg_api_realm_na}&account_id={account_id}'
+        request = requests.get(info_request_url)
+
+        # Check for bad request
+        if raw_user_response.get('status') != 'ok':
+            user_winrate = '0.0%'
+            raw_list[username_index] = f'[{user_winrate}] {username_fixed}'
+            continue
+                
+        user_stats_raw = rapidjson.loads(request.text)
+        user_stats_all = user_stats_raw.get('data').get(str(account_id)).get('statistics').get('all')
+
+        user_battles_won = user_stats_all.get('wins')
+        user_battles_lost = user_stats_all.get('losses')
+        user_battles_total = int(user_stats_all.get('battles')) + 1 # Adding one in case it's a 0
+
+        user_winrate = int(user_battles_won) / int(user_battles_total) * 100
+        if user_winrate > 30.0 and user_winrate < 80.0:
+            win_rates.append(user_winrate)
+        user_winrate = f'{str(round(user_winrate, 1))}%'
+
+        raw_list[username_index] = f'[{user_winrate}] {username_fixed}'
+    return raw_list, win_rates
 
 def setup(client):
     client.add_cog(blitz_aftermath(client))
