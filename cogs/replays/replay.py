@@ -105,6 +105,7 @@ class Replay:
         player_realm = 'asia'
         api_domain = 'http://api.wotblitz.asia'
 
+      print(player_realm)
       return api_domain + self.wg_api_url_end, player_realm
 
       
