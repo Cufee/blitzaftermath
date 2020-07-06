@@ -30,7 +30,7 @@ class blitz_aftermath_replays(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.client.user: return
-        channel = message.channel.name
+        channel_name = message.channel.name
         attachments = message.attachments
 
         # Verify channel
@@ -52,9 +52,12 @@ class blitz_aftermath_replays(commands.Cog):
             # requests.post('http://localhost:4000/replays', json=replay_data)
             # test = rapidjson.loads(requests.get(f'http://localhost:4000/replays/{replay_id}').text)
 
-            await message.channel.send(f'```{str(replay_data)[:1000]}...```')
+            # await message.channel.send(f'```{str(replay_data)[:1000]}...```')
 
+            new_message = f"{replay_data[0].get('summary').get('player_name')}\n{replay_data[0].get('summary').get('map_name')}"
 
+            await message.channel.send(new_message)
+            
             # # Defining Embed
             # embed_allies = ('\n'.join(allies))
             # embed_enemies = ('\n'.join(enemies))
@@ -71,20 +74,6 @@ class blitz_aftermath_replays(commands.Cog):
             # # Send message
             # await message.channel.send(embed=embed)
             # return
-
-
-def detect_realm(player_id):
-    if player_id < 500000000:
-        return 'ru'
-
-    if player_id < 1000000000:
-        return 'eu'
-
-    if player_id < 2000000000:
-        return 'na'
-
-    else:
-        return 'asia'
 
 
 def setup(client):
