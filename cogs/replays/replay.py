@@ -89,15 +89,15 @@ class Replay:
 
     def get_wg_api_url(self, player_id):
       # Detect realm
-      if player_id < 500000000:
+      if len(str(player_id)) == 8:
         player_realm = 'ru'
         api_domain = 'http://wotblitz.ru'
 
-      if player_id < 1000000000:
+      if len(str(player_id)) == 9:
         player_realm = 'eu'
         api_domain = 'http://api.wotblitz.eu'
 
-      if player_id < 2000000000:
+      if len(str(player_id)) == 10:
         player_realm = 'na'
         api_domain = 'http://api.wotblitz.com'
 
