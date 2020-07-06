@@ -35,6 +35,7 @@ class Replay:
       
       return self.replays
 
+
     def gather_summary(self, url):
       res = requests.get(url)
       res_json = rapidjson.loads(res.text)
