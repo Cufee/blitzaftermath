@@ -107,7 +107,3 @@ class Replay:
 
       print(player_realm)
       return api_domain + self.wg_api_url_end, player_realm
-
-      
-
-        

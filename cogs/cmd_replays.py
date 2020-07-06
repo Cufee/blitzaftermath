@@ -52,8 +52,6 @@ class blitz_aftermath_replays(commands.Cog):
             # requests.post('http://localhost:4000/replays', json=replay_data)
             # test = rapidjson.loads(requests.get(f'http://localhost:4000/replays/{replay_id}').text)
 
-            # await message.channel.send(f'```{str(replay_data)[:1000]}...```')
-
             new_message = f"{replay_data[0].get('summary').get('player_name')}\n{replay_data[0].get('summary').get('map_name')}"
 
             await message.channel.send(new_message)
