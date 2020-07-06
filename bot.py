@@ -11,7 +11,6 @@ logger = Logger()
 with open(f'{os.path.dirname(os.path.realpath(__file__))}/settings.json') as f:
     settings = rapidjson.load(f)
 TOKEN = settings["TOKEN"]
-ATLAS_URI = settings["ATLAS_URI"]
 mode = settings["mode"]
 prefix = settings["prefix"]
 default_game = settings["default_game"]
