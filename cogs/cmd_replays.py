@@ -76,17 +76,19 @@ class blitz_aftermath_replays(commands.Cog):
                 else:
                     enemies_names.append(player_name)
 
-            print(len(allies_names), len(enemies_names))
-
             # Defining Embed
             # embed_allies = ('\n'.join(allies_names))
             embed_allies = (' \n'.join(allies_names))
             embed_enemies = (' \n'.join(enemies_names))
             embed_stats = 'embed_stats_text'
-            embed_footer = "This bot is made and maintained by @Vovko#0851. Let me know if something breaks :)"
+            embed_footer = f"MD5: {replay_data[0].get('_id')}"
+
+            replay_link = 'https://www.google.com/'
 
             # Constructing Embed
-            embed = discord.Embed(title="Aftermath Replays")
+            embed = discord.Embed(
+                title="Click here for detailed results", url=replay_link)
+            embed.set_author(name="Aftermath Replays")
             embed.add_field(
                 name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
