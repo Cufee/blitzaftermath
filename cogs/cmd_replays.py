@@ -86,7 +86,7 @@ class blitz_aftermath_replays(commands.Cog):
             embed_footer = "This bot is made and maintained by @Vovko#0851. Let me know if something breaks :)"
 
             # Constructing Embed
-            embed = discord.Embed(title="Aftermath Repplays")
+            embed = discord.Embed(title="Aftermath Replays")
             embed.add_field(
                 name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
