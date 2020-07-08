@@ -50,38 +50,63 @@ class blitz_aftermath_replays(commands.Cog):
                     replays.append(attachment.url)
 
             # Send replay to WoTInspector
-            replay_data = Replay(replays).gather_all()
+            replays_list_data = Replay(replays).process_replays()
 
-            # requests.post('http://localhost:4000/replays', json=replay_data)
-            # test = rapidjson.loads(requests.get(f'http://localhost:4000/replays/{replay_id}').text)
+            replay_data = replays_list_data.get(
+                list(replays_list_data.keys())[0])
 
-            # json_formatted_str = rapidjson.dumps(replay_data, indent=4)
-            # print(json_formatted_str)
+            map_name = replay_data.get('battle_summary').get('map_name')
+            winner_team = replay_data.get('battle_summary').get('winner_team')
 
-            # new_message = ''f"{replay_data[0].get('summary').get('player_name')}\n{replay_data[0].get('summary').get('map_name')}"''
-            # await message.channel.send(new_message)
-            allies = replay_data[0].get('summary').get('allies')
-            enemies = replay_data[0].get('summary').get('enemies')
+            protagonist_id = replay_data.get(
+                'battle_summary').get('protagonist')
+            protagonist_data = replay_data.get(
+                'players').get(str(protagonist_id))
+
+            battle_result = 'Win'
+            if winner_team != 1:
+                battle_result = 'Loss'
 
             allies_names = []
             enemies_names = []
 
-            for player in replay_data[0].get('players'):
-                player_id = player.get('player_id')
-                player_name = player.get(
-                    'data').get('all').get('nickname')
-
-                if int(player_id) in allies:
-                    allies_names.append(player_name)
+            for player in replay_data.get('players'):
+                data = replay_data.get('players').get(player)
+                if data.get('team') == 2:
+                    enemies_names.append(data.get('nickname'))
                 else:
-                    enemies_names.append(player_name)
+                    allies_names.append(data.get('nickname'))
+
+            # Protagonist performance
+            pr_performance = protagonist_data.get('performance')
+            pr_vehicle_stats = protagonist_data.get('vehicle_stats')
+
+            pr_battle_dmg = pr_performance.get(
+                'damage_made')
+            pr_stats_avg_dmg = round(pr_vehicle_stats.get(
+                'damage_dealt') / pr_vehicle_stats.get('battles'))
+
+            pr_battle_kills = pr_performance.get(
+                'enemies_destroyed')
+            pr_stats_avg_kills = round(pr_vehicle_stats.get(
+                'frags8p') / pr_vehicle_stats.get('battles'))
+
+            pr_battle_shots = pr_performance.get(
+                'shots_made')
+            pr_battle_pen = pr_performance.get(
+                'shots_pen')
+
+            embed_stats_text = (
+                f'Damage vs Career {pr_battle_dmg}/{pr_stats_avg_dmg}\n' +
+                f'Kills vs Career {pr_battle_kills}/{pr_stats_avg_kills}\n' +
+                f'Shots vs Pen {pr_battle_shots}/{pr_battle_pen}')
 
             # Defining Embed
-            # embed_allies = ('\n'.join(allies_names))
             embed_allies = (' \n'.join(allies_names))
             embed_enemies = (' \n'.join(enemies_names))
-            embed_stats = 'embed_stats_text'
-            embed_footer = f"MD5: {replay_data[0].get('_id')}"
+            embed_stats = embed_stats_text
+
+            embed_footer = f"MD5/ID: {list(replays_list_data.keys())[0]}"
 
             replay_link = 'https://www.google.com/'
 

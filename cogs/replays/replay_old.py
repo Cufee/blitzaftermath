@@ -54,10 +54,8 @@ class Replay:
             'summary').get('battle_start_timestamp')
         map_name = replay_data.get('summary').get('map_name')
         room_type = replay_data.get('summary').get('room_type')
-        protagonist = replay_data.get('summary').get('protagonist')
 
         battle_summary = {
-            "protagonist": protagonist,
             "winner_team": winner_team,
             "battle_type": battle_type,
             "battle_duration": battle_duration,
@@ -73,9 +71,6 @@ class Replay:
         protagonist_id = replay_summary.get('protagonist')
         players_all = replay_summary.get('details')
 
-        enemies = replay_summary.get('enemies')
-        allies = replay_summary.get('allies')
-
         # Get stats for each player from WG API
         player_ids_all = replay_summary.get(
             'allies') + replay_summary.get('enemies')
@@ -84,7 +79,7 @@ class Replay:
         wg_api_domain, player_realm = self.get_wg_api_domain(protagonist_id)
 
         players_stats = rapidjson.loads(requests.get(
-            wg_api_domain + self.wg_api_url_end + player_ids_all_str).text).get('data')
+            wg_api_domain + wg_api_url_end + player_ids_all_str).text).get('data')
 
         # Get all vehicle data from WG API
         vehicles_all = []
@@ -95,36 +90,27 @@ class Replay:
         vehicles_all_str = ','.join((str(vehicle)
                                      for vehicle in vehicles_all))
         vehicles_all_data = rapidjson.loads(requests.get(
-            wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str).text).get('data')
+            wg_api_domain + wg_tanks_api_url_end + vehicles_all_str).text).get('data')
 
         for player in players_all:
-            player_id = str(player.get('dbid'))
+            player_id = player.get('dbid')
             nickname = players_stats.get(player_id).get('nickname')
             stats = players_stats.get(player_id).get('statistics').get('all')
 
-            vehicle = vehicles_all_data.get(str(
-                player.get('vehicle_descr')))
-            vehicle_id = player.get('vehicle_descr')
+            vehicle = vehicles_all_data.get(
+                player.get('vehicle_descr'))
             vehicle_stats = rapidjson.loads(requests.get(
-                wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}').text).get('data').get(player_id)[0].get('all')
-
-            if int(player_id) in enemies:
-                team = 2
-            else:
-                team = 1
+                wg_api_domain + wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle}').text).get('data').get(player_id)[0].get('all')
 
             player_data = {
-                player_id: {
-                    'nickname': nickname,
-                    'team': team,
-                    'vehicle': vehicle,
-                    'vehicle_stats': vehicle_stats,
-                    'performance': player,
-                    'stats': stats
-                }
+                'nickname': nickname,
+                'vehicle': vehicle,
+                'vehicle_stats': vehicle_stats,
+                'performance': player,
+                'stats': stats
             }
 
-            players.update(player_data)
+            players[player.get('dbid')](player_data)
         return players
 
     def get_wg_api_domain(self, player_id):
