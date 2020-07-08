@@ -42,7 +42,7 @@ async def on_ready():
             # cog_settings = settings.get(filename[:-3])
             # cog_name = cog_settings.get('name')
             # is_enabled = cog_settings.get(f'enabled_{mode}')
-            is_enabled = True # Need to replace once hooked up to db
+            is_enabled = True  # Need to replace once hooked up to db
             if is_enabled:
                 client.load_extension(f'cogs.{filename[:-3]}')
                 logger.log(f'{filename} was loaded')

@@ -6,6 +6,8 @@ import rapidjson
 import requests
 import re
 
+from cogs.replays.replay import Replay
+
 # WG API setup
 wg_application_id = 'application_id=add73e99679dd4b7d1ed7218fe0be448'
 wg_api_base_url = 'https://api.wotblitz.com/wotb/account/'
@@ -29,7 +31,8 @@ class blitz_aftermath_replays(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user: return
+        if message.author == self.client.user:
+            return
         channel_name = message.channel.name
         attachments = message.attachments
 
@@ -43,35 +46,58 @@ class blitz_aftermath_replays(commands.Cog):
             print('valid message')
 
             for attachment in attachments:
-              if attachment.url.endswith('.wotbreplay'):
-                replays.append(attachment.url)
+                if attachment.url.endswith('.wotbreplay'):
+                    replays.append(attachment.url)
 
             # Send replay to WoTInspector
             replay_data = Replay(replays).gather_all()
-            
+
             # requests.post('http://localhost:4000/replays', json=replay_data)
             # test = rapidjson.loads(requests.get(f'http://localhost:4000/replays/{replay_id}').text)
 
-            new_message = f"{replay_data[0].get('summary').get('player_name')}\n{replay_data[0].get('summary').get('map_name')}"
+            # json_formatted_str = rapidjson.dumps(replay_data, indent=4)
+            # print(json_formatted_str)
 
-            await message.channel.send(new_message)
-            
-            # # Defining Embed
-            # embed_allies = ('\n'.join(allies))
-            # embed_enemies = ('\n'.join(enemies))
-            # embed_stats = embed_stats_text
-            # embed_footer = "This bot is made and maintained by @Vovko #0851. Let me know if something breaks :)" + f'\n{min_x}, {max_x}, {middle_line}, {len(all_predictions)}'
+            # new_message = ''f"{replay_data[0].get('summary').get('player_name')}\n{replay_data[0].get('summary').get('map_name')}"''
+            # await message.channel.send(new_message)
+            allies = replay_data[0].get('summary').get('allies')
+            enemies = replay_data[0].get('summary').get('enemies')
 
-            # # Constructing Embed
-            # embed=discord.Embed(title="Support Blitz Aftermath", url="https://www.paypal.me/vovko", description="If you would like to support me, click the link above.")
-            # embed.add_field(name="Allies", value=f'```{embed_allies}```', inline=False)
-            # embed.add_field(name="Enemies", value=f'```{embed_enemies}```', inline=False)
-            # embed.add_field(name="Stats", value=f'```{embed_stats}```', inline=False)
-            # embed.set_footer(text=embed_footer)
+            allies_names = []
+            enemies_names = []
 
-            # # Send message
-            # await message.channel.send(embed=embed)
-            # return
+            for player in replay_data[0].get('players'):
+                player_id = player.get('player_id')
+                player_name = player.get(
+                    'data').get('all').get('nickname')
+
+                if int(player_id) in allies:
+                    allies_names.append(player_name)
+                else:
+                    enemies_names.append(player_name)
+
+            print(len(allies_names), len(enemies_names))
+
+            # Defining Embed
+            # embed_allies = ('\n'.join(allies_names))
+            embed_allies = (' \n'.join(allies_names))
+            embed_enemies = (' \n'.join(enemies_names))
+            embed_stats = 'embed_stats_text'
+            embed_footer = "This bot is made and maintained by @Vovko#0851. Let me know if something breaks :)"
+
+            # Constructing Embed
+            embed = discord.Embed(title="Aftermath Repplays")
+            embed.add_field(
+                name="Allies", value=f'```{embed_allies} ```', inline=False)
+            embed.add_field(
+                name="Enemies", value=f'```{embed_enemies} ```', inline=False)
+            embed.add_field(
+                name="Stats", value=f'```{embed_stats}```', inline=False)
+            embed.set_footer(text=embed_footer)
+
+            # Send message
+            await message.channel.send(embed=embed)
+            return
 
 
 def setup(client):
