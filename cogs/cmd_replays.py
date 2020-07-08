@@ -62,6 +62,8 @@ class blitz_aftermath_replays(commands.Cog):
                 'battle_summary').get('protagonist')
             protagonist_data = replay_data.get(
                 'players').get(str(protagonist_id))
+            protagonist_name = replay_data.get(
+                'players').get(str(protagonist_id)).get('nickname')
 
             battle_result = 'Win'
             if winner_team != 1:
@@ -113,13 +115,14 @@ class blitz_aftermath_replays(commands.Cog):
             # Constructing Embed
             embed = discord.Embed(
                 title="Click here for detailed results", url=replay_link)
-            embed.set_author(name="Aftermath Replays")
+            embed.set_author(
+                name=f"Battle by {protagonist_name} on {map_name}")
             embed.add_field(
                 name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
                 name="Enemies", value=f'```{embed_enemies} ```', inline=False)
             embed.add_field(
-                name="Stats", value=f'```{embed_stats}```', inline=False)
+                name=protagonist_name, value=f'```{embed_stats}```', inline=False)
             embed.set_footer(text=embed_footer)
 
             # Send message
