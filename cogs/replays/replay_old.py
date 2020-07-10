@@ -12,7 +12,7 @@ class Replay:
         self.base_view_url = 'https://replays.wotinspector.com/en/view/'
         self.base_api_url = 'https://wotinspector.com/api/replay/upload/?details=full&url='
 
-        self.replay_urls = replay_urls
+        self.replay_urls = replay_urls 
         self.api_urls = []
 
         for url in replay_urls:

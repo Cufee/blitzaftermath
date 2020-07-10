@@ -1,31 +1,49 @@
 class Rating:
-    def __init__(self, replays_data):
-        self.replay_data = replay_data[0]
+    def __init__(self, replay_data):
+        self.replay_data = replay_data
         self.replay_summary = self.replay_data.get('summary')
         self.replay_players = self.replay_data.get('players')
 
-    def restructure_data(self):
-        replay_details = self.replay_summary.get('details')
-        all_vehicles = []
-        for player in replay_details:
-            # Player info
-            player_id = player.get('dbid')
-            vehicle = player.get('vehicle_descr')
-            all_vehicles.append(vehicle)
-            platoon_number = player.get('squad_index')
+    def calculate_rating(self):
+        for player in self.replay_data.get('players'):
+            player_data = self.replay_data.get('players').get(player)
+            player_name = player_data.get('nickname')
+
             survived_bool = True
-            if player.get('hitpoints_left') == 0:
+            if player_data.get('performance').get('hitpoints_left') == 0:
                 survived_bool = False
 
-            # Performance
-            shots_fired = player.get('shots_made')
-            shots_penetrated = player.get('shots_pen')
-            enemies_destroyed = player.get('enemies_destroyed')
-            time_alive = player.get('time_alive')
-            damage_blocked = player.get('damage_blocked')
-            distance_travelled = player.get('distance_travelled')
-            damage_assisted = player.get('damage_assisted')
-            damage_assisted_track = player.get('damage_assisted_track')
-            damage_made = player.get('damage_made')
+            shots_fired = player_data.get('performance').get('shots_made')
+            shots_penetrated = player_data.get('performance').get('shots_pen')
+            enemies_destroyed = player_data.get(
+                'performance').get('enemies_destroyed')
+            time_alive = player_data.get('performance').get('time_alive')
+            damage_blocked = player_data.get(
+                'performance').get('damage_blocked')
+            distance_travelled = player_data.get(
+                'performance').get('distance_travelled')
+            damage_assisted = player_data.get(
+                'performance').get('damage_assisted')
+            damage_assisted_track = player_data.get(
+                'performance').get('damage_assisted_track')
+            damage_made = player_data.get('performance').get('damage_made')
+            kills = player_data.get('performance').get('enemies_destroyed')
 
-            player_rating = ''
+            tank_hp = 2000
+            travel_avg = 1000
+
+            player_id = player
+            platoon_number = player_data.get('performance').get('squad_index')
+            survived_bool = True
+
+            damage_efficiency = (damage_made + damage_assisted) / tank_hp
+            kill_efficiency = kills / 7
+            travel_efficiency = distance_travelled / (travel_avg + 0.001)
+            shot_efficiency = (shots_penetrated + 0.001) / shots_fired
+
+            rating = round(((damage_efficiency + kill_efficiency +
+                             travel_efficiency + shot_efficiency) / 4 * 1000))
+
+            player_data['rating'] = rating
+
+        return self.replay_data

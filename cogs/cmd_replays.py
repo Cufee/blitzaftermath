@@ -1,5 +1,6 @@
 from discord.ext import commands, tasks
 from cogs.replays.replay import Replay
+from cogs.replays.rating import Rating
 import discord
 
 import rapidjson
@@ -55,6 +56,8 @@ class blitz_aftermath_replays(commands.Cog):
             replay_data = replays_list_data.get(
                 list(replays_list_data.keys())[0])
 
+            replay_data = Rating(replay_data).calculate_rating()
+
             map_name = replay_data.get('battle_summary').get('map_name')
             winner_team = replay_data.get('battle_summary').get('winner_team')
 
@@ -75,9 +78,11 @@ class blitz_aftermath_replays(commands.Cog):
             for player in replay_data.get('players'):
                 data = replay_data.get('players').get(player)
                 if data.get('team') == 2:
-                    enemies_names.append(data.get('nickname'))
+                    enemies_names.append(
+                        f"[{data.get('rating')}] {data.get('nickname')}")
                 else:
-                    allies_names.append(data.get('nickname'))
+                    allies_names.append(
+                        f"[{data.get('rating')}] {data.get('nickname')}")
 
             # Protagonist performance
             pr_performance = protagonist_data.get('performance')
@@ -118,9 +123,9 @@ class blitz_aftermath_replays(commands.Cog):
             embed.set_author(
                 name=f"Battle by {protagonist_name} on {map_name}")
             embed.add_field(
-                name="Allies", value=f'```{embed_allies} ```', inline=False)
+                name="[vRT] Nickname\nAllies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
-                name="Enemies", value=f'```{embed_enemies} ```', inline=False)
+                name='Enemies', value=f'```{embed_enemies} ```', inline=False)
             embed.add_field(
                 name=protagonist_name, value=f'```{embed_stats}```', inline=False)
             embed.set_footer(text=embed_footer)
