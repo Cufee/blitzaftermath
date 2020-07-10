@@ -77,12 +77,26 @@ class blitz_aftermath_replays(commands.Cog):
 
             for player in replay_data.get('players'):
                 data = replay_data.get('players').get(player)
+
+                player_wins = data.get('stats').get('wins')
+                player_battles = data.get('stats').get('battles')
+                data = replay_data.get('players').get(player)
+
+                vehicle_wins = data.get('vehicle_stats').get('wins')
+                vehicle_battles = data.get('vehicle_stats').get('battles')
+
+                player_wr = "%.2f" % round(
+                    (player_wins / player_battles * 100), 2)
+                vehicle_wr = "%.2f" % round(
+                    (vehicle_wins / vehicle_battles * 100), 2)
+
+                player_final_str = (
+                    f"[{player_wr}%] [{vehicle_wr}%] [{data.get('rating')}] {data.get('nickname')}")
+
                 if data.get('team') == 2:
-                    enemies_names.append(
-                        f"[{data.get('rating')}] {data.get('nickname')}")
+                    enemies_names.append(player_final_str)
                 else:
-                    allies_names.append(
-                        f"[{data.get('rating')}] {data.get('nickname')}")
+                    allies_names.append(player_final_str)
 
             # Protagonist performance
             pr_performance = protagonist_data.get('performance')
@@ -123,7 +137,7 @@ class blitz_aftermath_replays(commands.Cog):
             embed.set_author(
                 name=f"Battle by {protagonist_name} on {map_name}")
             embed.add_field(
-                name="[vRT] Nickname\nAllies", value=f'```{embed_allies} ```', inline=False)
+                name="[WR] [Vehicle WR] [vRT] Nickname\nAllies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
                 name='Enemies', value=f'```{embed_enemies} ```', inline=False)
             embed.add_field(
