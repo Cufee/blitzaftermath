@@ -97,7 +97,7 @@ class blitz_aftermath_replays(commands.Cog):
                     (vehicle_wins / vehicle_battles * 100), 2)
 
                 player_final_str = (
-                    f"[{player_wr}%] [{vehicle_wr}%] [{data.get('rating')}] {data.get('nickname')}")
+                    f"[{player_wr}%] [{vehicle_wr}% ({vehicle_battles})] [{data.get('rating')}] {data.get('nickname')}")
 
                 all_names.append(player_final_str)
 
@@ -131,8 +131,8 @@ class blitz_aftermath_replays(commands.Cog):
                 f'Shots vs Pen {pr_battle_shots}/{pr_battle_pen}')
 
             # Defining Embed
-            embed_key = f'[WR] [Vehicle WR] [vRT] Nickname'
-            embed_allies = embed_key + '\n\n' + (' \n'.join(allies_names))
+            embed_key = f'[WR] [Vehicle WR (Battles)] [vRT] Nickname'
+            embed_allies = (' \n'.join(allies_names))
             embed_enemies = (' \n'.join(enemies_names))
             embed_all_players = (' \n'.join(all_names))
             embed_stats = embed_stats_text
@@ -146,8 +146,8 @@ class blitz_aftermath_replays(commands.Cog):
                 title="Click here for detailed results", url=replay_link)
             embed.set_author(
                 name=f"Battle by {protagonist_name} on {map_name}")
-            # embed.add_field(
-            #     name=embed_key, value='', inline=False)
+            embed.add_field(
+                name='Legend', value=f'```{embed_key}```', inline=False)
             embed.add_field(
                 name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
