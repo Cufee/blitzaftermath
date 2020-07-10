@@ -74,9 +74,15 @@ class blitz_aftermath_replays(commands.Cog):
 
             allies_names = []
             enemies_names = []
+            all_names = []
+
+            best_rating = 0
 
             for player in replay_data.get('players'):
                 data = replay_data.get('players').get(player)
+
+                if best_rating < data.get('rating'):
+                    best_rating = data.get('rating')
 
                 player_wins = data.get('stats').get('wins')
                 player_battles = data.get('stats').get('battles')
@@ -92,6 +98,8 @@ class blitz_aftermath_replays(commands.Cog):
 
                 player_final_str = (
                     f"[{player_wr}%] [{vehicle_wr}%] [{data.get('rating')}] {data.get('nickname')}")
+
+                all_names.append(player_final_str)
 
                 if data.get('team') == 2:
                     enemies_names.append(player_final_str)
@@ -123,8 +131,10 @@ class blitz_aftermath_replays(commands.Cog):
                 f'Shots vs Pen {pr_battle_shots}/{pr_battle_pen}')
 
             # Defining Embed
-            embed_allies = (' \n'.join(allies_names))
+            embed_key = f'[WR] [Vehicle WR] [vRT] Nickname'
+            embed_allies = embed_key + '\n\n' + (' \n'.join(allies_names))
             embed_enemies = (' \n'.join(enemies_names))
+            embed_all_players = (' \n'.join(all_names))
             embed_stats = embed_stats_text
 
             embed_footer = f"MD5/ID: {list(replays_list_data.keys())[0]}"
@@ -136,10 +146,14 @@ class blitz_aftermath_replays(commands.Cog):
                 title="Click here for detailed results", url=replay_link)
             embed.set_author(
                 name=f"Battle by {protagonist_name} on {map_name}")
+            # embed.add_field(
+            #     name=embed_key, value='', inline=False)
             embed.add_field(
-                name="[WR] [Vehicle WR] [vRT] Nickname\nAllies", value=f'```{embed_allies} ```', inline=False)
+                name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
                 name='Enemies', value=f'```{embed_enemies} ```', inline=False)
+            # embed.add_field(
+            #     name='Players', value=f'```{embed_all_players} ```', inline=False)
             embed.add_field(
                 name=protagonist_name, value=f'```{embed_stats}```', inline=False)
             embed.set_footer(text=embed_footer)
