@@ -87,6 +87,7 @@ class blitz_aftermath_replays(commands.Cog):
                 player_wins = data.get('stats').get('wins')
                 player_battles = data.get('stats').get('battles')
                 player_vehicle = data.get('vehicle').get('name')
+                player_vehicle_type = data.get('vehicle').get('type')
                 data = replay_data.get('players').get(player)
 
                 try:
@@ -116,6 +117,7 @@ class blitz_aftermath_replays(commands.Cog):
             pr_performance = protagonist_data.get('performance')
             pr_vehicle_stats = protagonist_data.get('vehicle_stats')
             pr_vehicle_name = protagonist_data.get('vehicle').get('name')
+            pr_vehicle_type = protagonist_data.get('vehicle').get('type')
 
             pr_battle_dmg = pr_performance.get(
                 'damage_made')
