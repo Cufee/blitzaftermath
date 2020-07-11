@@ -1,6 +1,7 @@
 #Python cache
 */__pycache__/*
-*__pycache__*
+*__pycache__
+*.vscode
 
 #Settings
 settings.json
