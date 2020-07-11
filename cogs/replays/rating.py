@@ -55,8 +55,6 @@ class Rating:
         tank_hp_avg = total_dmg / players_count
         shots_avg_dmg = total_dmg / total_shots
 
-        print(shots_avg_dmg)
-
         for player in self.replay_data.get('players'):
             player_data = self.replay_data.get('players').get(player)
             player_name = player_data.get('nickname')
