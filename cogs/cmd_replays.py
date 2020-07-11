@@ -77,6 +77,8 @@ class blitz_aftermath_replays(commands.Cog):
             all_names = []
 
             best_rating = 0
+            ally_rating_total = 0
+            enemy_rating_total = 0
 
             for player in replay_data.get('players'):
                 data = replay_data.get('players').get(player)
@@ -110,8 +112,10 @@ class blitz_aftermath_replays(commands.Cog):
 
                 if data.get('team') == 2:
                     enemies_names.append(player_final_str)
+                    enemy_rating_total += data.get('rating')
                 else:
                     allies_names.append(player_final_str)
+                    ally_rating_total += data.get('rating')
 
             # Protagonist performance
             pr_performance = protagonist_data.get('performance')
@@ -159,9 +163,9 @@ class blitz_aftermath_replays(commands.Cog):
             # embed.add_field(
             #     name='Legend', value=f'```{embed_key}```', inline=False)
             embed.add_field(
-                name="Allies", value=f'```{embed_allies} ```', inline=False)
+                name=f'Allies [{ally_rating_total}]', value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
-                name='Enemies', value=f'```{embed_enemies} ```', inline=False)
+                name=f'Enemies [{enemy_rating_total}]', value=f'```{embed_enemies} ```', inline=False)
             # embed.add_field(
             #     name='Players', value=f'```{embed_all_players} ```', inline=False)
             embed.add_field(
