@@ -9,6 +9,9 @@ verify_ssl = true
 discord = "*"
 python-rapidjson = "*"
 requests = "*"
+imgkit = "*"
+wkhtmltopdf = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.8"

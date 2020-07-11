@@ -47,10 +47,14 @@ class blitz_aftermath_replays(commands.Cog):
             replay_id = list(replays_list_data.keys())[0]
 
             replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
-            embed = Render(replay_data, replay_id).embed()
+
+            # embed = Render(replay_data, replay_id).embed()
+            image = discord.File(filename="Result.png", fp=Render(
+                replay_data, replay_id).image())
 
             # Send message
-            await message.channel.send(embed=embed)
+            # await message.channel.send(embed=embed)
+            await message.channel.send(file=image)
             return
 
 

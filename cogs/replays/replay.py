@@ -99,6 +99,7 @@ class Replay:
 
         for player in players_all:
             player_id = str(player.get('dbid'))
+            clan_tag = player.get('clan_tag')
             nickname = players_stats.get(player_id).get('nickname')
             stats = players_stats.get(player_id).get('statistics').get('all')
 
@@ -120,6 +121,7 @@ class Replay:
             player_data = {
                 player_id: {
                     'nickname': nickname,
+                    'clan_tag': clan_tag,
                     'team': team,
                     'vehicle': vehicle,
                     'vehicle_stats': vehicle_stats,
