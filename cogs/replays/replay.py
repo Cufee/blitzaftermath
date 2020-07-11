@@ -105,8 +105,12 @@ class Replay:
             vehicle = vehicles_all_data.get(str(
                 player.get('vehicle_descr')))
             vehicle_id = player.get('vehicle_descr')
-            vehicle_stats = rapidjson.loads(requests.get(
-                wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}').text).get('data').get(player_id)[0].get('all')
+
+            try:
+                vehicle_stats = rapidjson.loads(requests.get(
+                    wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}').text).get('data').get(player_id)[0].get('all')
+            except:
+                vehicle_stats = None
 
             if int(player_id) in enemies:
                 team = 2

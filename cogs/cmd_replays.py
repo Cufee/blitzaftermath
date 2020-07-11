@@ -86,18 +86,24 @@ class blitz_aftermath_replays(commands.Cog):
 
                 player_wins = data.get('stats').get('wins')
                 player_battles = data.get('stats').get('battles')
+                player_vehicle = data.get('vehicle').get('name')
                 data = replay_data.get('players').get(player)
 
-                vehicle_wins = data.get('vehicle_stats').get('wins')
-                vehicle_battles = data.get('vehicle_stats').get('battles')
+                try:
+                    vehicle_wins = data.get('vehicle_stats').get('wins')
+                    vehicle_battles = data.get('vehicle_stats').get('battles')
+                    vehicle_wr = "%.2f" % round(
+                        (vehicle_wins / vehicle_battles * 100), 2) + '%'
+                except:
+                    vehicle_wins = 0
+                    vehicle_battles = 0
+                    vehicle_wr = '0%'
 
                 player_wr = "%.2f" % round(
-                    (player_wins / player_battles * 100), 2)
-                vehicle_wr = "%.2f" % round(
-                    (vehicle_wins / vehicle_battles * 100), 2)
+                    (player_wins / player_battles * 100), 2) + '%'
 
                 player_final_str = (
-                    f"[{player_wr}%] [{vehicle_wr}% ({vehicle_battles})] [{data.get('rating')}] {data.get('nickname')}")
+                    f"[{data.get('rating')}] {data.get('nickname')} - {player_vehicle}\nWR: {player_wr} Tank WR: {vehicle_wr} ({vehicle_battles})")
 
                 all_names.append(player_final_str)
 
@@ -109,16 +115,17 @@ class blitz_aftermath_replays(commands.Cog):
             # Protagonist performance
             pr_performance = protagonist_data.get('performance')
             pr_vehicle_stats = protagonist_data.get('vehicle_stats')
+            pr_vehicle_name = protagonist_data.get('vehicle').get('name')
 
             pr_battle_dmg = pr_performance.get(
                 'damage_made')
             pr_stats_avg_dmg = round(pr_vehicle_stats.get(
-                'damage_dealt') / pr_vehicle_stats.get('battles'))
+                'damage_dealt') / (pr_vehicle_stats.get('battles') or 1))
 
             pr_battle_kills = pr_performance.get(
                 'enemies_destroyed')
             pr_stats_avg_kills = round(pr_vehicle_stats.get(
-                'frags8p') / pr_vehicle_stats.get('battles'))
+                'frags8p') / (pr_vehicle_stats.get('battles') or 1))
 
             pr_battle_shots = pr_performance.get(
                 'shots_made')
@@ -128,13 +135,14 @@ class blitz_aftermath_replays(commands.Cog):
             embed_stats_text = (
                 f'Damage vs Career {pr_battle_dmg}/{pr_stats_avg_dmg}\n' +
                 f'Kills vs Career {pr_battle_kills}/{pr_stats_avg_kills}\n' +
-                f'Shots vs Pen {pr_battle_shots}/{pr_battle_pen}')
+                f'Shots vs Pen {pr_battle_shots}/{pr_battle_pen}\n' +
+                f'')
 
             # Defining Embed
             embed_key = f'[WR] [Vehicle WR (Battles)] [vRT] Nickname'
-            embed_allies = (' \n'.join(allies_names))
-            embed_enemies = (' \n'.join(enemies_names))
-            embed_all_players = (' \n'.join(all_names))
+            embed_allies = (' \n\n'.join(allies_names))
+            embed_enemies = (' \n\n'.join(enemies_names))
+            embed_all_players = (' \n\n'.join(all_names))
             embed_stats = embed_stats_text
 
             embed_footer = f"MD5/ID: {list(replays_list_data.keys())[0]}"
@@ -146,8 +154,8 @@ class blitz_aftermath_replays(commands.Cog):
                 title="Click here for detailed results", url=replay_link)
             embed.set_author(
                 name=f"Battle by {protagonist_name} on {map_name}")
-            embed.add_field(
-                name='Legend', value=f'```{embed_key}```', inline=False)
+            # embed.add_field(
+            #     name='Legend', value=f'```{embed_key}```', inline=False)
             embed.add_field(
                 name="Allies", value=f'```{embed_allies} ```', inline=False)
             embed.add_field(
@@ -155,7 +163,7 @@ class blitz_aftermath_replays(commands.Cog):
             # embed.add_field(
             #     name='Players', value=f'```{embed_all_players} ```', inline=False)
             embed.add_field(
-                name=protagonist_name, value=f'```{embed_stats}```', inline=False)
+                name=f'{protagonist_name} - {pr_vehicle_name}', value=f'```{embed_stats}```', inline=False)
             embed.set_footer(text=embed_footer)
 
             # Send message

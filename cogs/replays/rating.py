@@ -38,9 +38,9 @@ class Rating:
 
             damage_efficiency = (damage_made + damage_assisted) / tank_hp
             kill_efficiency = kills / 7
-            travel_efficiency = distance_travelled / (travel_avg + 0.001)
-            shot_efficiency = (shots_penetrated + 0.001) / \
-                (shots_fired + 0.001)
+            travel_efficiency = distance_travelled / (travel_avg or 1)
+            shot_efficiency = (shots_penetrated) / \
+                (shots_fired or 1)
 
             rating = round(((damage_efficiency + kill_efficiency +
                              travel_efficiency + shot_efficiency) / 4 * 1000))
