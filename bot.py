@@ -1,10 +1,11 @@
 import rapidjson
 import os
-import discord
+
 import discord
 from discord.ext import commands, tasks
 from itertools import cycle
 from cogs.core_logger.logger import Logger
+
 logger = Logger()
 
 # Startup

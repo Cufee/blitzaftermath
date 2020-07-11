@@ -1,21 +1,9 @@
 from discord.ext import commands, tasks
-from cogs.replays.replay import Replay
-from cogs.replays.rating import Rating
 import discord
 
-import rapidjson
-import requests
-import re
-
 from cogs.replays.replay import Replay
+from cogs.replays.rating import Rating
 from cogs.replays.render import Render
-
-# WG API setup
-wg_application_id = 'application_id=add73e99679dd4b7d1ed7218fe0be448'
-wg_api_base_url = 'https://api.wotblitz.com/wotb/account/'
-wg_api_addon_list = 'list/?'
-wg_api_addon_info = 'info/?'
-wg_api_realm = 'r_realm=na'
 
 
 class blitz_aftermath_replays(commands.Cog):
