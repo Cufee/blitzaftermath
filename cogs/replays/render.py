@@ -28,7 +28,7 @@ class Render():
         self.enemies_render = []
         self.all_names = []
 
-        best_rating = 0
+        self.best_rating = 0
         self.ally_rating_total = 0
         self.enemy_rating_total = 0
 
@@ -39,8 +39,8 @@ class Render():
         for player in players_data:
             data = player
 
-            if best_rating < data.get('rating'):
-                best_rating = data.get('rating')
+            if self.best_rating < data.get('rating'):
+                self.best_rating = data.get('rating')
 
             player_wins = data.get('stats').get('wins')
             player_battles = data.get('stats').get('battles')
@@ -67,7 +67,7 @@ class Render():
             platoon_number = data.get('performance').get('squad_index')
             platoon_str = ''
             if platoon_number:
-                platoon_str = f'[{platoon_number}]'
+                platoon_str = f'[{platoon_number}] '
 
             player_final_str = (
                 f"[{data.get('rating')}] {platoon_str} {data.get('nickname')}{clan_tag} - {player_vehicle}\nWR: {player_wr} Tank WR: {vehicle_wr} ({vehicle_battles})")
@@ -120,15 +120,19 @@ class Render():
         from PIL import ImageFont
         from PIL import ImageDraw
 
+        from discord import File
+
         import sys
         from io import BytesIO
 
-        text = ['Testing ____________', 'TESTING MORE\nText here']
-
+        images = []
         image = Image.open('./cogs/replays/render/frame.png')
+        draw = ImageDraw.Draw(image)
+
         font = ImageFont.truetype("./cogs/replays/render/font.ttf", 28)
         font_color_base = (150, 150, 150)
-        draw = ImageDraw.Draw(image)
+        font_color_nickname = (150, 150, 150)
+        font_color_clan = (150, 150, 150)
 
         image_w, image_h = image.size
         image_min_w = 84
@@ -136,42 +140,48 @@ class Render():
         image_step = image_h / 8
 
         step = 1
-        for player in self.enemies_render:
-            rating = str(player.get('rating'))
-            platoon = player.get('platoon_str')
-            nickname = player.get('nickname')
-            player_wr = player.get('player_wr')
-            clan = player.get('clan_tag')
-            vehicle = player.get('player_vehicle')
-            vehicle_battles = player.get('vehicle_battles')
-            vehicle_wr = player.get('vehicle_wr')
+        all_players = [self.enemies_render, self.allies_render]
+        for list_ in all_players:
+            for player in list_:
+                rating = str(player.get('rating'))
+                platoon = player.get('platoon_str')
+                nickname = player.get('nickname')
+                player_wr = player.get('player_wr')
+                clan = player.get('clan_tag')
+                vehicle = player.get('player_vehicle')
+                vehicle_battles = player.get('vehicle_battles')
+                vehicle_wr = player.get('vehicle_wr')
 
-            # Draw Rating
-            text_w, text_h = draw.textsize(rating, font=font)
-            draw.text(((image_rt_mid_w - (text_w / 2)), (((image_step - text_h) / 2) + ((image_step) * step))),
-                      rating, font_color_base, font=font)
+                # Draw Rating
+                text_w, text_h = draw.textsize(rating, font=font)
+                draw.text(((image_rt_mid_w - (text_w / 2)), (((image_step - text_h) / 2) + ((image_step) * step))),
+                          rating, font_color_base, font=font)
 
-            # Draw Player name, platoon, vehicle
-            player_info_top = f'{platoon} {nickname}{clan} - {vehicle}'
-            player_info_bot = f'Winrate {player_wr}   Tank Winrate {vehicle_wr} ({vehicle_battles})'
+                # Draw Player name, platoon, vehicle
+                player_info_top = f'{platoon}{nickname}{clan} - {vehicle}'
+                player_info_bot = f'Winrate {player_wr}   Tank Winrate {vehicle_wr} ({vehicle_battles})'
 
-            _, text_h = draw.textsize(player_info_top, font=font)
-            draw.text(((image_min_w), (((image_step - text_h) / 4) + (step * image_step))),
-                      player_info_top, font_color_base, font=font)
+                _, text_h = draw.textsize(player_info_top, font=font)
+                draw.text(((image_min_w), (((image_step - text_h) / 4) + (step * image_step))),
+                          player_info_top, font_color_base, font=font)
 
-            _, text_h = draw.textsize(player_info_bot, font=font)
-            draw.text(((image_min_w), ((((image_step - text_h) / 4)) + (step * image_step) + text_h)),
-                      player_info_bot, font_color_base, font=font)
+                _, text_h = draw.textsize(player_info_bot, font=font)
+                draw.text(((image_min_w), ((((image_step - text_h) / 4)) + (step * image_step) + text_h)),
+                          player_info_bot, font_color_base, font=font)
 
-            step += 1
-            if step > 7:
-                break
+                step += 1
+                if step > 7:
+                    break
 
-        final_buffer = BytesIO()
-        image.save(final_buffer, 'png')
-        final_buffer.seek(0)
+            final_buffer = BytesIO()
+            image.save(final_buffer, 'png')
+            img_id = 1
+            image_file = File(
+                filename=f"Result{img_id}.png", fp=final_buffer.seek(0))
+            img_id += 1
+            images.append(image_file)
 
-        return final_buffer
+        return images
 
     def embed(self):
         from discord import Embed
@@ -210,3 +220,34 @@ class Render():
         embed.set_footer(text=embed_footer)
 
         return embed
+
+    def get_color(self, key, value=None):
+        colors = {
+            'rating': {
+                'purple': '#a61a95',
+                'blue': '#3972c6',
+                'green': '#4d7326',
+                'yellow': '#ffbf01',
+                'red': '#c20000',
+            },
+            'winrate': {
+                'purple': '#a61a95',
+                'blue': '#3972c6',
+                'green': '#4d7326',
+                'yellow': '#ffbf01',
+                'red': '#c20000',
+            },
+            'clan': '#FFA500',
+            'platoon': '#FE9B04',
+            'primary': '#5A5A5A',
+        }
+
+        if value:
+            hex_color = colors.get(key).get(value)
+        else:
+            hex_color = colors.get(key) or colors.get('primary')
+
+        hex_color.lstrip('#')
+        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+        return rgb_color
