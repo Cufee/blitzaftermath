@@ -218,8 +218,7 @@ class Render():
 
                 team_offset_h = self.image_step
 
-                # Draw platoons
-
+                # Draw platoons, needs to be unique for offset formula
                 if platoon:
                     platoon_img = self.platoon_image.copy()
                     draw_platoon = ImageDraw.Draw(platoon_img)
@@ -241,7 +240,7 @@ class Render():
                     image.paste(platoon_img, mask=self.platoon_image.split()[
                                 3], box=(round(platoon_w), round(platoon_h)))
 
-                # Draw tank
+                # Draw tank, needs to be unique for offset formula
                 vehicle_str = f'{vehicle}'
                 text_w, text_h = draw.textsize(vehicle_str, font=font_slim)
                 text_margin = (self.image_step - (text_h * 2)) / 3
@@ -253,7 +252,7 @@ class Render():
                 draw.text((draw_w, draw_h), vehicle_str,
                           font_color_base, font=font_slim)
 
-                # Draw name and clan
+                # Draw name and clan, needs to be unique for offset formula
                 font_color_nickname_fixed = font_color_nickname
                 if nickname == self.protagonist_name:
                     font_color_nickname_fixed = font_color_pr
@@ -267,52 +266,20 @@ class Render():
                           font_color_nickname_fixed, font=font)
 
                 # Draw rating
-                rating_str = f'{rating}'
-                text_w, text_h = draw.textsize(rating_str, font=font_fat)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                draw_w = (self.image_rating_min_w) + ((self.image_rating_max_w -
-                                                       self.image_rating_min_w - text_w) / 2) + team_offset_w
-                draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 3) + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), rating_str,
-                          rating_font_color, font=font_fat)
+                self.simple_draw(step, draw, rating, font_fat, rating_font_color, self.image_rating_min_w,
+                                 self.image_rating_max_w, team_offset_w)
 
                 # Draw winrate
-                player_wr_str = f'{player_wr}'
-                text_w, text_h = draw.textsize(player_wr_str, font=font_slim)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                draw_w = (self.image_wr_min_w) + ((self.image_wr_max_w -
-                                                   self.image_wr_min_w - text_w) / 2) + team_offset_w
-                draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 3) + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), player_wr_str,
-                          font_color_base, font=font_slim)
+                self.simple_draw(step, draw, player_wr, font_slim, font_color_base, self.image_wr_min_w,
+                                 self.image_wr_max_w, team_offset_w)
 
                 # Draw damage
-                damage_str = f'{damage}'
-                text_w, text_h = draw.textsize(damage_str, font=font_fat)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                draw_w = (self.image_dmg_min_w) + ((self.image_dmg_max_w -
-                                                    self.image_dmg_min_w - text_w) / 2) + team_offset_w
-                draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 3) + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), damage_str,
-                          font_color_base, font=font_fat)
+                self.simple_draw(step, draw, damage, font_fat, font_color_base, self.image_dmg_min_w,
+                                 self.image_dmg_max_w, team_offset_w)
 
                 # Draw kills
-                kills_str = f'{kills}'
-                text_w, text_h = draw.textsize(kills_str, font=font_slim)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                draw_w = (self.image_kills_min_w) + ((self.image_kills_max_w -
-                                                      self.image_kills_min_w - text_w) / 2) + team_offset_w
-                draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 3) + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), kills_str,
-                          font_color_base, font=font_slim)
+                self.simple_draw(step, draw, kills, font_slim, font_color_base, self.image_kills_min_w,
+                                 self.image_kills_max_w, team_offset_w)
 
                 # Not working, needs a fix
                 # draw.line(((self.image_min_w + team_offset_w), (self.image_step * (step + 1) + text_margin),
@@ -354,6 +321,24 @@ class Render():
             filename=f"result.png", fp=final_buffer)
 
         return image_file
+
+    def simple_draw(self, step, draw, text, font, font_color, offset_min_w, offset_max_w, team_offset_w):
+        """
+        Renders text in the middle, using offsets passed in
+        Pass:
+        step, draw, text, font, font_color, offset_min_w, offset_max_w, team_offset_w
+        """
+        text_str = f'{text}'
+        text_w, text_h = draw.textsize(text_str, font=font)
+        text_margin = (self.image_step - (text_h * 2)) / 3
+        draw_w = (offset_min_w) + ((offset_max_w -
+                                    offset_min_w - text_w) / 2) + team_offset_w
+        draw_h = self.image_min_h + \
+            ((self.image_step - text_h) / 3) + \
+            (self.image_step * step)
+        draw.text((draw_w, draw_h), text_str,
+                  font_color, font=font)
+        return
 
     def embed(self):
         from discord import Embed
