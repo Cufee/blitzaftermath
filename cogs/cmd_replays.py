@@ -51,7 +51,7 @@ class blitz_aftermath_replays(commands.Cog):
             # Send message
             try:
                 image_file = Render(replay_data, replay_id).image()
-                await message.channel.send(file=image_file)
+                await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
             except:
                 embed = Render(replay_data, replay_id).embed()
                 await message.channel.send(embed=embed)
