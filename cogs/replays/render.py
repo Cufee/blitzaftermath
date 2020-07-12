@@ -330,11 +330,10 @@ class Render():
         """
         text_str = f'{text}'
         text_w, text_h = draw.textsize(text_str, font=font)
-        text_margin = (self.image_step - (text_h * 2)) / 3
         draw_w = (offset_min_w) + ((offset_max_w -
                                     offset_min_w - text_w) / 2) + team_offset_w
         draw_h = self.image_min_h + \
-            ((self.image_step - text_h) / 3) + \
+            ((self.image_step - text_h) / 4) + \
             (self.image_step * step)
         draw.text((draw_w, draw_h), text_str,
                   font_color, font=font)
