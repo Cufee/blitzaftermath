@@ -17,9 +17,11 @@ class Render():
             'players').get(str(self.protagonist_id))
         self.protagonist_name = self.replay_data.get(
             'players').get(str(self.protagonist_id)).get('nickname')
+        self.protagonist_team = self.replay_data.get(
+            'players').get(str(self.protagonist_id)).get('team')
 
         self.battle_result = 'Defeat'
-        if self.winner_team == 1:
+        if self.winner_team == self.protagonist_team:
             self.battle_result = 'Victory'
 
         self.all_names_render = []
@@ -68,7 +70,7 @@ class Render():
             platoon_number = data.get('performance').get('squad_index')
             platoon_str = ''
             if platoon_number:
-                platoon_str = f'[{platoon_number}]'
+                platoon_str = f'{platoon_number}'
 
             player_final_str = (
                 f"[{data.get('rating')}] {platoon_str} {data.get('nickname')}{clan_tag} - {player_vehicle}\nWR: {player_wr} Tank WR: {vehicle_wr} ({vehicle_battles})")
@@ -133,6 +135,7 @@ class Render():
 
         images = []
         image = Image.open('./cogs/replays/render/frame.png')
+        self.platoon_image = Image.open('./cogs/replays/render/platoon.png')
         draw = ImageDraw.Draw(image)
 
         font_size = 16
@@ -145,6 +148,8 @@ class Render():
             "./cogs/replays/render/font_slim.ttf", font_size)
         font_slim_title = ImageFont.truetype(
             "./cogs/replays/render/font_slim.ttf", (font_size * 3))
+        font_platoon = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", 14)
         font_color_base = (255, 255, 255)
         font_color_nickname = (255, 255, 255)
         font_color_clan = (150, 150, 150)
@@ -156,19 +161,21 @@ class Render():
             "./cogs/replays/render/font.ttf", 18)
 
         self.image_w, image_h = image.size
-        self.image_min_w = 12 + font_size
+        self.image_min_w = 12 + font_size   # Margin from frame border
         self.image_max_w = 516 - 12
-        self.image_min_h = 150
-        self.image_team_min_h = 100
+        self.image_min_h = 150              # Height offset
+
+        self.image_platoon_icon_offs = 5    # Need to start calculating dynamically
+        self.image_team_min_h = 100         # Total Team rating offset
         self.image_team_min_w = 135
 
-        self.image_rating_min_w = 322
+        self.image_rating_min_w = 322       # Rating offset
         self.image_rating_max_w = 365
-        self.image_wr_min_w = 380
+        self.image_wr_min_w = 380           # Winrate offset
         self.image_wr_max_w = 429
-        self.image_dmg_min_w = 441
+        self.image_dmg_min_w = 441          # Damage offset
         self.image_dmg_max_w = 490
-        self.image_kills_min_w = 497
+        self.image_kills_min_w = 497        # Kills offset
         self.image_kills_max_w = 506
 
         self.image_step = 54
@@ -212,17 +219,27 @@ class Render():
                 team_offset_h = self.image_step
 
                 # Draw platoons
-                platoon_str = f'{platoon}'
-                text_w, text_h = draw.textsize(platoon_str, font=font)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                platoon_margin = text_h + self.image_min_w
 
-                draw_w = self.image_min_w + team_offset_w
-                draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 4) + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), platoon_str,
-                          font_color_base, font=font)
+                if platoon:
+                    platoon_img = self.platoon_image.copy()
+                    draw_platoon = ImageDraw.Draw(platoon_img)
+                    platoon_str = f'{platoon}'
+                    text_w, text_h = draw.textsize(platoon_str, font=font)
+                    text_margin = (self.image_step - (text_h * 2)) / 3
+                    platoon_margin = text_h + self.image_min_w
+
+                    draw_w = self.image_platoon_icon_offs
+                    draw_h = 0
+                    draw_platoon.text((draw_w, draw_h), platoon_str,
+                                      font_color_base, font=font_platoon)
+
+                    platoon_img_w, platoon_img_h = self.platoon_image.size
+                    platoon_w = self.image_min_w + team_offset_w
+                    platoon_h = self.image_min_h + \
+                        ((self.image_step - platoon_img_h) / 4) + \
+                        (self.image_step * step)
+                    image.paste(platoon_img, mask=self.platoon_image.split()[
+                                3], box=(round(platoon_w), round(platoon_h)))
 
                 # Draw tank
                 vehicle_str = f'{vehicle}'

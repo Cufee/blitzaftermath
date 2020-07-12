@@ -48,14 +48,17 @@ class blitz_aftermath_replays(commands.Cog):
 
             replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
 
-            # Send message
-            try:
-                image_file = Render(replay_data, replay_id).image()
-                await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
-            except:
-                embed = Render(replay_data, replay_id).embed()
-                await message.channel.send(embed=embed)
-            return
+            image_file = Render(replay_data, replay_id).image()
+            await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+
+            # # Send message
+            # try:
+            #     image_file = Render(replay_data, replay_id).image()
+            #     await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+            # except:
+            #     embed = Render(replay_data, replay_id).embed()
+            #     await message.channel.send(embed=embed)
+            # return
 
 
 def setup(client):
