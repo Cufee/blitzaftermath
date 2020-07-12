@@ -49,6 +49,10 @@ class Render():
             player_battles = data.get('stats').get('battles')
             player_vehicle = data.get('vehicle').get('name')
             player_vehicle_type = data.get('vehicle').get('type')
+            hp_left = data.get('performance').get('hitpoints_left')
+            survived = True
+            if hp_left <= 0:
+                survived = False
 
             try:
                 vehicle_wins = data.get('vehicle_stats').get('wins')
@@ -82,6 +86,7 @@ class Render():
                 'damage': data.get('performance').get('damage_made'),
                 'kills': data.get('performance').get('enemies_destroyed'),
                 'team': data.get('team'),
+                'survived': survived,
                 'platoon_str': platoon_str,
                 'nickname': data.get('nickname'),
                 'clan_tag': clan_tag,
@@ -152,8 +157,10 @@ class Render():
             "./cogs/replays/render/font_slim.ttf", 14)
         font_color_base = (255, 255, 255)
         font_color_nickname = (255, 255, 255)
+        font_color_nickname_dead = (180, 180, 180)
         font_color_clan = (150, 150, 150)
         font_color_pr = (255, 165, 0)
+        font_color_pr_dead = (204, 132, 0)
         font_color_win = (95, 227, 66)
         font_color_loss = (242, 94, 61)
 
@@ -187,6 +194,7 @@ class Render():
             team_rating = 0
             for player in player_list:
                 rating = player.get('rating')
+                survived = player.get('survived')
                 damage = player.get('damage')
                 kills = player.get('kills')
                 platoon = player.get('platoon_str')
@@ -240,6 +248,20 @@ class Render():
                     image.paste(platoon_img, mask=self.platoon_image.split()[
                                 3], box=(round(platoon_w), round(platoon_h)))
 
+                # Select font for dead players
+                font_color_nickname_fixed = font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = font_color_base
+                if not survived:
+                    font_color_nickname_fixed = font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = (
+                        font_color_nickname_dead)
+                elif not survived and nickname == self.protagonist_name:
+                    font_color_nickname_fixed = font_color_pr_dead
+                    font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = (
+                        font_color_nickname_dead)
+                elif nickname == self.protagonist_name:
+                    font_color_nickname_fixed = font_color_pr
+
+                print(nickname, team, self.winner_team)
+
                 # Draw tank, needs to be unique for offset formula
                 vehicle_str = f'{vehicle}'
                 text_w, text_h = draw.textsize(vehicle_str, font=font_slim)
@@ -250,13 +272,9 @@ class Render():
                 draw_h = self.image_min_h + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), vehicle_str,
-                          font_color_base, font=font_slim)
+                          font_color_tank_fixed, font=font_slim)
 
                 # Draw name and clan, needs to be unique for offset formula
-                font_color_nickname_fixed = font_color_nickname
-                if nickname == self.protagonist_name:
-                    font_color_nickname_fixed = font_color_pr
-
                 name_str = f'{nickname} {clan}'
                 text_w, text_h = draw.textsize(name_str, font=font)
                 text_margin = (self.image_step - (text_h * 2)) / 3
@@ -270,15 +288,15 @@ class Render():
                                  self.image_rating_max_w, team_offset_w)
 
                 # Draw winrate
-                self.simple_draw(step, draw, player_wr, font_slim, font_color_base, self.image_wr_min_w,
+                self.simple_draw(step, draw, player_wr, font_slim, font_color_wr_fixed, self.image_wr_min_w,
                                  self.image_wr_max_w, team_offset_w)
 
                 # Draw damage
-                self.simple_draw(step, draw, damage, font_fat, font_color_base, self.image_dmg_min_w,
+                self.simple_draw(step, draw, damage, font_fat, font_color_dmg_fixed, self.image_dmg_min_w,
                                  self.image_dmg_max_w, team_offset_w)
 
                 # Draw kills
-                self.simple_draw(step, draw, kills, font_slim, font_color_base, self.image_kills_min_w,
+                self.simple_draw(step, draw, kills, font_slim, font_color_kills_fixed, self.image_kills_min_w,
                                  self.image_kills_max_w, team_offset_w)
 
                 # Not working, needs a fix
