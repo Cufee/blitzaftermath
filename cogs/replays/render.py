@@ -162,14 +162,14 @@ class Render():
         self.image_team_min_h = 100
         self.image_team_min_w = 135
 
-        self.image_rating_min_w = 326
-        self.image_rating_max_w = 372
-        self.image_wr_min_w = 384
-        self.image_wr_max_w = 430
-        self.image_dmg_min_w = 430
-        self.image_dmg_max_w = 486
-        self.image_kills_min_w = 496
-        self.image_kills_max_w = 508
+        self.image_rating_min_w = 322
+        self.image_rating_max_w = 365
+        self.image_wr_min_w = 380
+        self.image_wr_max_w = 429
+        self.image_dmg_min_w = 441
+        self.image_dmg_max_w = 490
+        self.image_kills_min_w = 497
+        self.image_kills_max_w = 506
 
         self.image_step = 54
 
@@ -193,6 +193,18 @@ class Render():
 
                 team_rating += int(rating)
 
+                rating_percent = rating / self.best_rating * 100
+                if rating_percent > 90:
+                    rating_font_color = (201, 101, 219)
+                elif rating_percent > 75:
+                    rating_font_color = (101, 176, 219)
+                elif rating_percent > 55:
+                    rating_font_color = (123, 219, 101)
+                elif rating_percent > 40:
+                    rating_font_color = (219, 193, 101)
+                else:
+                    rating_font_color = (219, 109, 101)
+
                 team_offset_w = 0
                 if team == 2:
                     team_offset_w = 534
@@ -207,7 +219,7 @@ class Render():
 
                 draw_w = self.image_min_w + team_offset_w
                 draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 3) + \
+                    ((self.image_step - text_h) / 4) + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), platoon_str,
                           font_color_base, font=font)
@@ -247,7 +259,7 @@ class Render():
                     ((self.image_step - text_h) / 3) + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), rating_str,
-                          font_color_base, font=font_fat)
+                          rating_font_color, font=font_fat)
 
                 # Draw winrate
                 player_wr_str = f'{player_wr}'
@@ -263,7 +275,7 @@ class Render():
 
                 # Draw damage
                 damage_str = f'{damage}'
-                text_w, text_h = draw.textsize(damage_str, font=font_slim)
+                text_w, text_h = draw.textsize(damage_str, font=font_fat)
                 text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_w = (self.image_dmg_min_w) + ((self.image_dmg_max_w -
                                                     self.image_dmg_min_w - text_w) / 2) + team_offset_w
@@ -271,7 +283,7 @@ class Render():
                     ((self.image_step - text_h) / 3) + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), damage_str,
-                          font_color_base, font=font_slim)
+                          font_color_base, font=font_fat)
 
                 # Draw kills
                 kills_str = f'{kills}'
@@ -363,34 +375,3 @@ class Render():
         embed.set_footer(text=embed_footer)
 
         return embed
-
-    def get_color(self, key, value=None):
-        colors = {
-            'rating': {
-                'purple': '#a61a95',
-                'blue': '#3972c6',
-                'green': '#4d7326',
-                'yellow': '#ffbf01',
-                'red': '#c20000',
-            },
-            'winrate': {
-                'purple': '#a61a95',
-                'blue': '#3972c6',
-                'green': '#4d7326',
-                'yellow': '#ffbf01',
-                'red': '#c20000',
-            },
-            'clan': '#FFA500',
-            'platoon': '#FE9B04',
-            'primary': '#5A5A5A',
-        }
-
-        if value:
-            hex_color = colors.get(key).get(value)
-        else:
-            hex_color = colors.get(key) or colors.get('primary')
-
-        hex_color.lstrip('#')
-        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-
-        return rgb_color
