@@ -253,14 +253,10 @@ class Render():
                 if not survived:
                     font_color_nickname_fixed = font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = (
                         font_color_nickname_dead)
-                elif nickname == self.protagonist_name:
+                if nickname == self.protagonist_name:
                     font_color_nickname_fixed = font_color_pr
-                elif not survived and nickname == self.protagonist_name:
-                    font_color_nickname_fixed = font_color_pr_dead
-                    font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = (
-                        font_color_nickname_dead)
-
-                print(nickname, team, self.winner_team)
+                    if not survived:
+                        font_color_nickname_fixed = font_color_pr_dead
 
                 # Draw tank, needs to be unique for offset formula
                 vehicle_str = f'{vehicle}'
