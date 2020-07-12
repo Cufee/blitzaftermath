@@ -157,7 +157,7 @@ class Render():
             "./cogs/replays/render/font_slim.ttf", 14)
         font_color_base = (255, 255, 255)
         font_color_nickname = (255, 255, 255)
-        font_color_nickname_dead = (180, 180, 180)
+        font_color_nickname_dead = (120, 120, 120)
         font_color_clan = (150, 150, 150)
         font_color_pr = (255, 165, 0)
         font_color_pr_dead = (204, 132, 0)
