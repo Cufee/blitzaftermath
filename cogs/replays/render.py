@@ -1,4 +1,10 @@
 from operator import itemgetter
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+
+from discord import File
+from io import BytesIO
 
 
 class Render():
@@ -87,6 +93,7 @@ class Render():
                 'kills': data.get('performance').get('enemies_destroyed'),
                 'team': data.get('team'),
                 'survived': survived,
+                'hero_bonus_exp': data.get('performance').get('hero_bonus_exp'),
                 'platoon_str': platoon_str,
                 'nickname': data.get('nickname'),
                 'clan_tag': clan_tag,
@@ -129,229 +136,317 @@ class Render():
             'shots_pen')
 
     def image(self):
-        from PIL import Image
-        from PIL import ImageFont
-        from PIL import ImageDraw
-
-        from discord import File
-
-        import sys
-        from io import BytesIO
-
-        images = []
-        image = Image.open('./cogs/replays/render/frame.png')
+        self.image = Image.open('./cogs/replays/render/frame.png')
         self.platoon_image = Image.open('./cogs/replays/render/platoon.png')
-        draw = ImageDraw.Draw(image)
+        self.draw_frame = ImageDraw.Draw(self.image)
 
-        font_size = 16
-        font = ImageFont.truetype("./cogs/replays/render/font.ttf", font_size)
-        font_title = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", (font_size * 3))
-        font_fat = ImageFont.truetype(
-            "./cogs/replays/render/font_fat.ttf", (round(font_size * 1.25)))
-        font_slim = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", font_size)
-        font_slim_title = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", (font_size * 3))
-        font_platoon = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", 14)
-        font_color_base = (255, 255, 255)
-        font_color_nickname = (255, 255, 255)
-        font_color_nickname_dead = (120, 120, 120)
-        font_color_clan = (150, 150, 150)
-        font_color_pr = (255, 165, 0)
-        font_color_pr_dead = (204, 132, 0)
-        font_color_win = (95, 227, 66)
-        font_color_loss = (242, 94, 61)
-
-        team_rating_font = ImageFont.truetype(
+        self.font_size = 16
+        self.font = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", self.font_size)
+        self.font_title = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", (self.font_size * 3))
+        self.font_fat = ImageFont.truetype(
+            "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
+        self.font_slim = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", self.font_size)
+        self.font_slim_title = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
+        self.font_platoon = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", 12)
+        self.team_rating_font = ImageFont.truetype(
             "./cogs/replays/render/font.ttf", 18)
 
-        self.image_w, image_h = image.size
-        self.image_min_w = 12 + font_size   # Margin from frame border
-        self.image_max_w = 516 - 12
-        self.image_min_h = 150              # Height offset
+        self.font_color_base = (255, 255, 255)
+        self.font_color_nickname = (255, 255, 255)
+        self.font_color_nickname_dead = (120, 120, 120)
+        self.font_color_clan = (150, 150, 150)
+        self.font_color_pr = (255, 165, 0)
+        self.font_color_pr_dead = (204, 132, 0)
+        self.font_color_win = (95, 227, 66)
+        self.font_color_loss = (242, 94, 61)
 
-        self.image_platoon_icon_offs = 5    # Need to start calculating dynamically
-        self.image_team_min_h = 100         # Total Team rating offset
-        self.image_team_min_w = 135
+        self.image_w, self.image_h = self.image.size
+        self.image_min_w = 12               # Margin from frame border
+        self.image_min_h = 150              # Margin from frame border
+        self.player_card_w = 500           # Width of each player card
+        self.image_step = 54                # Height of each player card
+        self.platoon_icon_margin = 28       # Will bhe devided by 2
 
-        self.image_rating_min_w = 322       # Rating offset
-        self.image_rating_max_w = 365
-        self.image_wr_min_w = 380           # Winrate offset
-        self.image_wr_max_w = 429
-        self.image_dmg_min_w = 441          # Damage offset
-        self.image_dmg_max_w = 490
-        self.image_kills_min_w = 497        # Kills offset
-        self.image_kills_max_w = 506
+        self.enemy_team_offset_w = self.image_w - \
+            (self.image_min_w)-(self.player_card_w)
 
-        self.image_step = 54
+        self.text_margin_w = 10
+        self.text_margin_h = 5
+
+        self.global_stat_max_width = {
+            'kills': 0,
+            'damage': 0,
+            'player_wr': 0,
+            'rating': 0,
+        }
+
+        self.stats_list = ['kills', 'damage', 'player_wr', 'rating']
 
         all_players = [self.enemies_render, self.allies_render]
-
         for player_list in all_players:
             step = 0
             team_rating = 0
+            team_offset_w = self.image_min_w
+            if player_list[0].get('team') == 2:
+                team_offset_w = self.enemy_team_offset_w
+
             for player in player_list:
-                rating = player.get('rating')
-                survived = player.get('survived')
-                damage = player.get('damage')
-                kills = player.get('kills')
-                platoon = player.get('platoon_str')
-                team = player.get('team')
-                nickname = player.get('nickname')
-                player_wr = player.get('player_wr')
-                clan = player.get('clan_tag')
-                vehicle = player.get('player_vehicle')
-                vehicle_battles = player.get('vehicle_battles')
-                vehicle_wr = player.get('vehicle_wr')
+                team_rating += int(player.get('rating'))
+                player_card = self.draw_player_card(player)
+                plate_w_pos = round(team_offset_w)
+                plate_h_pos = round(self.image_min_h +
+                                    (self.image_step * step))
 
-                team_rating += int(rating)
+                self.image.paste(player_card, box=(
+                    plate_w_pos, plate_h_pos), mask=player_card.split()[3])
 
-                rating_percent = rating / self.best_rating * 100
-                if rating_percent > 90:
-                    rating_font_color = (201, 101, 219)
-                elif rating_percent > 75:
-                    rating_font_color = (101, 176, 219)
-                elif rating_percent > 55:
-                    rating_font_color = (123, 219, 101)
-                elif rating_percent > 40:
-                    rating_font_color = (219, 193, 101)
-                else:
-                    rating_font_color = (219, 109, 101)
+                # rating_percent = rating / self.best_rating * 100
+                # if rating_percent > 90:
+                #     rating_font_color = (201, 101, 219)
+                # elif rating_percent > 75:
+                #     rating_font_color = (101, 176, 219)
+                # elif rating_percent > 55:
+                #     rating_font_color = (123, 219, 101)
+                # elif rating_percent > 40:
+                #     rating_font_color = (219, 193, 101)
+                # else:
+                #     rating_font_color = (219, 109, 101)
 
-                team_offset_w = 0
-                if team == 2:
-                    team_offset_w = 534
-
-                team_offset_h = self.image_step
-
-                # Draw platoons, needs to be unique for offset formula
-                if platoon:
-                    platoon_img = self.platoon_image.copy()
-                    draw_platoon = ImageDraw.Draw(platoon_img)
-                    platoon_str = f'{platoon}'
-                    text_w, text_h = draw.textsize(platoon_str, font=font)
-                    text_margin = (self.image_step - (text_h * 2)) / 3
-                    platoon_margin = text_h + self.image_min_w
-
-                    draw_w = self.image_platoon_icon_offs
-                    draw_h = 0
-                    draw_platoon.text((draw_w, draw_h), platoon_str,
-                                      font_color_base, font=font_platoon)
-
-                    platoon_img_w, platoon_img_h = self.platoon_image.size
-                    platoon_w = self.image_min_w + team_offset_w
-                    platoon_h = self.image_min_h + \
-                        ((self.image_step - platoon_img_h) / 4) + \
-                        (self.image_step * step)
-                    image.paste(platoon_img, mask=self.platoon_image.split()[
-                                3], box=(round(platoon_w), round(platoon_h)))
-
-                # Select font for dead players
-                font_color_nickname_fixed = font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = font_color_base
-                if not survived:
-                    font_color_nickname_fixed = font_color_tank_fixed = font_color_wr_fixed = font_color_dmg_fixed = font_color_kills_fixed = (
-                        font_color_nickname_dead)
-                if nickname == self.protagonist_name:
-                    font_color_nickname_fixed = font_color_pr
-                    if not survived:
-                        font_color_nickname_fixed = font_color_pr_dead
-
-                # Draw tank, needs to be unique for offset formula
-                vehicle_str = f'{vehicle}'
-                text_w, text_h = draw.textsize(vehicle_str, font=font_slim)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                platoon_margin = text_h + text_margin
-
-                draw_w = self.image_min_w + platoon_margin + team_offset_w
-                draw_h = self.image_min_h + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), vehicle_str,
-                          font_color_tank_fixed, font=font_slim)
-
-                # Draw name and clan, needs to be unique for offset formula
-                name_str = f'{nickname} {clan}'
-                text_w, text_h = draw.textsize(name_str, font=font)
-                text_margin = (self.image_step - (text_h * 2)) / 3
-                draw_h = self.image_min_h + text_h + \
-                    (self.image_step * step)
-                draw.text((draw_w, draw_h), name_str,
-                          font_color_nickname_fixed, font=font)
-
-                # Draw rating
-                self.simple_draw(step, draw, rating, font_fat, rating_font_color, self.image_rating_min_w,
-                                 self.image_rating_max_w, team_offset_w)
-
-                # Draw winrate
-                self.simple_draw(step, draw, player_wr, font_slim, font_color_wr_fixed, self.image_wr_min_w,
-                                 self.image_wr_max_w, team_offset_w)
-
-                # Draw damage
-                self.simple_draw(step, draw, damage, font_fat, font_color_dmg_fixed, self.image_dmg_min_w,
-                                 self.image_dmg_max_w, team_offset_w)
-
-                # Draw kills
-                self.simple_draw(step, draw, kills, font_slim, font_color_kills_fixed, self.image_kills_min_w,
-                                 self.image_kills_max_w, team_offset_w)
-
-                # Not working, needs a fix
-                # draw.line(((self.image_min_w + team_offset_w), (self.image_step * (step + 1) + text_margin),
-                #            (self.image_min_w + team_offset_w), (self.image_step * (step + 1) + text_margin)), fill=0, width=1)
+                # team_offset_h = self.image_step
 
                 step += 1
                 if step >= 7:
                     break
 
-            # Draw team rating
-            team_rating_str = f'{team_rating}'
-            text_w, text_h = draw.textsize(team_rating_str, font=font)
-            text_margin = (self.image_step - (text_h * 2)) / 3
-            draw_w = self.image_team_min_w + text_h + team_offset_w
-            draw_h = self.image_team_min_h
-            draw.text((draw_w, draw_h), team_rating_str,
-                      font_color_base, font=team_rating_font)
-
-            font_color_result = font_color_win
-            if self.winner_team != 1:
-                font_color_result = font_color_loss
-
-            # Draw map name and result
-            map_pos_h = 40
-            map_pos_w = self.image_w / 2
-            map_name_str = f'{self.map_name} - {self.battle_result}'
-            text_w, text_h = draw.textsize(map_name_str, font=font_slim_title)
-            text_margin = (self.image_step - (text_h * 2)) / 3
-            draw_w = map_pos_w - (text_w / 2)
-            draw_h = map_pos_h - (text_h / 2)
-            draw.text((draw_w, draw_h), map_name_str,
-                      font_color_base, font=font_slim_title)
+            self.draw_ui_self(team_rating, team_offset_w)
             step = 0
 
+        # Draw battle result
+        battle_result_str = f'{self.map_name} - {self.battle_result}'
+        text_w, text_h = self.draw_frame.textsize(
+            battle_result_str, font=self.font_slim_title)
+
+        result_draw_w = round((self.image_w - text_w) / 2)
+        result_draw_h = round(
+            (self.image_min_h - self.image_step - text_h) / 2)
+
+        self.draw_frame.text((result_draw_w, result_draw_h), battle_result_str,
+                             self.font_color_base, font=self.font_slim_title)
+
         final_buffer = BytesIO()
-        image.save(final_buffer, 'png')
+        self.image.save(final_buffer, 'png')
         final_buffer.seek(0)
         image_file = File(
             filename=f"result.png", fp=final_buffer)
 
         return image_file
 
-    def simple_draw(self, step, draw, text, font, font_color, offset_min_w, offset_max_w, team_offset_w):
-        """
-        Renders text in the middle, using offsets passed in
-        Pass:
-        step, draw, text, font, font_color, offset_min_w, offset_max_w, team_offset_w
-        """
-        text_str = f'{text}'
-        text_w, text_h = draw.textsize(text_str, font=font)
-        draw_w = (offset_min_w) + ((offset_max_w -
-                                    offset_min_w - text_w) / 2) + team_offset_w
-        draw_h = self.image_min_h + \
-            ((self.image_step - text_h) / 4) + \
-            (self.image_step * step)
-        draw.text((draw_w, draw_h), text_str,
-                  font_color, font=font)
+    def draw_ui_self(self, rating_total, team_offs):
+        self.player_card_w
+        self.text_margin_w
+
+        team_card = Image.new(
+            'RGBA', (self.player_card_w, (self.image_step)), (51, 51, 51, 220))
+        team_card_w, team_card_h = team_card.size
+
+        icon_frame_w = icon_frame_h = round(
+            (self.image_step / 2) - self.text_margin_h)
+
+        player_list = Image.open(f'./cogs/replays/render/player_list.png')
+        player_list = player_list.resize((icon_frame_w, icon_frame_h))
+        player_list_w, player_list_h = player_list.size
+
+        card_draw_w = team_offs
+        card_draw_h = self.image_min_h - self.image_step
+
+        player_list_draw_w = self.platoon_icon_margin
+        player_list_draw_h = round((team_card_h - player_list_h) / 2)
+
+        team_card.paste(player_list, box=(
+            player_list_draw_w, player_list_draw_h), mask=player_list.split()[3])
+
+        self.image.paste(team_card, box=(
+            card_draw_w, card_draw_h), mask=team_card.split()[3])
+
+        last_stat_pos = 0
+        for icon in self.stats_list:
+            icon_name = icon
+            icon = Image.open(f'./cogs/replays/render/{icon_name}.png')
+            icon = icon.resize((icon_frame_w, icon_frame_h))
+            icon_w, icon_h = icon.size
+            max_width = self.global_stat_max_width.get(icon_name)
+
+            draw_w = round(
+                ((self.player_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2))) + team_offs
+            draw_h = self.image_min_h + \
+                round(((self.image_step - icon_h) / 2) - self.image_step)
+
+            self.image.paste(icon, box=(
+                draw_w, draw_h), mask=icon.split()[3])
+            last_stat_pos += max_width + self.text_margin_w
         return
+
+    def draw_player_card(self, player):
+        """
+        Renders a complete [player_card]
+        """
+        rating = player.get('rating')
+        survived = player.get('survived')
+        hero_bonus_exp = player.get('hero_bonus_exp')
+        damage = player.get('damage')
+        kills = player.get('kills')
+        platoon = player.get('platoon_str')
+        team = player.get('team')
+        nickname = player.get('nickname')
+        player_wr = player.get('player_wr')
+        clan = player.get('clan_tag')
+        vehicle = player.get('player_vehicle')
+        vehicle_battles = player.get('vehicle_battles')
+        vehicle_wr = player.get('vehicle_wr')
+
+        # Draw name bg plates
+        player_card = Image.new(
+            'RGBA', (self.player_card_w, (self.image_step - 10)), (128, 128, 128, 10))
+        player_card_w, player_card_h = player_card.size
+
+        draw = ImageDraw.Draw(player_card)
+
+        # Draw platoons
+        if platoon:
+            platoon_font = self.font_slim
+            platoon_font_color = self.font_color_base
+            platoon_img = self.platoon_image.copy()
+            draw_platoon = ImageDraw.Draw(platoon_img)
+
+            platoon_str = f'{platoon}'
+            text_w, text_h = draw.textsize(platoon_str, font=platoon_font)
+            platoon_img_w, platoon_img_h = self.platoon_image.size
+
+            draw_w = round((platoon_img_w - text_w) / 2)
+            draw_h = -1
+            draw_platoon.text((draw_w, draw_h), platoon_str,
+                              platoon_font_color, font=platoon_font)
+
+            platoon_w_pos = round(
+                (self.platoon_icon_margin - platoon_img_w) / 2)
+            platoon_h_pos = round((player_card_h - platoon_img_h) / 2)
+            player_card.paste(platoon_img, mask=self.platoon_image.split()[
+                3], box=(platoon_w_pos, platoon_h_pos))
+
+        # Render Tank, Player name, Clan
+        tank_font = self.font_slim
+
+        name_font = self.font
+        font_color = self.font_color_base
+        font_color_info = self.font_color_base
+        font_color_name = self.font_color_base
+        if not survived:
+            font_color_info = self.font_color_nickname_dead
+            font_color_name = self.font_color_nickname_dead
+        if nickname == self.protagonist_name:
+            font_color_name = self.font_color_pr
+            if not survived:
+                font_color_name = self.font_color_pr_dead
+
+        clan_str = f'{clan}'
+        tank_str = f'{vehicle}'
+        name_str = f'{nickname}'
+        tank_text_w, tank_text_h = draw.textsize(tank_str, font=tank_font)
+        name_text_w, name_text_h = draw.textsize(name_str, font=name_font)
+
+        draw_w = self.platoon_icon_margin
+        tank_draw_w = self.platoon_icon_margin
+        tank_draw_h = self.text_margin_h
+        name_draw_w = self.platoon_icon_margin
+        name_draw_h = round(
+            (player_card_h - (tank_text_h + name_text_h + self.text_margin_h)) + tank_text_h)
+        clan_draw_w = name_draw_w + name_text_w + (self.font_size / 2)
+        clan_draw_h = name_draw_h
+
+        draw.text((tank_draw_w, tank_draw_h), tank_str,
+                  font_color_info, font=tank_font)
+        draw.text((name_draw_w, name_draw_h), name_str,
+                  font_color_name, font=name_font)
+        draw.text((clan_draw_w, clan_draw_h), clan_str,
+                  font_color_info, font=name_font)
+
+        if hero_bonus_exp > 0:
+            hero_icon = Image.open(f'./cogs/replays/render/hero_icon.png')
+            hero_icon = hero_icon.resize((tank_font, tank_font))
+            hero_icon_w = name_draw_w + self.text_margin_w
+            hero_icon_h = name_draw_h
+
+            player_card.paste(hero_icon, box=(
+                hero_icon_w, hero_icon_h), mask=hero_icon.split()[3])
+
+        stats = {
+            'kills': {
+                'value': kills,
+                'max_width': 0,
+            },
+            'damage': {
+                'value': damage,
+                'max_width': 0,
+            },
+            'player_wr': {
+                'value': player_wr,
+                'max_width': 0,
+            },
+            'rating': {
+                'value': rating,
+                'max_width': 0,
+            },
+        }
+
+        # Render performance stats
+        for stat in stats:
+            stat_font = self.get_font(f'{stat}')
+            stat_str = f'{stats.get(stat).get("value")}'
+            text_w, _ = draw.textsize(stat_str, font=stat_font)
+            stat_max_width = stats.get(stat).get('max_width')
+            stat_max_width_global = self.global_stat_max_width.get(stat)
+
+            if text_w > stat_max_width_global:
+                self.global_stat_max_width[stat] = text_w
+
+        last_stat_pos = 0
+        for stat in stats:
+            stat_value = stats.get(stat).get("value")
+            stat_max_width = self.global_stat_max_width.get(stat)
+            stat_str = f'{stat_value}'
+
+            stat_font = self.get_font(f'{stat}')
+            stat_font_color = self.get_font(f'{stat}', 'color')
+            if not survived:
+                stat_font_color = font_color_info
+
+            stat_text_w, stat_text_h = draw.textsize(
+                stat_str, font=stat_font)
+
+            stat_draw_w = round(
+                ((player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) + ((stat_max_width - stat_text_w) / 2)))
+            stat_draw_h = round((player_card_h - stat_text_h) / 2)
+            draw.text((stat_draw_w, stat_draw_h), stat_str,
+                      stat_font_color, font=stat_font)
+            last_stat_pos += stat_max_width + self.text_margin_w
+
+        return player_card
+
+    def get_font(self, stat, color=None):
+        rating_font = dmg_font = self.font
+        wr_font = kills_font = self.font_slim
+        font_color = self.font_color_base
+        rating_font_color = self.font_color_base
+
+        if color:
+            return (255, 255, 255)
+
+        return rating_font
 
     def embed(self):
         from discord import Embed

@@ -137,7 +137,7 @@ class Replay:
         # Detect realm
         if len(str(player_id)) == 8:
             player_realm = 'ru'
-            api_domain = 'http://wotblitz.ru'
+            api_domain = 'http://api.wotblitz.ru'
 
         if len(str(player_id)) == 9:
             player_realm = 'eu'

@@ -39,26 +39,28 @@ class blitz_aftermath_replays(commands.Cog):
                 if attachment.url.endswith('.wotbreplay'):
                     replays.append(attachment.url)
 
-            # Send replay to WoTInspector
-            replays_list_data = Replay(replays).process_replays()
+            if replays:
+                # Send replay to WoTInspector
+                replays_list_data = Replay(replays).process_replays()
 
-            replay_data = replays_list_data.get(
-                list(replays_list_data.keys())[0])
-            replay_id = list(replays_list_data.keys())[0]
+                replay_data = replays_list_data.get(
+                    list(replays_list_data.keys())[0])
 
-            replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
+                replay_id = list(replays_list_data.keys())[0]
 
-            image_file = Render(replay_data, replay_id).image()
-            await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+                replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
 
-            # # Send message
-            # try:
-            #     image_file = Render(replay_data, replay_id).image()
-            #     await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
-            # except:
-            #     embed = Render(replay_data, replay_id).embed()
-            #     await message.channel.send(embed=embed)
-            # return
+                image_file = Render(replay_data, replay_id).image()
+                await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+
+                # # Send message
+                # try:
+                #     image_file = Render(replay_data, replay_id).image()
+                #     await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+                # except:
+                #     embed = Render(replay_data, replay_id).embed()
+                #     await message.channel.send(embed=embed)
+                # return
 
 
 def setup(client):
