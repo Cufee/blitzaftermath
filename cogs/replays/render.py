@@ -162,14 +162,14 @@ class Render():
         self.image_team_min_h = 100
         self.image_team_min_w = 135
 
-        self.image_rating_min_w = 279
-        self.image_rating_max_w = 339
-        self.image_wr_min_w = 356
-        self.image_wr_max_w = 383
-        self.image_dmg_min_w = 403
-        self.image_dmg_max_w = 443
-        self.image_kills_min_w = 465
-        self.image_kills_max_w = 510
+        self.image_rating_min_w = 326
+        self.image_rating_max_w = 372
+        self.image_wr_min_w = 384
+        self.image_wr_max_w = 430
+        self.image_dmg_min_w = 430
+        self.image_dmg_max_w = 486
+        self.image_kills_min_w = 496
+        self.image_kills_max_w = 508
 
         self.image_step = 54
 
@@ -203,11 +203,11 @@ class Render():
                 platoon_str = f'{platoon}'
                 text_w, text_h = draw.textsize(platoon_str, font=font)
                 text_margin = (self.image_step - (text_h * 2)) / 3
-                platoon_margin = text_h + (text_margin * 2)
+                platoon_margin = text_h + self.image_min_w
 
                 draw_w = self.image_min_w + team_offset_w
                 draw_h = self.image_min_h + \
-                    ((self.image_step - text_h) / 4) + \
+                    ((self.image_step - text_h) / 3) + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), platoon_str,
                           font_color_base, font=font)
@@ -216,7 +216,7 @@ class Render():
                 vehicle_str = f'{vehicle}'
                 text_w, text_h = draw.textsize(vehicle_str, font=font_slim)
                 text_margin = (self.image_step - (text_h * 2)) / 3
-                platoon_margin = text_h + (text_margin * 2)
+                platoon_margin = text_h + text_margin
 
                 draw_w = self.image_min_w + platoon_margin + team_offset_w
                 draw_h = self.image_min_h + \
@@ -231,7 +231,7 @@ class Render():
 
                 name_str = f'{nickname} {clan}'
                 text_w, text_h = draw.textsize(name_str, font=font)
-                draw_w = self.image_min_w + platoon_margin + team_offset_w
+                text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_h = self.image_min_h + text_h + \
                     (self.image_step * step)
                 draw.text((draw_w, draw_h), name_str,
@@ -240,6 +240,7 @@ class Render():
                 # Draw rating
                 rating_str = f'{rating}'
                 text_w, text_h = draw.textsize(rating_str, font=font_fat)
+                text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_w = (self.image_rating_min_w) + ((self.image_rating_max_w -
                                                        self.image_rating_min_w - text_w) / 2) + team_offset_w
                 draw_h = self.image_min_h + \
@@ -251,6 +252,7 @@ class Render():
                 # Draw winrate
                 player_wr_str = f'{player_wr}'
                 text_w, text_h = draw.textsize(player_wr_str, font=font_slim)
+                text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_w = (self.image_wr_min_w) + ((self.image_wr_max_w -
                                                    self.image_wr_min_w - text_w) / 2) + team_offset_w
                 draw_h = self.image_min_h + \
@@ -262,6 +264,7 @@ class Render():
                 # Draw damage
                 damage_str = f'{damage}'
                 text_w, text_h = draw.textsize(damage_str, font=font_slim)
+                text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_w = (self.image_dmg_min_w) + ((self.image_dmg_max_w -
                                                     self.image_dmg_min_w - text_w) / 2) + team_offset_w
                 draw_h = self.image_min_h + \
@@ -272,7 +275,8 @@ class Render():
 
                 # Draw kills
                 kills_str = f'{kills}'
-                text_w, text_h = draw.textsize(rating_str, font=font_slim)
+                text_w, text_h = draw.textsize(kills_str, font=font_slim)
+                text_margin = (self.image_step - (text_h * 2)) / 3
                 draw_w = (self.image_kills_min_w) + ((self.image_kills_max_w -
                                                       self.image_kills_min_w - text_w) / 2) + team_offset_w
                 draw_h = self.image_min_h + \
@@ -292,6 +296,7 @@ class Render():
             # Draw team rating
             team_rating_str = f'{team_rating}'
             text_w, text_h = draw.textsize(team_rating_str, font=font)
+            text_margin = (self.image_step - (text_h * 2)) / 3
             draw_w = self.image_team_min_w + text_h + team_offset_w
             draw_h = self.image_team_min_h
             draw.text((draw_w, draw_h), team_rating_str,
@@ -306,6 +311,7 @@ class Render():
             map_pos_w = self.image_w / 2
             map_name_str = f'{self.map_name} - {self.battle_result}'
             text_w, text_h = draw.textsize(map_name_str, font=font_slim_title)
+            text_margin = (self.image_step - (text_h * 2)) / 3
             draw_w = map_pos_w - (text_w / 2)
             draw_h = map_pos_h - (text_h / 2)
             draw.text((draw_w, draw_h), map_name_str,
