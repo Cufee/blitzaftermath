@@ -48,15 +48,11 @@ class blitz_aftermath_replays(commands.Cog):
 
             replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
 
-            # images = Render(replay_data, replay_id).image()
-            # await message.channel.send(files=images)
-
             # Send message
             try:
-                image = discord.File(filename="Result.png", fp=Render(
-                    replay_data, replay_id).image())
-                await message.channel.send(file=image)
-            except:
+                image_file = Render(replay_data, replay_id).image()
+                await message.channel.send(file=image_file)
+            except error:
                 embed = Render(replay_data, replay_id).embed()
                 await message.channel.send(embed=embed)
             return
