@@ -52,7 +52,7 @@ class blitz_aftermath_replays(commands.Cog):
             try:
                 image_file = Render(replay_data, replay_id).image()
                 await message.channel.send(file=image_file)
-            except error:
+            except:
                 embed = Render(replay_data, replay_id).embed()
                 await message.channel.send(embed=embed)
             return
