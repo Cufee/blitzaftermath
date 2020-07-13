@@ -204,21 +204,6 @@ class Render():
 
                 self.image.paste(player_card, box=(
                     plate_w_pos, plate_h_pos), mask=player_card.split()[3])
-
-                # rating_percent = rating / self.best_rating * 100
-                # if rating_percent > 90:
-                #     rating_font_color = (201, 101, 219)
-                # elif rating_percent > 75:
-                #     rating_font_color = (101, 176, 219)
-                # elif rating_percent > 55:
-                #     rating_font_color = (123, 219, 101)
-                # elif rating_percent > 40:
-                #     rating_font_color = (219, 193, 101)
-                # else:
-                #     rating_font_color = (219, 109, 101)
-
-                # team_offset_h = self.image_step
-
                 step += 1
                 if step >= 7:
                     break
@@ -433,6 +418,31 @@ class Render():
             stat_draw_h = round((player_card_h - stat_text_h) / 2)
             draw.text((stat_draw_w, stat_draw_h), stat_str,
                       stat_font_color, font=stat_font)
+
+            if stat == 'rating':
+                rating_percent = stat_value / self.best_rating * 100
+                if rating_percent > 90:
+                    stat_color = (201, 101, 219)
+                elif rating_percent > 75:
+                    stat_color = (101, 176, 219)
+                elif rating_percent > 55:
+                    stat_color = (123, 219, 101)
+                elif rating_percent > 40:
+                    stat_color = (219, 193, 101)
+                else:
+                    stat_color = (219, 109, 101)
+
+                rating_box_w1 = round(
+                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - 6
+                rating_box_h1 = stat_draw_h
+                rating_box_w2 = rating_box_w1 - 3
+                rating_box_h2 = rating_box_h1 + stat_text_h + 1
+
+                draw.rectangle([(rating_box_w1, rating_box_h1),
+                                (rating_box_w2, rating_box_h2)], fill=stat_color)
+                # draw.text((rating_line_w, rating_line_h), '|',
+                #           stat_color, font=stat_font)
+
             last_stat_pos += stat_max_width + self.text_margin_w
 
         return player_card
