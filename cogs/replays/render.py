@@ -188,6 +188,38 @@ class Render():
         self.font_color_loss = (242, 94, 61)
 
         self.player_card_color = (80, 80, 80, 200)
+        self.result_back_color = (80, 80, 80, 0)
+        self.map_font_color = (110, 110, 110, 255)
+
+        self.font = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", self.font_size)
+        self.font_fat = ImageFont.truetype(
+            "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
+        self.font_slim = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", self.font_size)
+        # self.font_slim_title = ImageFont.truetype(
+        #     "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
+        self.font_platoon = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", 12)
+        self.team_rating_font = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", 18)
+
+        # Width of each player card
+        longest_name, _ = self.draw_frame.textsize(
+            self.longest_name, self.font)
+        longest_clan, _ = self.draw_frame.textsize(
+            self.longest_clan, self.font)
+        longest_rating, _ = self.draw_frame.textsize(
+            f'{self.best_rating}', self.font)
+
+        self.player_card_w = round(
+            self.platoon_icon_margin + longest_name + longest_clan + (self.text_margin_w * 6) + (longest_rating * 5))
+
+        # Margin from frame border
+        self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
+
+        self.enemy_team_offset_w = self.image_w - \
+            (self.image_min_w)-(self.player_card_w)
 
         if bg == 1:
             try:
@@ -231,7 +263,6 @@ class Render():
 
             map_font_size = round(self.image_min_h - (self.image_step / 2))
             result_font_size = round(self.image_min_h / 2)
-            map_font_color = (100, 100, 100, 255)
             font_title = ImageFont.truetype(
                 "./cogs/replays/render/font.ttf", (map_font_size))
             font_result = ImageFont.truetype(
@@ -243,47 +274,29 @@ class Render():
             result_text_w, result_text_h = self.draw_frame.textsize(
                 battle_result_str, font=font_result)
 
-            map_name_draw_w = round((self.image_w - text_w) / 2)
+            map_name_back_w = self.image_w - (self.image_min_w * 2)
+            map_name_back_h = round(
+                self.image_min_h)
+            map_name_back = Image.new(
+                'RGBA', (map_name_back_w, map_name_back_h), self.result_back_color)
+            map_name_draw = ImageDraw.Draw(map_name_back)
+
+            map_name_draw_w = round((map_name_back_w - text_w) / 2)
             map_name_draw_h = round(
-                (self.image_min_h - (self.image_step / 3) - text_h) / 2)
+                ((map_name_back_h) - text_h) / 2)
 
-            battle_result_draw_w = round((self.image_w - result_text_w) / 2)
-            battle_result_draw_h = round(
-                ((self.image_min_h) - result_text_h) / 8)
+            battle_result_draw_w = round((map_name_back_w - result_text_w) / 2)
+            battle_result_draw_h = 0 - (result_font_size * 0.19)
 
-            self.draw_frame.text((map_name_draw_w, map_name_draw_h), map_name_str,
-                                 fill=map_font_color, font=font_title)
-            self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
-                                 fill=result_font_color, font=font_result)
+            map_name_draw.text((map_name_draw_w, map_name_draw_h), map_name_str,
+                               fill=self.map_font_color, font=font_title)
+            map_name_draw.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
+                               fill=result_font_color, font=font_result)
 
-        self.font = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", self.font_size)
-        self.font_fat = ImageFont.truetype(
-            "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
-        self.font_slim = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", self.font_size)
-        # self.font_slim_title = ImageFont.truetype(
-        #     "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
-        self.font_platoon = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", 12)
-        self.team_rating_font = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", 18)
-
-        # Width of each player card
-        longest_name, _ = self.draw_frame.textsize(
-            self.longest_name, self.font)
-        longest_clan, _ = self.draw_frame.textsize(
-            self.longest_clan, self.font)
-        longest_rating, _ = self.draw_frame.textsize(
-            f'{self.best_rating}', self.font)
-        self.player_card_w = round(
-            self.platoon_icon_margin + longest_name + longest_clan + (self.text_margin_w * 8) + (longest_rating * 5))
-
-        # Margin from frame border
-        self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
-
-        self.enemy_team_offset_w = self.image_w - \
-            (self.image_min_w)-(self.player_card_w)
+            map_name_back_w_pos = self.image_min_w
+            map_name_back_h_pos = self.image_min_h - map_name_back_h + 14
+            self.image.paste(
+                map_name_back, (map_name_back_w_pos, map_name_back_h_pos), mask=map_name_back.split()[3])
 
         self.global_stat_max_width = {
             'kills': 0,
