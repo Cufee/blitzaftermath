@@ -14,6 +14,8 @@ class Render():
 
         # Player details
         self.map_name = self.replay_data.get('battle_summary').get('map_name')
+        self.room_type = self.replay_data.get(
+            'battle_summary').get('room_type')
         self.winner_team = self.replay_data.get(
             'battle_summary').get('winner_team')
 
@@ -38,6 +40,8 @@ class Render():
         self.all_names = []
 
         self.best_rating = 0
+        self.longest_name = ''
+        self.longest_clan = ''
         self.ally_rating_total = 0
         self.enemy_rating_total = 0
 
@@ -48,8 +52,19 @@ class Render():
         for player in players_data:
             data = player
 
+            clan_tag = ''
+            if data.get('clan_tag'):
+                clan_tag = f'[{data.get("clan_tag")}]'
+
             if self.best_rating < data.get('rating'):
                 self.best_rating = data.get('rating')
+            data = player
+
+            if len(self.longest_name) < len(clan_tag):
+                self.longest_name = clan_tag
+
+            if len(self.longest_clan) < len(clan_tag):
+                self.longest_clan = data.get('nickname')
 
             player_wins = data.get('stats').get('wins')
             player_battles = data.get('stats').get('battles')
@@ -72,10 +87,6 @@ class Render():
 
             player_wr = "%.2f" % round(
                 (player_wins / player_battles * 100), 2) + '%'
-
-            clan_tag = ''
-            if data.get('clan_tag'):
-                clan_tag = f'[{data.get("clan_tag")}]'
 
             platoon_number = data.get('performance').get('squad_index')
             platoon_str = ''
@@ -166,17 +177,31 @@ class Render():
         self.font_color_loss = (242, 94, 61)
 
         self.image_w, self.image_h = self.image.size
-        self.image_min_w = 12               # Margin from frame border
-        self.image_min_h = 150              # Margin from frame border
-        self.player_card_w = 520           # Width of each player card
-        self.image_step = 54                # Height of each player card
-        self.platoon_icon_margin = 28       # Will bhe devided by 2
-
-        self.enemy_team_offset_w = self.image_w - \
-            (self.image_min_w)-(self.player_card_w)
+        # Will bhe devided by 2
+        self.platoon_icon_margin = 28
+        # Margin from frame border
+        self.image_min_h = 150
+        # Height of each player card
+        self.image_step = 54
 
         self.text_margin_w = 10
         self.text_margin_h = 5
+
+        # Width of each player card
+        longest_name, _ = self.draw_frame.textsize(
+            self.longest_name, self.font)
+        longest_clan, _ = self.draw_frame.textsize(
+            self.longest_clan, self.font)
+        longest_rating, _ = self.draw_frame.textsize(
+            f'{self.best_rating}', self.font)
+        self.player_card_w = round(
+            self.platoon_icon_margin + longest_name + longest_clan + (self.text_margin_w * 8) + (longest_rating * 5))
+
+        # Margin from frame border
+        self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
+
+        self.enemy_team_offset_w = self.image_w - \
+            (self.image_min_w)-(self.player_card_w)
 
         self.global_stat_max_width = {
             'kills': 0,
