@@ -50,6 +50,7 @@ class Replay:
         winner_team = replay_data.get('summary').get('winner_team')
         battle_type = replay_data.get('summary').get('battle_type')
         battle_duration = replay_data.get('summary').get('battle_duration')
+        battle_result = replay_data.get('summary').get('battle_result')
         battle_start_time = replay_data.get(
             'summary').get('battle_start_timestamp')
         map_name = replay_data.get('summary').get('map_name')
@@ -59,6 +60,7 @@ class Replay:
         battle_summary = {
             "protagonist": protagonist,
             "winner_team": winner_team,
+            "battle_result": battle_result,
             "battle_type": battle_type,
             "battle_duration": battle_duration,
             "battle_start_timestamp": battle_start_time,
