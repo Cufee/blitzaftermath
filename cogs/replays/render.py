@@ -160,7 +160,7 @@ class Render():
         frame_w = 1100
         frame_h = 550
 
-        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
+        frame = Image.new('RGB', (frame_w, frame_h), (0, 0, 0))
         self.image = frame
         self.draw_frame = ImageDraw.Draw(self.image)
         self.platoon_image = Image.open('./cogs/replays/render/platoon.png')
@@ -187,11 +187,15 @@ class Render():
         self.font_color_win = (95, 227, 66)
         self.font_color_loss = (242, 94, 61)
 
-        self.player_card_color = (80, 80, 80, 128)
+        self.player_card_color = (80, 80, 80, 200)
 
         if bg == 1:
-            bg_image = Image.open(
-                './cogs/replays/render/bg_frame.png')
+            try:
+                bg_image = Image.open(
+                    f'./cogs/replays/render/bg_frames_named/{self.protagonist_id}.jpg')
+            except:
+                bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = frame_w / bg_image_w
             bg_image = bg_image.resize(
