@@ -27,11 +27,13 @@ class Render():
             'players').get(str(self.protagonist_id)).get('nickname')
         self.protagonist_team = self.replay_data.get(
             'players').get(str(self.protagonist_id)).get('team')
+        self.battle_result_num = self.replay_data.get(
+            'battle_summary').get('battle_result')
 
         self.battle_result = 'Defeat'
-        if self.replay_data.get('battle_summary').get('battle_result') == 1:
+        if self.battle_result_num == 1:
             self.battle_result = 'Victory'
-        if self.replay_data.get('battle_summary').get('battle_result') == 2:
+        if self.battle_result_num == 2:
             self.battle_result = 'Draw'
 
         self.all_names_render = []
@@ -148,46 +150,120 @@ class Render():
         self.pr_battle_pen = self.pr_performance.get(
             'shots_pen')
 
-    def image(self):
-        self.image = Image.open('./cogs/replays/render/frame.png')
-        self.platoon_image = Image.open('./cogs/replays/render/platoon.png')
+    def image(self, bg=1, brand=1, darken=1, mapname=1):
+        """
+        bg - Draw background image \n
+        brand - Draw branding \n
+        darken - Draw dark bg overlay \n
+        mapname - Draw map name and result \n
+        """
+        frame_w = 1100
+        frame_h = 550
+
+        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
+        self.image = frame
         self.draw_frame = ImageDraw.Draw(self.image)
+        self.platoon_image = Image.open('./cogs/replays/render/platoon.png')
 
         self.font_size = 16
-        self.font = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", self.font_size)
-        self.font_title = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", (self.font_size * 3))
-        self.font_fat = ImageFont.truetype(
-            "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
-        self.font_slim = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", self.font_size)
-        self.font_slim_title = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
-        self.font_platoon = ImageFont.truetype(
-            "./cogs/replays/render/font_slim.ttf", 12)
-        self.team_rating_font = ImageFont.truetype(
-            "./cogs/replays/render/font.ttf", 18)
+
+        self.image_w, self.image_h = frame.size
+        # Will bhe devided by 2
+        self.platoon_icon_margin = 28
+        # Height of each player card
+        self.image_step = 54
+        # Margin from frame border
+        self.image_min_h = 150
+
+        self.text_margin_w = self.font_size
+        self.text_margin_h = 5
 
         self.font_color_base = (255, 255, 255)
         self.font_color_nickname = (255, 255, 255)
-        self.font_color_nickname_dead = (120, 120, 120)
+        self.font_color_nickname_dead = (180, 180, 180)
         self.font_color_clan = (150, 150, 150)
         self.font_color_pr = (255, 165, 0)
         self.font_color_pr_dead = (204, 132, 0)
         self.font_color_win = (95, 227, 66)
         self.font_color_loss = (242, 94, 61)
 
-        self.image_w, self.image_h = self.image.size
-        # Will bhe devided by 2
-        self.platoon_icon_margin = 28
-        # Margin from frame border
-        self.image_min_h = 150
-        # Height of each player card
-        self.image_step = 54
+        self.player_card_color = (80, 80, 80, 128)
 
-        self.text_margin_w = 10
-        self.text_margin_h = 5
+        if bg == 1:
+            bg_image = Image.open(
+                './cogs/replays/render/bg_frame.png')
+            bg_image_w, bg_image_h = bg_image.size
+            bg_image_ratio = frame_w / bg_image_w
+            bg_image = bg_image.resize(
+                (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
+            frame.paste(bg_image, box=(
+                0, 0))
+
+        if mapname == 0:
+            self.image_min_h = self.image_step
+
+        if brand == 1:
+            branding_w = int((frame_w - frame_w) / 2)
+            branding_h = int((frame_h - frame_h) / 2)
+            overlay_brand_am = Image.open(
+                './cogs/replays/render/aftermath_frame.png')
+            frame.paste(overlay_brand_am, box=(
+                branding_w, branding_h), mask=overlay_brand_am.split()[3])
+
+        if darken == 1:
+            overlay_dark = Image.new(
+                'RGBA', (frame_w, frame_h), (0, 0, 0, 128))
+            frame.paste(overlay_dark, box=(
+                0, 0), mask=overlay_dark.split()[3])
+
+        if mapname == 1:
+            # Draw battle result
+            if self.battle_result_num == 0:
+                result_font_color = self.font_color_loss
+            if self.battle_result_num == 1:
+                result_font_color = self.font_color_win
+            if self.battle_result_num == 2:
+                result_font_color = self.font_color_base
+
+            map_font_size = round(self.image_min_h - (self.image_step / 2))
+            result_font_size = round(self.image_min_h / 2)
+            map_font_color = (100, 100, 100, 255)
+            font_title = ImageFont.truetype(
+                "./cogs/replays/render/font.ttf", (map_font_size))
+            font_result = ImageFont.truetype(
+                "./cogs/replays/render/font.ttf", (result_font_size))
+            map_name_str = f'{self.map_name}'
+            battle_result_str = f'{self.battle_result}'
+            text_w, text_h = self.draw_frame.textsize(
+                map_name_str, font=font_title)
+            result_text_w, result_text_h = self.draw_frame.textsize(
+                battle_result_str, font=font_result)
+
+            map_name_draw_w = round((self.image_w - text_w) / 2)
+            map_name_draw_h = round(
+                (self.image_min_h - (self.image_step / 3) - text_h) / 2)
+
+            battle_result_draw_w = round((self.image_w - result_text_w) / 2)
+            battle_result_draw_h = round(
+                ((self.image_min_h) - result_text_h) / 8)
+
+            self.draw_frame.text((map_name_draw_w, map_name_draw_h), map_name_str,
+                                 fill=map_font_color, font=font_title)
+            self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
+                                 fill=result_font_color, font=font_result)
+
+        self.font = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", self.font_size)
+        self.font_fat = ImageFont.truetype(
+            "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
+        self.font_slim = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", self.font_size)
+        # self.font_slim_title = ImageFont.truetype(
+        #     "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
+        self.font_platoon = ImageFont.truetype(
+            "./cogs/replays/render/font_slim.ttf", 12)
+        self.team_rating_font = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", 18)
 
         # Width of each player card
         longest_name, _ = self.draw_frame.textsize(
@@ -238,17 +314,13 @@ class Render():
             self.draw_ui_self(team_rating, team_offset_w)
             step = 0
 
-        # Draw battle result
-        battle_result_str = f'{self.map_name} - {self.battle_result}'
-        text_w, text_h = self.draw_frame.textsize(
-            battle_result_str, font=self.font_slim_title)
+        # if mode == 4:
+        #     lower = round((self.image_min_h) +
+        #                   ((int(len(all_players) / 2) + 1) * self.image_step))
+        #     left = upper = 0
+        #     right = left + self.image_w
 
-        result_draw_w = round((self.image_w - text_w) / 2)
-        result_draw_h = round(
-            (self.image_min_h - self.image_step - text_h) / 2)
-
-        self.draw_frame.text((result_draw_w, result_draw_h), battle_result_str,
-                             self.font_color_base, font=self.font_slim_title)
+        #     self.image = self.image.crop((0, 0, 0, lower))
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
@@ -262,28 +334,27 @@ class Render():
         self.player_card_w
         self.text_margin_w
 
+        card_height = self.image_step - 10
+
         team_card = Image.new(
-            'RGBA', (self.player_card_w, (self.image_step)), (51, 51, 51, 220))
+            'RGBA', (self.player_card_w, (card_height)), (51, 51, 51, 255))
         team_card_w, team_card_h = team_card.size
 
         icon_frame_w = icon_frame_h = round(
-            (self.image_step / 2) - self.text_margin_h)
+            (card_height * 2 / 3) - self.text_margin_h)
 
         player_list = Image.open(f'./cogs/replays/render/player_list.png')
         player_list = player_list.resize((icon_frame_w, icon_frame_h))
         player_list_w, player_list_h = player_list.size
 
         card_draw_w = team_offs
-        card_draw_h = self.image_min_h - self.image_step
+        card_draw_h = self.image_min_h - card_height
 
         player_list_draw_w = self.platoon_icon_margin
-        player_list_draw_h = round((team_card_h - player_list_h) / 2)
+        icons_draw_h = round((team_card_h - player_list_h) / 2)
 
         team_card.paste(player_list, box=(
-            player_list_draw_w, player_list_draw_h), mask=player_list.split()[3])
-
-        self.image.paste(team_card, box=(
-            card_draw_w, card_draw_h), mask=team_card.split()[3])
+            player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
 
         last_stat_pos = 0
         for icon in self.stats_list:
@@ -294,13 +365,16 @@ class Render():
             max_width = self.global_stat_max_width.get(icon_name)
 
             draw_w = round(
-                ((self.player_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2))) + team_offs
-            draw_h = self.image_min_h + \
-                round(((self.image_step - icon_h) / 2) - self.image_step)
+                ((team_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2)))
+            # draw_w = round(team_card_w)
 
-            self.image.paste(icon, box=(
-                draw_w, draw_h), mask=icon.split()[3])
+            team_card.paste(icon, box=(
+                draw_w, icons_draw_h), mask=icon.split()[3])
             last_stat_pos += max_width + self.text_margin_w
+
+        self.image.paste(team_card, box=(
+            (card_draw_w), card_draw_h), mask=team_card.split()[3])
+
         return
 
     def draw_player_card(self, player):
@@ -323,14 +397,14 @@ class Render():
 
         # Draw name bg plates
         player_card = Image.new(
-            'RGBA', (self.player_card_w, (self.image_step - 10)), (128, 128, 128, 10))
+            'RGBA', (self.player_card_w, (self.image_step - 10)), self.player_card_color)
         player_card_w, player_card_h = player_card.size
 
         draw = ImageDraw.Draw(player_card)
 
         # Draw platoons
         if platoon:
-            platoon_font = self.font_slim
+            platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()
             draw_platoon = ImageDraw.Draw(platoon_img)
@@ -340,7 +414,7 @@ class Render():
             platoon_img_w, platoon_img_h = self.platoon_image.size
 
             draw_w = round((platoon_img_w - text_w) / 2)
-            draw_h = -1
+            draw_h = 0
             draw_platoon.text((draw_w, draw_h), platoon_str,
                               platoon_font_color, font=platoon_font)
 
@@ -351,9 +425,8 @@ class Render():
                 3], box=(platoon_w_pos, platoon_h_pos))
 
         # Render Tank, Player name, Clan
-        tank_font = self.font_slim
-
-        name_font = self.font
+        tank_font = self.font
+        name_font = self.font_slim
         font_color = self.font_color_base
         font_color_info = self.font_color_base
         font_color_name = self.font_color_base
@@ -468,8 +541,6 @@ class Render():
 
                 draw.rectangle([(rating_box_w1, rating_box_h1),
                                 (rating_box_w2, rating_box_h2)], fill=stat_color)
-                # draw.text((rating_line_w, rating_line_h), '|',
-                #           stat_color, font=stat_font)
 
             last_stat_pos += stat_max_width + self.text_margin_w
 

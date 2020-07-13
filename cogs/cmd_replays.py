@@ -50,7 +50,7 @@ class blitz_aftermath_replays(commands.Cog):
 
                 replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
 
-                image_file = Render(replay_data, replay_id).image()
+                image_file = Render(replay_data, replay_id).image(brand=0)
                 await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
 
                 # # Send message
