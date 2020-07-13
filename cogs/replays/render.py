@@ -158,7 +158,7 @@ class Render():
         mapname - Draw map name and result \n
         """
         frame_w = 1100
-        frame_h = 550
+        frame_h = 580
 
         frame = Image.new('RGB', (frame_w, frame_h), (0, 0, 0))
         self.image = frame
@@ -173,7 +173,7 @@ class Render():
         # Height of each player card
         self.image_step = 54
         # Margin from frame border
-        self.image_min_h = 150
+        self.image_min_h = 200
 
         self.text_margin_w = self.font_size
         self.text_margin_h = 5
@@ -197,8 +197,8 @@ class Render():
             "./cogs/replays/render/font_fat.ttf", (round(self.font_size * 1.25)))
         self.font_slim = ImageFont.truetype(
             "./cogs/replays/render/font_slim.ttf", self.font_size)
-        # self.font_slim_title = ImageFont.truetype(
-        #     "./cogs/replays/render/font_slim.ttf", (self.font_size * 3))
+        self.font_title = ImageFont.truetype(
+            "./cogs/replays/render/font.ttf", (self.font_size * 5))
         self.font_platoon = ImageFont.truetype(
             "./cogs/replays/render/font_slim.ttf", 12)
         self.team_rating_font = ImageFont.truetype(
@@ -261,42 +261,16 @@ class Render():
             if self.battle_result_num == 2:
                 result_font_color = self.font_color_base
 
-            map_font_size = round(self.image_min_h - (self.image_step / 2))
-            result_font_size = round(self.image_min_h / 2)
-            font_title = ImageFont.truetype(
-                "./cogs/replays/render/font.ttf", (map_font_size))
-            font_result = ImageFont.truetype(
-                "./cogs/replays/render/font.ttf", (result_font_size))
-            map_name_str = f'{self.map_name}'
             battle_result_str = f'{self.battle_result}'
-            text_w, text_h = self.draw_frame.textsize(
-                map_name_str, font=font_title)
             result_text_w, result_text_h = self.draw_frame.textsize(
-                battle_result_str, font=font_result)
+                battle_result_str, font=self.font_title)
 
-            map_name_back_w = self.image_w - (self.image_min_w * 2)
-            map_name_back_h = round(
-                self.image_min_h)
-            map_name_back = Image.new(
-                'RGBA', (map_name_back_w, map_name_back_h), self.result_back_color)
-            map_name_draw = ImageDraw.Draw(map_name_back)
+            battle_result_draw_w = round((self.image_w - result_text_w) / 2)
+            battle_result_draw_h = round(
+                (self.image_min_h - self.image_step - result_text_h) / 2)
 
-            map_name_draw_w = round((map_name_back_w - text_w) / 2)
-            map_name_draw_h = round(
-                ((map_name_back_h) - text_h) / 2)
-
-            battle_result_draw_w = round((map_name_back_w - result_text_w) / 2)
-            battle_result_draw_h = 0 - (result_font_size * 0.19)
-
-            map_name_draw.text((map_name_draw_w, map_name_draw_h), map_name_str,
-                               fill=self.map_font_color, font=font_title)
-            map_name_draw.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
-                               fill=result_font_color, font=font_result)
-
-            map_name_back_w_pos = self.image_min_w
-            map_name_back_h_pos = self.image_min_h - map_name_back_h + 14
-            self.image.paste(
-                map_name_back, (map_name_back_w_pos, map_name_back_h_pos), mask=map_name_back.split()[3])
+            self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
+                                 fill=result_font_color, font=self.font_title)
 
         self.global_stat_max_width = {
             'kills': 0,
@@ -320,7 +294,7 @@ class Render():
                 player_card = self.draw_player_card(player)
                 plate_w_pos = round(team_offset_w)
                 plate_h_pos = round(self.image_min_h +
-                                    (self.image_step * step))
+                                    (self.image_step * (step)))
 
                 self.image.paste(player_card, box=(
                     plate_w_pos, plate_h_pos), mask=player_card.split()[3])
@@ -330,14 +304,6 @@ class Render():
 
             self.draw_ui_self(team_rating, team_offset_w)
             step = 0
-
-        # if mode == 4:
-        #     lower = round((self.image_min_h) +
-        #                   ((int(len(all_players) / 2) + 1) * self.image_step))
-        #     left = upper = 0
-        #     right = left + self.image_w
-
-        #     self.image = self.image.crop((0, 0, 0, lower))
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
@@ -351,7 +317,7 @@ class Render():
         self.player_card_w
         self.text_margin_w
 
-        card_height = self.image_step - 10
+        card_height = self.image_step - self.text_margin_h
 
         team_card = Image.new(
             'RGBA', (self.player_card_w, (card_height)), (51, 51, 51, 255))
@@ -365,7 +331,7 @@ class Render():
         player_list_w, player_list_h = player_list.size
 
         card_draw_w = team_offs
-        card_draw_h = self.image_min_h - card_height
+        card_draw_h = self.image_min_h - card_height - (self.text_margin_h * 2)
 
         player_list_draw_w = self.platoon_icon_margin
         icons_draw_h = round((team_card_h - player_list_h) / 2)
