@@ -168,7 +168,7 @@ class Render():
         self.image_w, self.image_h = self.image.size
         self.image_min_w = 12               # Margin from frame border
         self.image_min_h = 150              # Margin from frame border
-        self.player_card_w = 500           # Width of each player card
+        self.player_card_w = 520           # Width of each player card
         self.image_step = 54                # Height of each player card
         self.platoon_icon_margin = 28       # Will bhe devided by 2
 
@@ -343,6 +343,7 @@ class Render():
         name_str = f'{nickname}'
         tank_text_w, tank_text_h = draw.textsize(tank_str, font=tank_font)
         name_text_w, name_text_h = draw.textsize(name_str, font=name_font)
+        clan_text_w, clan_text_h = draw.textsize(clan_str, font=name_font)
 
         draw_w = self.platoon_icon_margin
         tank_draw_w = self.platoon_icon_margin
@@ -350,7 +351,7 @@ class Render():
         name_draw_w = self.platoon_icon_margin
         name_draw_h = round(
             (player_card_h - (tank_text_h + name_text_h + self.text_margin_h)) + tank_text_h)
-        clan_draw_w = name_draw_w + name_text_w + (self.font_size / 2)
+        clan_draw_w = round(name_draw_w + name_text_w + (self.font_size / 2))
         clan_draw_h = name_draw_h
 
         draw.text((tank_draw_w, tank_draw_h), tank_str,
@@ -362,9 +363,9 @@ class Render():
 
         if hero_bonus_exp > 0:
             hero_icon = Image.open(f'./cogs/replays/render/hero_icon.png')
-            hero_icon = hero_icon.resize((tank_font, tank_font))
-            hero_icon_w = name_draw_w + self.text_margin_w
-            hero_icon_h = name_draw_h
+            hero_icon = hero_icon.resize((self.font_size, self.font_size))
+            hero_icon_w = round(tank_draw_w + self.text_margin_w + tank_text_w)
+            hero_icon_h = self.text_margin_h + 1
 
             player_card.paste(hero_icon, box=(
                 hero_icon_w, hero_icon_h), mask=hero_icon.split()[3])
