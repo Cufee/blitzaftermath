@@ -60,11 +60,11 @@ class Render():
                 self.best_rating = data.get('rating')
             data = player
 
-            if len(self.longest_name) < len(clan_tag):
-                self.longest_name = clan_tag
+            if len(self.longest_name) < len(data.get('nickname')):
+                self.longest_name = data.get('nickname')
 
             if len(self.longest_clan) < len(clan_tag):
-                self.longest_clan = data.get('nickname')
+                self.longest_clan = clan_tag
 
             player_wins = data.get('stats').get('wins')
             player_battles = data.get('stats').get('battles')
@@ -196,6 +196,8 @@ class Render():
             f'{self.best_rating}', self.font)
         self.player_card_w = round(
             self.platoon_icon_margin + longest_name + longest_clan + (self.text_margin_w * 8) + (longest_rating * 5))
+
+        print(self.longest_name, self.longest_clan, self.best_rating)
 
         # Margin from frame border
         self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
@@ -459,7 +461,7 @@ class Render():
                     stat_color = (219, 109, 101)
 
                 rating_box_w1 = round(
-                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - 6
+                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - self.text_margin_w
                 rating_box_h1 = stat_draw_h
                 rating_box_w2 = rating_box_w1 - 3
                 rating_box_h2 = rating_box_h1 + stat_text_h + 1
