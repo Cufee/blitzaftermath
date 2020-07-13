@@ -29,8 +29,10 @@ class Render():
             'players').get(str(self.protagonist_id)).get('team')
 
         self.battle_result = 'Defeat'
-        if self.winner_team == self.protagonist_team:
+        if self.replay_data.get('battle_summary').get('battle_result') == 1:
             self.battle_result = 'Victory'
+        if self.replay_data.get('battle_summary').get('battle_result') == 2:
+            self.battle_result = 'Draw'
 
         self.all_names_render = []
         self.allies_names = []
