@@ -199,8 +199,6 @@ class Render():
         self.player_card_w = round(
             self.platoon_icon_margin + longest_name + longest_clan + (self.text_margin_w * 8) + (longest_rating * 5))
 
-        print(self.longest_name, self.longest_clan, self.best_rating)
-
         # Margin from frame border
         self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
 
