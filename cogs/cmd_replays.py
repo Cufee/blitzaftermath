@@ -88,13 +88,16 @@ class blitz_aftermath_replays(commands.Cog):
                         title='Download replay', url=replay_link, description=embed_desc)
                     embed.set_footer(text=f"MD5: {replay_id}")
                     await message.channel.send(embed=embed, file=image_file)
+                    return
 
     # Events
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        print('reaction')
         if payload.channel_id not in enabled_channels:
             return
+            print('error')
         else:
             channel = self.client.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -103,27 +106,6 @@ class blitz_aftermath_replays(commands.Cog):
                 lambda g: g.id == payload.guild_id, self.client.guilds)
             member = discord.utils.find(
                 lambda m: m.id == payload.user_id, guild.members)
-
-            if payload.emoji.name == '👀':
-                print('Sending DM')
-                replays = []
-                replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link = get_image(
-                    replays, bg=0, brand=0, darken=0, mapname=0)
-
-                embed = discord.Embed(
-                    title='Download replay', url=replay_link)
-                embed.set_footer(text=f"MD5: {replay_id}")
-
-                dm_channel = await member.create_dm()
-                await dm_channel.send(embed=embed, file=image_file)
-                try:
-                    await message.remove_reaction(payload.emoji, member)
-                except:
-                    pass
-                return
-            else:
-                return
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -153,6 +135,25 @@ class blitz_aftermath_replays(commands.Cog):
                 embed.set_footer(text=f"MD5: {replay_id}")
 
                 await channel.send(embed=embed, file=image_file)
+                try:
+                    await message.remove_reaction(payload.emoji, member)
+                except:
+                    pass
+                return
+
+            elif payload.emoji.name == '👀':
+                print('Sending DM')
+                replays = []
+                replays.append(message.embeds[0].url)
+                image_file, replay_id, replay_link = get_image(
+                    replays, bg=0, brand=0, darken=0, mapname=0)
+
+                embed = discord.Embed(
+                    title='Download replay', url=replay_link)
+                embed.set_footer(text=f"MD5: {replay_id}")
+
+                dm_channel = await member.create_dm()
+                await dm_channel.send(embed=embed, file=image_file)
                 try:
                     await message.remove_reaction(payload.emoji, member)
                 except:
