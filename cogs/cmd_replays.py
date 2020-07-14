@@ -61,12 +61,15 @@ class blitz_aftermath_replays(commands.Cog):
                 stats = ['kills', 'damage', 'player_wr', 'rating']
                 stats_bot = None
 
+                embed_desc = (
+                    'React with 👀 for a transparent picture\nReact with 📈 for more detailed performance results')
+
                 if debug == False:
                     try:
                         image_file, replay_id, replay_link = get_image(
                             replays, stats=stats)
                         embed = discord.Embed(
-                            title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
+                            title='Download replay', url=replay_link, description=embed_desc)
                         embed.set_footer(text=f"MD5: {replay_id}")
 
                     except:
@@ -82,7 +85,7 @@ class blitz_aftermath_replays(commands.Cog):
                     image_file, replay_id, replay_link = get_image(
                         replays, stats=stats)
                     embed = discord.Embed(
-                        title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
+                        title='Download replay', url=replay_link, description=embed_desc)
                     embed.set_footer(text=f"MD5: {replay_id}")
                     await message.channel.send(embed=embed, file=image_file)
 
