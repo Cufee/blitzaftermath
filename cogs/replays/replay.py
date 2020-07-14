@@ -52,10 +52,13 @@ class Replay:
         battle_duration = replay_data.get('summary').get('battle_duration')
         battle_result = replay_data.get('summary').get('battle_result')
         battle_start_time = replay_data.get(
-            'summary').get('battle_start_timestamp')
+            'summary').get('battle_start_time')
         map_name = replay_data.get('summary').get('map_name')
         room_type = replay_data.get('summary').get('room_type')
         protagonist = replay_data.get('summary').get('protagonist')
+        exp_total = replay_data.get('summary').get('exp_total')
+        credits_total = replay_data.get('summary').get('credits_total')
+        mastery_badge = replay_data.get('summary').get('mastery_badge')
 
         battle_summary = {
             "protagonist": protagonist,
@@ -64,6 +67,9 @@ class Replay:
             "battle_type": battle_type,
             "battle_duration": battle_duration,
             "battle_start_timestamp": battle_start_time,
+            "exp_total": exp_total,
+            "mastery_badge": mastery_badge,
+            "credits_total": credits_total,
             "map_name": map_name,
             "room_type": room_type
         }
@@ -120,15 +126,53 @@ class Replay:
             else:
                 team = 1
 
+            player_wins = stats.get('wins')
+            player_battles = stats.get('battles')
+            player_vehicle = vehicle.get('name')
+            player_vehicle_type = vehicle.get('type')
+            player_vehicle_tier = vehicle.get('tier')
+            hp_left = player.get('hitpoints_left')
+            survived = True
+            if hp_left <= 0:
+                survived = False
+
+            try:
+                vehicle_wins = stats.get('wins')
+                vehicle_battles = stats.get('battles')
+                vehicle_wr = "%.2f" % round(
+                    (vehicle_wins / vehicle_battles * 100), 2) + '%'
+            except:
+                vehicle_wins = 0
+                vehicle_battles = 0
+                vehicle_wr = '0%'
+
+            player_wr = "%.2f" % round(
+                (player_wins / player_battles * 100), 2) + '%'
+
+            platoon_number = player.get('squad_index')
+            platoon_str = ''
+            if platoon_number:
+                platoon_str = f'{platoon_number}'
+
             player_data = {
                 player_id: {
                     'nickname': nickname,
                     'clan_tag': clan_tag,
                     'team': team,
-                    'vehicle': vehicle,
                     'vehicle_stats': vehicle_stats,
                     'performance': player,
-                    'stats': stats
+                    'stats': stats,
+                    'damage': player.get('damage_made'),
+                    'kills': player.get('enemies_destroyed'),
+                    'survived': survived,
+                    'hero_bonus_exp': player.get('hero_bonus_exp'),
+                    'platoon_str': platoon_str,
+                    'player_vehicle': player_vehicle,
+                    'player_vehicle_type': player_vehicle_type,
+                    'player_vehicle_tier': player_vehicle_tier,
+                    'vehicle_battles': vehicle_battles,
+                    'vehicle_wr': vehicle_wr,
+                    'player_wr': player_wr,
                 }
             }
 

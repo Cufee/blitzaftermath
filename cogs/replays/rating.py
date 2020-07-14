@@ -42,6 +42,44 @@ class Rating:
                     'spotting_efficiency': 0.25,
                     'track_efficiency': 0.75,
                 },
+            },
+            'sBRT1_0': {
+                'lightTank': {
+                    'damage_efficiency': 0.5,
+                    'blocked_efficiency': 0,
+                    'kill_efficiency': 0.75,
+                    'travel_efficiency': 0.75,
+                    'shot_efficiency': 0.5,
+                    'spotting_efficiency': 1.25,
+                    'track_efficiency': 1.25,
+                },
+                'heavyTank': {
+                    'damage_efficiency': 1,
+                    'blocked_efficiency': 0.5,
+                    'kill_efficiency': 0.5,
+                    'travel_efficiency': 0.50,
+                    'shot_efficiency': 1,
+                    'spotting_efficiency': 0.25,
+                    'track_efficiency': 1.25,
+                },
+                'mediumTank': {
+                    'damage_efficiency': 1.25,
+                    'blocked_efficiency': 0,
+                    'kill_efficiency': 1.25,
+                    'travel_efficiency': 0.50,
+                    'shot_efficiency': 0.75,
+                    'spotting_efficiency': 0.5,
+                    'track_efficiency': 0.75,
+                },
+                'AT-SPG': {
+                    'damage_efficiency': 1.5,
+                    'blocked_efficiency': 0,
+                    'kill_efficiency': 1,
+                    'travel_efficiency': 0.25,
+                    'shot_efficiency': 1.25,
+                    'spotting_efficiency': 0.25,
+                    'track_efficiency': 0.75,
+                },
             }
         }
 
@@ -86,8 +124,8 @@ class Rating:
             damage_made = player_data.get('performance').get('damage_made')
             kills = player_data.get('performance').get('enemies_destroyed')
 
-            tank_type = player_data.get('vehicle').get('type')
-            tank_name = player_data.get('vehicle').get('name')
+            tank_type = player_data.get('player_vehicle_type')
+            tank_name = player_data.get('player_vehicle')
             tank_hp = 2000  # Not used, unable to pull vehicle chars without spamming requests to WG API
             travel_avg = 1000  # How long a tank should travel on average
 
@@ -127,12 +165,24 @@ class Rating:
                 self.eff_multiplyers.get(rating_version).get(
                     tank_type).get('track_efficiency')
 
-            rating = round(((damage_efficiency + kill_efficiency +
-                             travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
+            if rating_version == 'bBRT1_0':
+                rating = round(((damage_efficiency + kill_efficiency +
+                                 travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
+                player_data['rating'] = rating
+                player_data['rating_value'] = rating
+
+            if rating_version == 'mBRT1_0':
+                rating = round(((damage_efficiency + kill_efficiency +
+                                 travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
+                player_data['rating'] = rating
+                player_data['rating_value'] = rating
+
+            if rating_version == 'sBRT1_0':
+                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) / 7 * 100))}%'
+                player_data['rating'] = rating
+                player_data['rating_value'] = float(rating.replace('%', ''))
 
             # print(
             #     f'[{player_id}] {tank_name}, DMG:{damage_efficiency}({damage_made})[{damage_blocked}], KILLS:{kill_efficiency}({kills}), DIST:{travel_efficiency}({distance_travelled}), SHOTS: {shot_efficiency}({shots_fired}), SPOT: {spotting_efficiency}({enemies_spotted}), TRACK: {track_efficiency}, vRT: {rating}')
-
-            player_data['rating'] = rating
 
         return self.replay_data

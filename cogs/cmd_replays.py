@@ -5,6 +5,24 @@ from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
+enabled_channels = [719831153162321981, 719875141047418962]
+
+
+def get_image(urls, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
+    # Send replay to WoTInspector
+    replays_list_data = Replay(urls).process_replays()
+    replay_data = replays_list_data.get(
+        list(replays_list_data.keys())[0])
+    replay_id = list(replays_list_data.keys())[0]
+    replay_link = replay_data.get('download_url')
+    replay_data = Rating(
+        replay_data).calculate_rating('mBRT1_0')
+
+    image_file = Render(
+        replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
+
+    return image_file, replay_id, replay_link
+
 
 class blitz_aftermath_replays(commands.Cog):
 
@@ -27,8 +45,7 @@ class blitz_aftermath_replays(commands.Cog):
         attachments = message.attachments
 
         # Verify channel
-        # if message.channel.id != 719875141047418962:
-        if message.channel.id != 719831153162321981 and message.channel.id != 719875141047418962:
+        if message.channel.id not in enabled_channels:
             return
 
         replays = []
@@ -40,27 +57,66 @@ class blitz_aftermath_replays(commands.Cog):
                     replays.append(attachment.url)
 
             if replays:
-                # Send replay to WoTInspector
-                replays_list_data = Replay(replays).process_replays()
+                debug = False
 
-                replay_data = replays_list_data.get(
-                    list(replays_list_data.keys())[0])
+                if debug == False:
+                    try:
+                        image_file, replay_id, replay_link = get_image(replays)
+                        embed = discord.Embed(
+                            title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
+                        embed.set_footer(text=f"MD5: {replay_id}")
 
-                replay_id = list(replays_list_data.keys())[0]
+                    except:
+                        image_file = None
+                        embed = discord.Embed()
+                        embed.set_author(name='Aftermath')
+                        embed.add_field(
+                            name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
 
-                replay_data = Rating(replay_data).calculate_rating('mBRT1_0')
+                    # Send final message
+                    await message.channel.send(embed=embed, file=image_file)
+                else:
+                    image_file, replay_id, replay_link = get_image(replays)
+                    embed = discord.Embed(
+                        title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
+                    embed.set_footer(text=f"MD5: {replay_id}")
+                    await message.channel.send(embed=embed, file=image_file)
 
-                image_file = Render(replay_data, replay_id).image(brand=0)
-                await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
+    # Events
+    # @commands.Cog.listener()
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.channel_id not in enabled_channels:
+            return
+        else:
+            channel = self.client.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
 
-                # # Send message
-                # try:
-                #     image_file = Render(replay_data, replay_id).image()
-                #     await message.channel.send(f"```MD5: {replay_id}```", file=image_file)
-                # except:
-                #     embed = Render(replay_data, replay_id).embed()
-                #     await message.channel.send(embed=embed)
-                # return
+            guild = discord.utils.find(
+                lambda g: g.id == payload.guild_id, self.client.guilds)
+            member = discord.utils.find(
+                lambda m: m.id == payload.user_id, guild.members)
+
+            if payload.emoji.name == '👀':
+                print('Sending DM')
+                replays = []
+                replays.append(message.embeds[0].url)
+                image_file, replay_id, replay_link = get_image(
+                    replays, bg=0, brand=0, darken=0, mapname=0)
+
+                embed = discord.Embed(
+                    title='Download replay', url=replay_link)
+                embed.set_footer(text=f"MD5: {replay_id}")
+
+                dm_channel = await member.create_dm()
+                await dm_channel.send(embed=embed, file=image_file)
+                try:
+                    await message.remove_reaction(payload.emoji, member)
+                except:
+                    pass
+                return
+            else:
+                return
 
 
 def setup(client):
