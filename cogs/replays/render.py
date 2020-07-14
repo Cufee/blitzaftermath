@@ -74,6 +74,9 @@ class Render():
             if len(self.longest_name) < len(data.get('nickname') + clan_tag):
                 self.longest_name = data.get('nickname') + clan_tag
 
+            if len(self.longest_name) < (len(data.get('player_vehicle')) + 2):
+                self.longest_name = data.get('player_vehicle')
+
             if data.get('team') == 2:
                 self.team_rating[1] += player.get('rating_value')
             else:
@@ -141,7 +144,7 @@ class Render():
             f'{self.longest_stat}', self.font)
 
         self.player_card_w = round(
-            (self.platoon_icon_margin) + longest_name + (self.text_margin_w * 2) + (longest_stat * len(self.stats)))
+            (self.platoon_icon_margin * 2) + longest_name + (self.text_margin_w * 2) + (longest_stat * len(self.stats)))
 
         # Margin from frame border
         self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
