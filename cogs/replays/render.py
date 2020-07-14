@@ -25,13 +25,11 @@ class Render():
         self.replay_id = replay_id
 
         # Replay Details
+        self.room_type = self.battle_summary.get('room_type')
         self.battle_result_num = self.battle_summary.get('battle_result')
         self.map_name = self.replay_data.get('battle_summary').get('map_name')
         self.battle_start_time = self.battle_summary.get(
             'battle_start_timestamp')
-
-        self.room_type = self.battle_summary.get('room_type')
-        self.winner_team = self.battle_summary.get('winner_team')
 
         self.battle_result = 'Defeat'
         if self.battle_result_num == 1:
@@ -41,50 +39,16 @@ class Render():
 
         # Protagonist performance
         self.protagonist_id = self.battle_summary.get('protagonist')
-        self.protagonist_data = self.replay_data.get(
-            'players').get(self.protagonist_id)
-        protagonist_data = self.replay_data.get(
-            'players').get(str(self.protagonist_id))
         self.protagonist_name = self.replay_data.get(
             'players').get(str(self.protagonist_id)).get('nickname')
-        self.protagonist_team = self.replay_data.get(
-            'players').get(str(self.protagonist_id)).get('team')
-
-        self.pr_performance = protagonist_data.get('performance')
-        self.pr_vehicle_stats = protagonist_data.get('vehicle_stats')
-        self.pr_vehicle_name = self.replay_data.get('players').get(
-            str(self.protagonist_id)).get('player_vehicle_name')
-        self.pr_vehicle_type = self.replay_data.get('players').get(
-            str(self.protagonist_id)).get('player_vehicle_type')
-        self.pr_vehicle_tier = self.replay_data.get('players').get(
-            str(self.protagonist_id)).get('player_vehicle_tier')
-
-        self.pr_battle_dmg = self.pr_performance.get(
-            'damage_made')
-        self.pr_stats_avg_dmg = round(self.pr_vehicle_stats.get(
-            'damage_dealt') / (self.pr_vehicle_stats.get('battles') or 1))
-
-        self.pr_battle_kills = self.pr_performance.get(
-            'enemies_destroyed')
-        self.pr_stats_avg_kills = round(self.pr_vehicle_stats.get(
-            'frags8p') / (self.pr_vehicle_stats.get('battles') or 1))
-
-        self.pr_battle_shots = self.pr_performance.get(
-            'shots_made')
-        self.pr_battle_pen = self.pr_performance.get(
-            'shots_pen')
 
         self.all_players = []
-        self.allies_render = []
-        self.enemies_render = []
 
         self.best_rating = 0
         self.longest_stat = 0
         self.longest_stat_bottom = 0
         self.longest_name = ''
-        self.longest_clan = ''
-        self.ally_rating_total = 0
-        self.enemy_rating_total = 0
+        self.team_rating = [0, 0]
 
         players_data = self.replay_data.get('players')
         players_data = sorted(
@@ -92,10 +56,7 @@ class Render():
 
         for player in players_data:
             data = player
-
-            clan_tag = ''
-            if data.get('clan_tag'):
-                clan_tag = f'[{data.get("clan_tag")}]'
+            self.all_players.append(player)
 
             if self.best_rating < data.get('rating_value'):
                 self.best_rating = data.get('rating_value')
@@ -108,20 +69,15 @@ class Render():
                 if len(f'{self.longest_stat_bottom}') < len(f'{data.get(stat)}'):
                     self.longest_stat_bottom = player.get(stat)
 
-            if len(self.longest_name) < len(data.get('nickname') + f'{ [clan_tag]}'):
-                self.longest_name = data.get('nickname') + f'{ [clan_tag]}'
+            clan_tag = data.get('clan_tag') or ''
 
-            if len(self.longest_clan) < len(clan_tag):
-                self.longest_clan = clan_tag
+            if len(self.longest_name) < len(data.get('nickname') + clan_tag):
+                self.longest_name = data.get('nickname') + clan_tag
 
             if data.get('team') == 2:
-                self.enemies_render.append(player)
-                self.all_players.append(player)
-                self.enemy_rating_total += player.get('rating_value')
+                self.team_rating[1] += player.get('rating_value')
             else:
-                self.allies_render.append(player)
-                self.all_players.append(player)
-                self.ally_rating_total += player.get('rating_value')
+                self.team_rating[0] += player.get('rating_value')
 
     def image(self, bg=1, brand=1, darken=1, mapname=1):
         """
@@ -190,8 +146,7 @@ class Render():
         # Margin from frame border
         self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
 
-        self.enemy_team_offset_w = self.image_w - \
-            (self.image_min_w)-(self.player_card_w)
+        self.enemy_team_offset_w = self.player_card_w + self.image_min_w
 
         if bg == 1:
             solid_bg = Image.new('RGB', (frame_w, frame_h), (0, 0, 0))
@@ -260,34 +215,24 @@ class Render():
             'credits_total': 0,
             'exp_total': 0,
         }
+        step = [0, 0]
+        for player in self.all_players:
+            step[player.get('team') - 1] += 1
 
-        self.teams = [self.enemies_render, self.allies_render]
-
-        self.draw_ui_all()
-
-        for player_list in self.teams:
-            step = 1
-            team_rating = 0
             team_offset_w = self.image_min_w
-            if player_list[0].get('team') == 2:
-                team_offset_w = self.enemy_team_offset_w
+            if player.get('team') == 2:
+                team_offset_w += self.enemy_team_offset_w
 
-            for player in player_list:
-                team_rating += int(player.get('rating_value'))
-                player_card = self.draw_player_card(player)
-                plate_w_pos = round(team_offset_w)
-                plate_h_pos = round(self.image_min_h +
-                                    (self.image_step * (step)))
+            player_card = self.draw_player_card(player)
+            plate_w_pos = round(team_offset_w)
+            plate_h_pos = round(self.image_min_h +
+                                (self.image_step * step[player.get('team') - 1]))
 
-                self.image.paste(player_card, box=(
-                    plate_w_pos, plate_h_pos), mask=player_card.split()[3])
-                step += 1
-                if step >= 8:
-                    break
+            self.image.paste(player_card, box=(
+                plate_w_pos, plate_h_pos), mask=player_card.split()[3])
 
-            step = 0
-
-            self.draw_top_ui_self(team_rating, team_offset_w)
+        self.draw_ui_top()
+        self.draw_ui_bot()
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
@@ -297,18 +242,9 @@ class Render():
 
         return image_file
 
-    def draw_ui_all(self):
+    def draw_ui_bot(self):
         team_card_w = (self.player_card_w * 2) + self.image_min_w
         team_card_h = self.image_step - (self.text_margin_h * 2)
-
-        # Draw top team card
-        team_card_top = Image.new(
-            'RGBA', (team_card_w, (team_card_h)), (51, 51, 51, 255))
-        team_card_w, team_card_h = team_card_top.size
-        top_card_draw_w = self.image_min_w
-        top_card_draw_h = self.image_min_h
-        self.image.paste(team_card_top, box=(
-            top_card_draw_w, top_card_draw_h), mask=team_card_top.split()[3])
 
         # Draw bottom team card
         team_card_bot = Image.new(
@@ -394,7 +330,7 @@ class Render():
 
         # Add bottom card to UI
         protagonist_card_draw_w = round(
-            (bot_team_card_w - last_icon_pos) / 2)
+            (bot_team_card_w - (last_icon_pos - icon_w)) / 2)
         protagonist_card_draw_h = 0
 
         team_card_bot.paste(protagonist_card_unique, box=(
@@ -403,49 +339,67 @@ class Render():
             bot_card_draw_w, bot_card_draw_h), mask=team_card_bot.split()[3])
         return
 
-    def draw_top_ui_self(self, rating_total, team_offs):
-        card_height = self.image_step - (self.text_margin_h * 2)
-        card_width = self.player_card_w
+    def draw_ui_top(self):
+        team_card_w = (self.player_card_w * 2) + self.image_min_w
+        team_card_h = self.image_step - (self.text_margin_h * 2)
 
-        team_card = Image.new(
-            'RGBA', (card_width, (card_height)), (51, 51, 51, 255))
-        team_card_w, team_card_h = team_card.size
+        # Draw top team card bg
+        team_card_top = Image.new(
+            'RGBA', (team_card_w, (team_card_h)), (51, 51, 51, 255))
+        team_card_w, team_card_h = team_card_top.size
+        top_card_draw_w = self.image_min_w
+        top_card_draw_h = self.image_min_h
+        self.image.paste(team_card_top, box=(
+            top_card_draw_w, top_card_draw_h), mask=team_card_top.split()[3])
 
-        icon_frame_w = icon_frame_h = round(
-            (card_height * 2 / 3) - self.text_margin_h)
+        for team in [0, 1]:
+            team_rating = self.team_rating[team]
+            team_offs = self.image_min_w + \
+                (self.enemy_team_offset_w * team)
 
-        player_list = Image.open(
-            f'./cogs/replays/render/icons/player_list.png')
-        player_list = player_list.resize((icon_frame_w, icon_frame_h))
-        player_list_w, player_list_h = player_list.size
+            card_height = self.image_step - (self.text_margin_h * 2)
+            card_width = self.player_card_w
 
-        card_draw_w = team_offs
-        card_draw_h = self.image_min_h
+            team_card = Image.new(
+                'RGBA', (card_width, (card_height)), (0, 0, 0, 0))
+            team_card_w, team_card_h = team_card.size
 
-        player_list_draw_w = self.platoon_icon_margin
-        icons_draw_h = round((team_card_h - player_list_h) / 2)
+            icon_frame_w = icon_frame_h = round(
+                (card_height * 2 / 3) - self.text_margin_h)
 
-        team_card.paste(player_list, box=(
-            player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
+            player_list = Image.open(
+                f'./cogs/replays/render/icons/player_list.png')
+            player_list = player_list.resize((icon_frame_w, icon_frame_h))
+            player_list_w, player_list_h = player_list.size
 
-        last_stat_pos = 0
-        for icon in self.stats:
-            icon_name = icon
-            icon = Image.open(f'./cogs/replays/render/icons/{icon_name}.png')
-            icon = icon.resize((icon_frame_w, icon_frame_h))
-            icon_w, icon_h = icon.size
-            max_width = self.global_stat_max_width.get(icon_name)
+            card_draw_w = team_offs
+            card_draw_h = self.image_min_h
 
-            draw_w = round(
-                ((team_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2)))
-            # draw_w = round(team_card_w)
+            player_list_draw_w = self.platoon_icon_margin
+            icons_draw_h = round((team_card_h - player_list_h) / 2)
 
-            team_card.paste(icon, box=(
-                draw_w, icons_draw_h), mask=icon.split()[3])
-            last_stat_pos += max_width + self.text_margin_w
+            team_card.paste(player_list, box=(
+                player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
 
-        self.image.paste(team_card, box=(
-            (card_draw_w), card_draw_h), mask=team_card.split()[3])
+            last_stat_pos = 0
+            for icon in self.stats:
+                icon_name = icon
+                icon = Image.open(
+                    f'./cogs/replays/render/icons/{icon_name}.png')
+                icon = icon.resize((icon_frame_w, icon_frame_h))
+                icon_w, icon_h = icon.size
+                max_width = self.global_stat_max_width.get(icon_name)
+
+                draw_w = round(
+                    ((team_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2)))
+                # draw_w = round(team_card_w)
+
+                team_card.paste(icon, box=(
+                    draw_w, icons_draw_h), mask=icon.split()[3])
+                last_stat_pos += max_width + self.text_margin_w
+
+            self.image.paste(team_card, box=(
+                (card_draw_w), card_draw_h), mask=team_card.split()[3])
         return
 
     def draw_player_card(self, player):
@@ -462,10 +416,14 @@ class Render():
         team = player.get('team')
         nickname = player.get('nickname')
         player_wr = player.get('player_wr')
-        clan = player.get('clan_tag')
+        clan = player.get("clan_tag")
         vehicle = player.get('player_vehicle')
         vehicle_battles = player.get('vehicle_battles')
         vehicle_wr = player.get('vehicle_wr')
+
+        clan_tag = ''
+        if clan:
+            clan_tag = f'[{clan}]'
 
         # Draw name bg plates
         player_card = Image.new(
@@ -510,7 +468,7 @@ class Render():
             if not survived:
                 font_color_name = self.font_color_pr_dead
 
-        clan_str = f'[{clan}]'
+        clan_str = f'{clan_tag}'
         tank_str = f'{vehicle}'
         name_str = f'{nickname}'
         tank_text_w, tank_text_h = draw.textsize(tank_str, font=tank_font)
@@ -609,41 +567,3 @@ class Render():
             return (255, 255, 255)
 
         return rating_font
-
-    def embed(self):
-        from discord import Embed
-        embed_stats_text = (
-            f'Damage vs Career {self.pr_battle_dmg}/{self.pr_stats_avg_dmg}\n' +
-            f'Kills vs Career {self.pr_battle_kills}/{self.pr_stats_avg_kills}\n' +
-            f'Shots vs Pen {self.pr_battle_shots}/{self.pr_battle_pen}\n' +
-            f'')
-
-        # Defining Embed
-        embed_key = f'[WR] [Vehicle WR (Battles)] [vRT] Nickname'
-        embed_allies = (' \n\n'.join(self.allies_names))
-        embed_enemies = (' \n\n'.join(self.enemies_names))
-        embed_all_players = (' \n\n'.join(self.all_names))
-        embed_stats = embed_stats_text
-
-        embed_footer = f"MD5/ID: {self.replay_id}"
-
-        replay_link = 'https://www.google.com/'
-
-        # Constructing Embed
-        embed = Embed(
-            title="Click here for detailed results", url=replay_link)
-        embed.set_author(
-            name=f"Battle by {self.protagonist_name} on {self.map_name}")
-        # embed.add_field(
-        #     name='Legend', value=f'```{embed_key}```', inline=False)
-        embed.add_field(
-            name=f'Allies [{self.ally_rating_total}]', value=f'```{embed_allies} ```', inline=False)
-        embed.add_field(
-            name=f'Enemies [{self.enemy_rating_total}]', value=f'```{embed_enemies} ```', inline=False)
-        # embed.add_field(
-        #     name='Players', value=f'```{embed_all_players} ```', inline=False)
-        embed.add_field(
-            name=f'{self.protagonist_name} - {self.pr_vehicle_name}', value=f'```{embed_stats}```', inline=False)
-        embed.set_footer(text=embed_footer)
-
-        return embed

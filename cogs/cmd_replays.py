@@ -6,6 +6,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
 enabled_channels = [719831153162321981, 719875141047418962]
+debug = True
 
 
 def get_image(urls, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
@@ -57,8 +58,6 @@ class blitz_aftermath_replays(commands.Cog):
                     replays.append(attachment.url)
 
             if replays:
-                debug = False
-
                 if debug == False:
                     try:
                         image_file, replay_id, replay_link = get_image(replays)
