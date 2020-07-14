@@ -537,7 +537,8 @@ class Render():
             hero_icon = Image.open(
                 f'./cogs/replays/render/icons/hero_icon.png')
             hero_icon = hero_icon.resize((self.font_size, self.font_size))
-            hero_icon_w = round(tank_draw_w + self.text_margin_w + tank_text_w)
+            hero_icon_w = round(
+                tank_draw_w + (self.font_size / 2) + tank_text_w)
             hero_icon_h = self.text_margin_h + 1
 
             player_card.paste(hero_icon, box=(
