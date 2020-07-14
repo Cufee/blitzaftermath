@@ -6,7 +6,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
 enabled_channels = [719831153162321981, 719875141047418962]
-debug = True
+debug = False
 
 
 def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
@@ -58,9 +58,13 @@ class blitz_aftermath_replays(commands.Cog):
                     replays.append(attachment.url)
 
             if replays:
+                stats = ['kills', 'damage', 'player_wr', 'rating']
+                stats_bot = None
+
                 if debug == False:
                     try:
-                        image_file, replay_id, replay_link = get_image(replays)
+                        image_file, replay_id, replay_link = get_image(
+                            replays, stats=stats)
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
                         embed.set_footer(text=f"MD5: {replay_id}")
@@ -75,7 +79,8 @@ class blitz_aftermath_replays(commands.Cog):
                     # Send final message
                     await message.channel.send(embed=embed, file=image_file)
                 else:
-                    image_file, replay_id, replay_link = get_image(replays)
+                    image_file, replay_id, replay_link = get_image(
+                        replays, stats=stats)
                     embed = discord.Embed(
                         title='Download replay', url=replay_link, description='React with 👀 for a transparent picture')
                     embed.set_footer(text=f"MD5: {replay_id}")
@@ -109,6 +114,42 @@ class blitz_aftermath_replays(commands.Cog):
 
                 dm_channel = await member.create_dm()
                 await dm_channel.send(embed=embed, file=image_file)
+                try:
+                    await message.remove_reaction(payload.emoji, member)
+                except:
+                    pass
+                return
+            else:
+                return
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.channel_id not in enabled_channels:
+            return
+        else:
+            channel = self.client.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+
+            guild = discord.utils.find(
+                lambda g: g.id == payload.guild_id, self.client.guilds)
+            member = discord.utils.find(
+                lambda m: m.id == payload.user_id, guild.members)
+
+            if payload.emoji.name == '📈':
+                replays = []
+
+                stats = ['kill_efficiency', 'damage_efficiency',
+                         'shot_efficiency', 'spotting_efficiency']
+
+                replays.append(message.embeds[0].url)
+                image_file, replay_id, replay_link = get_image(
+                    replays, rating='mBRT1_0', stats=stats)
+
+                embed = discord.Embed(
+                    title='Download replay', url=replay_link)
+                embed.set_footer(text=f"MD5: {replay_id}")
+
+                await channel.send(embed=embed, file=image_file)
                 try:
                     await message.remove_reaction(payload.emoji, member)
                 except:

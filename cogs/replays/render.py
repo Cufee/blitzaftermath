@@ -10,14 +10,17 @@ from io import BytesIO
 class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
 
-        # Stats to include for each player by default
-        if not stats:
-            stats = ['kills', 'damage', 'player_wr', 'rating']
-        if not stats_bottom:
-            stats_bottom = ['kills', 'damage', 'player_wr', 'rating']
-
         self.stats = stats
         self.stats_bottom = stats_bottom
+
+        # Stats to include for each player by default
+        if not stats:
+            self.stats = ['kills', 'damage', 'player_wr', 'rating']
+        if not stats_bottom:
+            self.stats_bottom = ['kills', 'damage', 'player_wr', 'rating']
+
+        self.global_stat_max_width = {}
+        self.global_stat_total_width = 0
 
         self.replay_data = replay_data
         self.battle_summary = self.replay_data.get(
@@ -51,10 +54,10 @@ class Render():
         self.team_rating = [0, 0]
 
         players_data = self.replay_data.get('players')
-        players_data = sorted(
+        self.players_data = sorted(
             players_data.values(), key=itemgetter('rating_value'), reverse=True)
 
-        for player in players_data:
+        for player in self.players_data:
             data = player
             self.all_players.append(player)
 
@@ -69,10 +72,10 @@ class Render():
                 if len(f'{self.longest_stat_bottom}') < len(f'{data.get(stat)}'):
                     self.longest_stat_bottom = player.get(stat)
 
-            clan_tag = data.get('clan_tag') or ''
+            clan_tag = f'[{data.get("clan_tag")}]' or ''
 
-            if len(self.longest_name) < len(data.get('nickname') + clan_tag):
-                self.longest_name = data.get('nickname') + clan_tag
+            if len(self.longest_name) < len(data.get('nickname') + clan_tag + ' '):
+                self.longest_name = data.get('nickname') + ' ' + clan_tag
 
             if len(self.longest_name) < (len(data.get('player_vehicle')) + 2):
                 self.longest_name = data.get('player_vehicle')
@@ -92,13 +95,13 @@ class Render():
         frame_w = 1100
         frame_h = 640
 
+        self.font_size = 16
+
         frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
         self.image = frame
         self.draw_frame = ImageDraw.Draw(self.image)
         self.platoon_image = Image.open(
             './cogs/replays/render/icons/platoon.png')
-
-        self.font_size = 16
 
         self.text_margin_w = self.font_size
         self.text_margin_h = 5
@@ -125,7 +128,7 @@ class Render():
         self.font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", self.font_size)
         self.font_fat = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font_fat.ttf", (round(self.font_size * 1.25)))
+            "./cogs/replays/render/fonts/font_fat.ttf", (int(self.font_size * 1.25)))
         self.font_slim = ImageFont.truetype(
             "./cogs/replays/render/fonts/font_slim.ttf", self.font_size)
         self.font_title = ImageFont.truetype(
@@ -135,7 +138,7 @@ class Render():
         self.team_rating_font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", 18)
         self.bottom_stats_font = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font_fat.ttf", round(self.font_size))
+            "./cogs/replays/render/fonts/font_fat.ttf", int(self.font_size))
 
         # Width of each player card
         longest_name, _ = self.draw_frame.textsize(
@@ -143,11 +146,18 @@ class Render():
         longest_stat, _ = self.draw_frame.textsize(
             f'{self.longest_stat}', self.font)
 
-        self.player_card_w = round(
-            (self.platoon_icon_margin * 2) + longest_name + (self.text_margin_w * 2) + (longest_stat * len(self.stats)))
+        text_check = Image.new('RGBA', (0, 0), (0, 0, 0, 0))
+        text_check = ImageDraw.Draw(text_check)
+        for stat in self.stats:
+            text_w, _ = text_check.textsize(
+                f'{self.players_data[0].get(stat)}', font=self.font)
+            self.global_stat_total_width += text_w + self.text_margin_w
+
+        self.player_card_w = int(self.platoon_icon_margin + longest_name +
+                                 (self.text_margin_w * 2) + self.global_stat_total_width)
 
         # Margin from frame border
-        self.image_min_w = round((self.image_w - (self.player_card_w * 2)) / 3)
+        self.image_min_w = int((self.image_w - (self.player_card_w * 2)) / 3)
 
         self.enemy_team_offset_w = self.player_card_w + self.image_min_w
 
@@ -171,7 +181,7 @@ class Render():
             self.draw_frame = ImageDraw.Draw(self.image)
 
         if mapname == 0:
-            self.image_min_h = round(
+            self.image_min_h = int(
                 (self.image_h - (int(len(self.all_players) / 2) + 2) * (self.image_step)) / 2)
 
         if brand == 1:
@@ -201,23 +211,15 @@ class Render():
             result_text_w, result_text_h = self.draw_frame.textsize(
                 battle_result_str, font=self.font_title)
 
-            self.image_min_h = round(result_text_h + self.image_step)
+            self.image_min_h = int(result_text_h + self.image_step)
 
-            battle_result_draw_w = round((self.image_w - result_text_w) / 2)
-            battle_result_draw_h = round(
+            battle_result_draw_w = int((self.image_w - result_text_w) / 2)
+            battle_result_draw_h = int(
                 (self.image_min_h - result_text_h) / 2)
 
             self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
                                  fill=result_font_color, font=self.font_title)
 
-        self.global_stat_max_width = {
-            'kills': 0,
-            'damage': 0,
-            'player_wr': 0,
-            'rating': 0,
-            'credits_total': 0,
-            'exp_total': 0,
-        }
         step = [0, 0]
         for player in self.all_players:
             step[player.get('team') - 1] += 1
@@ -227,15 +229,18 @@ class Render():
                 team_offset_w += self.enemy_team_offset_w
 
             player_card = self.draw_player_card(player)
-            plate_w_pos = round(team_offset_w)
-            plate_h_pos = round(self.image_min_h +
-                                (self.image_step * step[player.get('team') - 1]))
+            plate_w_pos = int(team_offset_w)
+            plate_h_pos = int(self.image_min_h +
+                              (self.image_step * step[player.get('team') - 1]))
 
             self.image.paste(player_card, box=(
                 plate_w_pos, plate_h_pos), mask=player_card.split()[3])
 
         self.draw_ui_top()
         self.draw_ui_bot()
+
+        error_rate = self.player_card_w - longest_name - \
+            self.global_stat_total_width - self.platoon_icon_margin
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
@@ -305,7 +310,7 @@ class Render():
         for icon in bottom_icons:
             icon_name = icon
             icon_value = self.battle_summary.get(icon_name)
-            icon_size = round(team_card_h / 2)
+            icon_size = int(team_card_h / 2)
             stat_value = str(self.battle_summary.get(icon))
 
             icon = Image.open(f'./cogs/replays/render/icons/{icon_name}.png')
@@ -319,10 +324,10 @@ class Render():
             icon_budle_width = icon_w + stat_text_w + (self.text_margin_w)
 
             icon_draw_w = last_icon_pos
-            icon_draw_h = round((protagonist_card_h - icon_h) / 2)
+            icon_draw_h = int((protagonist_card_h - icon_h) / 2)
 
             stat_text_draw_w = icon_draw_w + icon_w + (icon_w / 4)
-            stat_text_draw_h = round((protagonist_card_h - stat_text_h) / 2)
+            stat_text_draw_h = int((protagonist_card_h - stat_text_h) / 2)
 
             protagonist_card_unique.paste(icon, box=(
                 icon_draw_w, icon_draw_h), mask=icon.split()[3])
@@ -332,7 +337,7 @@ class Render():
             last_icon_pos += icon_budle_width + icon_w
 
         # Add bottom card to UI
-        protagonist_card_draw_w = round(
+        protagonist_card_draw_w = int(
             (bot_team_card_w - (last_icon_pos - icon_w)) / 2)
         protagonist_card_draw_h = 0
 
@@ -367,7 +372,7 @@ class Render():
                 'RGBA', (card_width, (card_height)), (0, 0, 0, 0))
             team_card_w, team_card_h = team_card.size
 
-            icon_frame_w = icon_frame_h = round(
+            icon_frame_w = icon_frame_h = int(
                 (card_height * 2 / 3) - self.text_margin_h)
 
             player_list = Image.open(
@@ -379,7 +384,7 @@ class Render():
             card_draw_h = self.image_min_h
 
             player_list_draw_w = self.platoon_icon_margin
-            icons_draw_h = round((team_card_h - player_list_h) / 2)
+            icons_draw_h = int((team_card_h - player_list_h) / 2)
 
             team_card.paste(player_list, box=(
                 player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
@@ -387,15 +392,20 @@ class Render():
             last_stat_pos = 0
             for icon in self.stats:
                 icon_name = icon
-                icon = Image.open(
-                    f'./cogs/replays/render/icons/{icon_name}.png')
+                try:
+                    icon = Image.open(
+                        f'./cogs/replays/render/icons/{icon_name}.png')
+                except:
+                    icon = Image.open(
+                        './cogs/replays/render/icons/default_icon.png')
                 icon = icon.resize((icon_frame_w, icon_frame_h))
                 icon_w, icon_h = icon.size
-                max_width = self.global_stat_max_width.get(icon_name)
+                max_width = self.global_stat_max_width.get(
+                    icon_name) or self.global_stat_max_width.get('damage')
 
-                draw_w = round(
+                draw_w = int(
                     ((team_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2)))
-                # draw_w = round(team_card_w)
+                # draw_w = int(team_card_w)
 
                 team_card.paste(icon, box=(
                     draw_w, icons_draw_h), mask=icon.split()[3])
@@ -446,14 +456,14 @@ class Render():
             text_w, text_h = draw.textsize(platoon_str, font=platoon_font)
             platoon_img_w, platoon_img_h = self.platoon_image.size
 
-            draw_w = round((platoon_img_w - text_w) / 2)
+            draw_w = int((platoon_img_w - text_w) / 2)
             draw_h = 0
             draw_platoon.text((draw_w, draw_h), platoon_str,
                               platoon_font_color, font=platoon_font)
 
-            platoon_w_pos = round(
+            platoon_w_pos = int(
                 (self.platoon_icon_margin - platoon_img_w) / 2)
-            platoon_h_pos = round((player_card_h - platoon_img_h) / 2)
+            platoon_h_pos = int((player_card_h - platoon_img_h) / 2)
             player_card.paste(platoon_img, mask=self.platoon_image.split()[
                 3], box=(platoon_w_pos, platoon_h_pos))
 
@@ -482,9 +492,9 @@ class Render():
         tank_draw_w = self.platoon_icon_margin
         tank_draw_h = self.text_margin_h
         name_draw_w = self.platoon_icon_margin
-        name_draw_h = round(
+        name_draw_h = int(
             (player_card_h - (tank_text_h + name_text_h + self.text_margin_h)) + tank_text_h)
-        clan_draw_w = round(name_draw_w + name_text_w + (self.font_size / 2))
+        clan_draw_w = int(name_draw_w + name_text_w + (self.font_size / 2))
         clan_draw_h = name_draw_h
 
         draw.text((tank_draw_w, tank_draw_h), tank_str,
@@ -498,7 +508,7 @@ class Render():
             hero_icon = Image.open(
                 f'./cogs/replays/render/icons/hero_icon.png')
             hero_icon = hero_icon.resize((self.font_size, self.font_size))
-            hero_icon_w = round(
+            hero_icon_w = int(
                 tank_draw_w + (self.font_size / 2) + tank_text_w)
             hero_icon_h = self.text_margin_h + 1
 
@@ -510,14 +520,16 @@ class Render():
             stat_font = self.get_font(f'{stat}')
             stat_str = f'{player.get(stat)}'
             text_w, _ = draw.textsize(stat_str, font=stat_font)
+            max_width = self.global_stat_max_width.get(stat) or 0
 
-            if stat in self.global_stat_max_width.keys() and text_w > self.global_stat_max_width.get(stat):
+            if text_w > max_width:
                 self.global_stat_max_width[stat] = text_w
 
         last_stat_pos = 0
         for stat in self.stats:
             stat_value = player.get(stat)
-            stat_max_width = self.global_stat_max_width.get(stat)
+            stat_max_width = self.global_stat_max_width.get(
+                stat)
             stat_str = f'{stat_value}'
 
             stat_font = self.get_font(f'{stat}')
@@ -528,9 +540,9 @@ class Render():
             stat_text_w, stat_text_h = draw.textsize(
                 stat_str, font=stat_font)
 
-            stat_draw_w = round(
+            stat_draw_w = int(
                 ((player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) + ((stat_max_width - stat_text_w) / 2)))
-            stat_draw_h = round((player_card_h - stat_text_h) / 2)
+            stat_draw_h = int((player_card_h - stat_text_h) / 2)
             draw.text((stat_draw_w, stat_draw_h), stat_str,
                       stat_font_color, font=stat_font)
 
@@ -547,11 +559,11 @@ class Render():
                 else:
                     stat_color = (219, 109, 101)
 
-                rating_box_w1 = round(
-                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - self.text_margin_w
+                rating_box_w1 = int(
+                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - (self.text_margin_w / 2)
                 rating_box_h1 = stat_draw_h
                 rating_box_w2 = rating_box_w1 - 3
-                rating_box_h2 = rating_box_h1 + stat_text_h + 1
+                rating_box_h2 = rating_box_h1 + stat_text_h + 2
 
                 draw.rectangle([(rating_box_w1, rating_box_h1),
                                 (rating_box_w2, rating_box_h2)], fill=stat_color)
