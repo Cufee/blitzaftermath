@@ -210,6 +210,7 @@ class Render():
             solid_bg.paste(bg_image, box=(
                 0, 0))
             self.image = solid_bg
+            self.draw_frame = ImageDraw.Draw(self.image)
 
         if mapname == 0:
             self.image_min_h = round(
