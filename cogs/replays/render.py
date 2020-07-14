@@ -52,7 +52,7 @@ class Render():
 
         players_data = self.replay_data.get('players')
         players_data = sorted(
-            players_data.values(), key=itemgetter('rating'), reverse=True)
+            players_data.values(), key=itemgetter('rating_value'), reverse=True)
 
         for player in players_data:
             data = player
