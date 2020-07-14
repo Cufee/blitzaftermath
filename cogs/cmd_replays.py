@@ -9,7 +9,7 @@ enabled_channels = [719831153162321981, 719875141047418962]
 debug = True
 
 
-def get_image(urls, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
+def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
     # Send replay to WoTInspector
     replays_list_data = Replay(urls).process_replays()
     replay_data = replays_list_data.get(
@@ -17,7 +17,7 @@ def get_image(urls, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapn
     replay_id = list(replays_list_data.keys())[0]
     replay_link = replay_data.get('download_url')
     replay_data = Rating(
-        replay_data).calculate_rating('mBRT1_0')
+        replay_data).calculate_rating(rating)
 
     image_file = Render(
         replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
