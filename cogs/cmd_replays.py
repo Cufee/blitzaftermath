@@ -6,7 +6,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
 enabled_channels = [719831153162321981, 719875141047418962]
-debug = True
+debug = False
 
 
 def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
@@ -82,6 +82,7 @@ class blitz_aftermath_replays(commands.Cog):
 
                     # Send final message
                     await message.channel.send(embed=embed, file=image_file)
+
                 else:
                     image_file, replay_id, replay_link = get_image(
                         replays, stats=stats, rating=rating)
@@ -125,7 +126,7 @@ class blitz_aftermath_replays(commands.Cog):
                 replays = []
 
                 stats = ['engagement_rating', 'spotting_rating',
-                         'survival_rating', 'assistance_rating']
+                         'survival_rating', 'assistance_rating', 'kill_bonus']
 
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link = get_image(

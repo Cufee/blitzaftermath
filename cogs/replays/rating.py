@@ -386,6 +386,8 @@ class Rating:
             if shots_fired == 0:
                 shots_fired = 1
 
+            shots_hit = player_data.get(
+                'performance').get('shots_hit')
             shots_penetrated = player_data.get(
                 'performance').get('shots_pen')
             enemies_destroyed = player_data.get(
@@ -441,10 +443,15 @@ class Rating:
             # expected_damage = round((
             #     (shots_fired * vehicle_alpha_efficiency) + 1), 2)
 
-            expected_damage = self.avg_damage
+            expected_damage = round(self.avg_damage)
 
-            engagement_rating = round(((vehicle_alpha_efficiency / self.average_vehicle_alpha_efficiency) + (
-                (distance_travelled + 1) / self.average_distance_travelled) + (damage_made / expected_damage)), 2)
+            shot_efficiency = shots_penetrated / shots_fired
+
+            kill_bonus = round(
+                (kills / (self.battle_duration / 60)), 2)
+
+            engagement_rating = round(((shot_efficiency * (vehicle_alpha_efficiency / self.average_vehicle_alpha_efficiency)) + (
+                (distance_travelled + 1) / self.average_distance_travelled) + (damage_made / expected_damage) + kill_bonus), 2)
 
             spotting_rating = round((enemies_spotted *
                                      lighttank_count / len(enemies)), 2)
@@ -460,12 +467,13 @@ class Rating:
 
             player_data['rating'] = rating
             player_data['rating_value'] = rating
-            player_data['engagement_rating'] = engagement_rating
-            player_data['spotting_rating'] = spotting_rating
-            player_data['survival_rating'] = survival_rating
-            player_data['assistance_rating'] = assistance_rating
+            player_data['engagement_rating'] = f'E:{round(engagement_rating * 100)}%'
+            player_data['spotting_rating'] = f'SP:{round(spotting_rating * 100)}%'
+            player_data['survival_rating'] = f'SV:{round(survival_rating * 100)}%'
+            player_data['assistance_rating'] = f'A{round(assistance_rating * 100)}%'
+            player_data['kill_bonus'] = f'KB:{kill_bonus}'
 
             # print(
-            #     f'[{player_name}] R:{rating} ER:{round((engagement_rating), 2)}(AE:{round((vehicle_alpha_efficiency), 2)}({shots_fired}/{shots_penetrated}), aAE:{round((self.average_vehicle_alpha_efficiency), 2)}, DE:{expected_damage}) SR:{spotting_rating} SPR:{spotting_rating} SRVR:{survival_rating}(TA:{time_alive}, DR:{damage_received}, DB:{damage_blocked}) AR:{assistance_rating}')
+            #     f'[{player_name}] R:{rating} ER:{round((engagement_rating), 2)}(AE:{round((vehicle_alpha_efficiency), 2)}([{shot_efficiency}]{shots_fired}/{shots_penetrated}), aAE:{round((self.average_vehicle_alpha_efficiency), 2)}, ED:{expected_damage}) SR:{spotting_rating} SPR:{spotting_rating} SRVR:{survival_rating}(TA:{time_alive}, DR:{damage_received}, DB:{damage_blocked}) AR:{assistance_rating}')
 
         return self.replay_data

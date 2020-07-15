@@ -132,12 +132,12 @@ class Replay:
             vehicle_turret_id = player.get('turret_id')
             vehicle_chassis_id = player.get('chassis_id')
 
-            shots_fired = player.get('shots_hit')
-            if shots_fired == 0:
-                shots_fired = 1
+            shots_made = player.get('shots_made')
+            if shots_made == 0:
+                shots_made = 1
 
             vehicle_alpha_efficiency = player.get(
-                'damage_made') / shots_fired
+                'damage_made') / shots_made
 
             vehicle_best_armor = 0
             for module in vehicle_profile.get('armor'):

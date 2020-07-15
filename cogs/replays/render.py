@@ -6,9 +6,13 @@ from PIL import ImageDraw
 from discord import File
 from io import BytesIO
 
+from re import compile, sub
+
 
 class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
+        self.convert_to_num = compile(r'[^\d.]')
+
         self.stats = stats
         self.stats_bottom = stats_bottom
 
@@ -91,39 +95,7 @@ class Render():
         darken - Draw dark bg overlay \n
         mapname - Draw map name and result \n
         """
-        frame_w = 1100
-        frame_h = 640
-
         self.font_size = 16
-
-        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
-        self.image = frame
-        self.draw_frame = ImageDraw.Draw(self.image)
-        self.platoon_image = Image.open(
-            './cogs/replays/render/icons/platoon.png')
-
-        self.text_margin_w = self.font_size
-        self.text_margin_h = 5
-
-        self.image_w, self.image_h = frame.size
-        # Will bhe devided by 2
-        self.platoon_icon_margin = 28
-        # Height of each player card
-        self.image_step = 54
-
-        self.font_color_base = (255, 255, 255)
-        self.font_color_nickname = (255, 255, 255)
-        self.font_color_nickname_dead = (180, 180, 180)
-        self.font_color_clan = (150, 150, 150)
-        self.font_color_pr = (255, 165, 0)
-        self.font_color_pr_dead = (204, 132, 0)
-        self.font_color_win = (95, 227, 66)
-        self.font_color_loss = (242, 94, 61)
-
-        self.player_card_color = (80, 80, 80, 200)
-        self.result_back_color = (80, 80, 80, 0)
-        self.map_font_color = (110, 110, 110, 255)
-
         self.font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", self.font_size)
         self.font_fat = ImageFont.truetype(
@@ -139,14 +111,22 @@ class Render():
         self.bottom_stats_font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font_fat.ttf", int(self.font_size))
 
-        # Width of each player card
-        longest_name, _ = self.draw_frame.textsize(
-            self.longest_name, self.font)
-        longest_stat, _ = self.draw_frame.textsize(
-            f'{self.longest_stat}', self.font)
+        player_card_margin = 60
+        self.text_margin_w = self.font_size
+        self.text_margin_h = 5
+        # Will bhe devided by 2
+        self.platoon_icon_margin = 28
+        # Height of each player card
+        self.image_step = 54
+        self.map_name_margin = self.image_step * 2 * mapname
 
+        # Width of each player card
         text_check = Image.new('RGBA', (0, 0), (0, 0, 0, 0))
         text_check = ImageDraw.Draw(text_check)
+        longest_name, _ = text_check.textsize(
+            self.longest_name, self.font)
+        longest_stat, _ = text_check.textsize(
+            f'{self.longest_stat}', self.font)
         for stat in self.stats:
             text_w, _ = text_check.textsize(
                 f'{self.players_data[0].get(stat)}', font=self.font)
@@ -155,8 +135,34 @@ class Render():
         self.player_card_w = int(self.platoon_icon_margin + longest_name +
                                  (self.text_margin_w * 2) + self.global_stat_total_width)
 
+        frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
+        frame_h = int(((int(len(self.all_players) / 2) + 4))
+                      * self.image_step) + self.map_name_margin
+
+        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
+        self.image = frame
+        self.image_w, self.image_h = frame.size
+        self.draw_frame = ImageDraw.Draw(self.image)
+        self.platoon_image = Image.open(
+            './cogs/replays/render/icons/platoon.png')
+
+        self.font_color_base = (255, 255, 255)
+        self.font_color_nickname = (255, 255, 255)
+        self.font_color_nickname_dead = (180, 180, 180)
+        self.font_color_clan = (150, 150, 150)
+        self.font_color_pr = (255, 165, 0)
+        self.font_color_pr_dead = (204, 132, 0)
+        self.font_color_win = (95, 227, 66)
+        self.font_color_loss = (242, 94, 61)
+
+        self.player_card_color = (80, 80, 80, 200)
+        self.result_back_color = (80, 80, 80, 0)
+        self.map_font_color = (110, 110, 110, 255)
+
         # Margin from frame border
         self.image_min_w = int((self.image_w - (self.player_card_w * 2)) / 3)
+        self.image_min_h = int(
+            (frame_h - ((len(self.all_players) / 2) + 2) * self.image_step) / 2)
 
         self.enemy_team_offset_w = self.player_card_w + self.image_min_w
 
@@ -178,10 +184,6 @@ class Render():
                 0, 0))
             self.image = solid_bg
             self.draw_frame = ImageDraw.Draw(self.image)
-
-        if mapname == 0:
-            self.image_min_h = int(
-                (self.image_h - (int(len(self.all_players) / 2) + 2) * (self.image_step)) / 2)
 
         if brand == 1:
             branding_w = int((frame_w - frame_w) / 2)
@@ -527,10 +529,15 @@ class Render():
         # Render performance stats
         last_stat_pos = 0
         for stat in self.stats:
-            stat_value = player.get(stat)
+            stat_value_raw = player.get(stat)
+
+            stat_value = stat_value_raw
+            if not self.is_number(stat_value_raw):
+                stat_value = self.convert_to_num.sub('', stat_value_raw)
+
             stat_max_width = self.global_stat_max_width.get(
                 stat)
-            stat_str = f'{stat_value}'
+            stat_str = f'{stat_value_raw}'
 
             stat_font = self.get_font(f'{stat}')
             stat_font_color = self.get_font(f'{stat}', 'color')
@@ -547,7 +554,7 @@ class Render():
                       stat_font_color, font=stat_font)
 
             if stat == 'rating':
-                rating_percent = rating_value / self.best_rating * 100
+                rating_percent = float(stat_value) / self.best_rating * 100
                 if rating_percent > 90:
                     stat_color = (201, 101, 219)
                 elif rating_percent > 75:
@@ -582,3 +589,10 @@ class Render():
             return (255, 255, 255)
 
         return rating_font
+
+    def is_number(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
