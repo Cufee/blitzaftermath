@@ -297,7 +297,7 @@ class Rating:
                 rating = round(((damage_efficiency + kill_efficiency + travel_efficiency +
                                  shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 10))
                 player_data['rating'] = rating
-                player_data['rating_value'] = float(rating.replace('%', ''))
+                player_data['rating_value'] = rating
                 player_data['damage_efficiency'] = round(
                     (damage_efficiency), 2)
                 player_data['kill_efficiency'] = round(
