@@ -9,7 +9,6 @@ from io import BytesIO
 
 class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
-
         self.stats = stats
         self.stats_bottom = stats_bottom
 
@@ -219,6 +218,16 @@ class Render():
 
             self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
                                  fill=result_font_color, font=self.font_title)
+
+        for player in self.all_players:
+            for stat in self.stats:
+                stat_font = self.get_font(f'{stat}')
+                stat_str = f'{player.get(stat)}'
+                text_w, _ = self.draw_frame.textsize(stat_str, font=stat_font)
+                max_width = self.global_stat_max_width.get(stat) or 0
+
+                if text_w > max_width:
+                    self.global_stat_max_width[stat] = text_w
 
         step = [0, 0]
         for player in self.all_players:
@@ -516,15 +525,6 @@ class Render():
                 hero_icon_w, hero_icon_h), mask=hero_icon.split()[3])
 
         # Render performance stats
-        for stat in self.stats:
-            stat_font = self.get_font(f'{stat}')
-            stat_str = f'{player.get(stat)}'
-            text_w, _ = draw.textsize(stat_str, font=stat_font)
-            max_width = self.global_stat_max_width.get(stat) or 0
-
-            if text_w > max_width:
-                self.global_stat_max_width[stat] = text_w
-
         last_stat_pos = 0
         for stat in self.stats:
             stat_value = player.get(stat)

@@ -6,7 +6,7 @@ class Replay:
     def __init__(self, replay_urls):
         self.wg_app_token = 'add73e99679dd4b7d1ed7218fe0be448'
         self.wg_api_url_end = f'/wotb/account/info/?&application_id={self.wg_app_token}&account_id='
-        self.wg_tanks_api_url_end = f'/wotb/encyclopedia/vehicles/?&application_id={self.wg_app_token}&fields=tier,is_premium,type,name,nation&tank_id='
+        self.wg_tanks_api_url_end = f'/wotb/encyclopedia/vehicles/?&application_id={self.wg_app_token}&fields=tier,is_premium,type,name,nation,default_profile&tank_id='
         self.wg_tank_stats_api_url_end = f'/wotb/tanks/stats/?&application_id={self.wg_app_token}&fields=all&account_id='
 
         self.base_view_url = 'https://replays.wotinspector.com/en/view/'
@@ -60,8 +60,13 @@ class Replay:
         credits_total = replay_data.get('summary').get('credits_total')
         mastery_badge = replay_data.get('summary').get('mastery_badge')
 
+        allies = replay_data.get('summary').get('allies')
+        enemies = replay_data.get('summary').get('enemies')
+
         battle_summary = {
             "protagonist": protagonist,
+            "enemies": enemies,
+            "allies": allies,
             "winner_team": winner_team,
             "battle_result": battle_result,
             "battle_type": battle_type,
@@ -107,12 +112,39 @@ class Replay:
 
         for player in players_all:
             player_id = str(player.get('dbid'))
+
+            if int(player_id) in enemies:
+                team = 2
+            else:
+                team = 1
+
             clan_tag = player.get('clan_tag')
             nickname = players_stats.get(player_id).get('nickname')
             stats = players_stats.get(player_id).get('statistics').get('all')
 
             vehicle = vehicles_all_data.get(str(
                 player.get('vehicle_descr')))
+            vehicle_profile = vehicles_all_data.get(str(
+                player.get('vehicle_descr'))).get('default_profile')
+            vehicle_modules = vehicles_all_data.get(str(
+                player.get('vehicle_descr'))).get('modules_tree')
+
+            vehicle_turret_id = player.get('turret_id')
+            vehicle_chassis_id = player.get('chassis_id')
+
+            shots_fired = player.get('shots_hit')
+            if shots_fired == 0:
+                shots_fired = 1
+
+            vehicle_alpha_efficiency = player.get(
+                'damage_made') / shots_fired
+
+            vehicle_best_armor = 0
+            for module in vehicle_profile.get('armor'):
+                if vehicle_profile.get('armor').get(module).get('front') > vehicle_best_armor:
+                    vehicle_best_armor = vehicle_profile.get(
+                        'armor').get(module).get('front')
+
             vehicle_id = player.get('vehicle_descr')
 
             try:
@@ -120,11 +152,6 @@ class Replay:
                     wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}').text).get('data').get(player_id)[0].get('all')
             except:
                 vehicle_stats = None
-
-            if int(player_id) in enemies:
-                team = 2
-            else:
-                team = 1
 
             player_wins = stats.get('wins')
             player_battles = stats.get('battles')
@@ -159,7 +186,9 @@ class Replay:
                     'nickname': nickname,
                     'clan_tag': clan_tag,
                     'team': team,
+                    'vehicle': vehicle,
                     'vehicle_stats': vehicle_stats,
+                    'vehicle_alpha_efficiency': vehicle_alpha_efficiency,
                     'performance': player,
                     'stats': stats,
                     'damage': player.get('damage_made'),
@@ -181,15 +210,16 @@ class Replay:
 
     def get_wg_api_domain(self, player_id):
         # Detect realm
-        if len(str(player_id)) == 8:
+        length = len(str(player_id))
+        if length == 8:
             player_realm = 'ru'
             api_domain = 'http://api.wotblitz.ru'
 
-        if len(str(player_id)) == 9:
+        elif length == 9:
             player_realm = 'eu'
             api_domain = 'http://api.wotblitz.eu'
 
-        if len(str(player_id)) == 10:
+        elif length == 10:
             player_realm = 'na'
             api_domain = 'http://api.wotblitz.com'
 

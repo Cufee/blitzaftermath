@@ -6,7 +6,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
 enabled_channels = [719831153162321981, 719875141047418962]
-debug = False
+debug = True
 
 
 def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
@@ -17,7 +17,7 @@ def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand
     replay_id = list(replays_list_data.keys())[0]
     replay_link = replay_data.get('download_url')
     replay_data = Rating(
-        replay_data).calculate_rating(rating)
+        replay_data).get_vbr()
 
     image_file = Render(
         replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
@@ -124,7 +124,8 @@ class blitz_aftermath_replays(commands.Cog):
             if payload.emoji.name == '📈':
                 replays = []
 
-                stats = ['kills', 'damage', 'player_wr', 'rating']
+                stats = ['engagement_rating', 'spotting_rating',
+                         'survival_rating', 'assistance_rating']
 
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link = get_image(
