@@ -170,6 +170,7 @@ class Rating:
 
         self.players_count = round(len(self.replay_data.get('players')))
         self.lighttank_count = [0, 0]
+        self.mediumtank_count = [0, 0]
 
         self.average_vehicle_alpha_efficiency = 0
         self.average_distance_travelled = 0
@@ -194,6 +195,9 @@ class Rating:
 
             if player_data.get('player_vehicle_type') == 'lightTank':
                 self.lighttank_count[player_team] += 1
+
+            if player_data.get('player_vehicle_type') == 'mediumTank':
+                self.mediumtank_count[player_team] += 1
 
         self.average_vehicle_alpha_efficiency = self.average_vehicle_alpha_efficiency / \
             self.players_count
@@ -426,6 +430,8 @@ class Rating:
                 'performance').get('enemies_destroyed')
 
             lighttank_count = self.lighttank_count[player_team_id]
+            if lighttank_count == 0:
+                lighttank_count = self.mediumtank_count[player_team_id]
 
             tank_type = player_data.get('player_vehicle_type')
             # Not used, unable to pull vehicle chars without spamming requests to WG API
