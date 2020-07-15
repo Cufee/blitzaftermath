@@ -7,13 +7,13 @@ class Rating:
         self.eff_multiplyers = {
             'mBRT1_0': {
                 'lightTank': {
-                    'damage_efficiency': 0.5,
+                    'damage_efficiency': 1,
                     'blocked_efficiency': 0,
                     'kill_efficiency': 0.75,
                     'travel_efficiency': 0.75,
                     'shot_efficiency': 0.5,
                     'spotting_efficiency': 1.25,
-                    'track_efficiency': 1.25,
+                    'track_efficiency': 0.75,
                 },
                 'heavyTank': {
                     'damage_efficiency': 1,
@@ -78,6 +78,82 @@ class Rating:
                     'travel_efficiency': 0.25,
                     'shot_efficiency': 1.25,
                     'spotting_efficiency': 0.25,
+                    'track_efficiency': 0.75,
+                },
+            },
+            'mBRT1_1': {
+                'lightTank': {
+                    'damage_efficiency': 1.5,
+                    'blocked_efficiency': 0.25,
+                    'kill_efficiency': 0.75,
+                    'travel_efficiency': 1.25,
+                    'shot_efficiency': 0.75,
+                    'spotting_efficiency': 2.0,
+                    'track_efficiency': 0.5,
+                },
+                'heavyTank': {
+                    'damage_efficiency': 1.5,
+                    'blocked_efficiency': 1.25,
+                    'kill_efficiency': 1.0,
+                    'travel_efficiency': 0.75,
+                    'shot_efficiency': 1.25,
+                    'spotting_efficiency': 0.50,
+                    'track_efficiency': 0.75,
+                },
+                'mediumTank': {
+                    'damage_efficiency': 1.75,
+                    'blocked_efficiency': 0.75,
+                    'kill_efficiency': 1.25,
+                    'travel_efficiency': 1.0,
+                    'shot_efficiency': 0.75,
+                    'spotting_efficiency': 0.75,
+                    'track_efficiency': 0.75,
+                },
+                'AT-SPG': {
+                    'damage_efficiency': 2.0,
+                    'blocked_efficiency': 0.5,
+                    'kill_efficiency': 1.25,
+                    'travel_efficiency': 0.50,
+                    'shot_efficiency': 1.50,
+                    'spotting_efficiency': 0.50,
+                    'track_efficiency': 0.75,
+                },
+            },
+            'mBRT1_1A': {
+                'lightTank': {
+                    'damage_efficiency': 1.5,
+                    'blocked_efficiency': 0.25,
+                    'kill_efficiency': 0.75,
+                    'travel_efficiency': 1.25,
+                    'shot_efficiency': 0.75,
+                    'spotting_efficiency': 2.0,
+                    'track_efficiency': 0.5,
+                },
+                'heavyTank': {
+                    'damage_efficiency': 1.5,
+                    'blocked_efficiency': 1.25,
+                    'kill_efficiency': 1.0,
+                    'travel_efficiency': 0.75,
+                    'shot_efficiency': 1.25,
+                    'spotting_efficiency': 0.50,
+                    'track_efficiency': 0.75,
+                },
+                'mediumTank': {
+                    'damage_efficiency': 1.75,
+                    'blocked_efficiency': 0.75,
+                    'kill_efficiency': 1.25,
+                    'travel_efficiency': 1.0,
+                    'shot_efficiency': 0.75,
+                    'spotting_efficiency': 0.75,
+                    'track_efficiency': 0.75,
+                },
+                'AT-SPG': {
+                    'damage_efficiency': 2.0,
+                    'blocked_efficiency': 0.5,
+                    'kill_efficiency': 1.25,
+                    'travel_efficiency': 0.50,
+                    'shot_efficiency': 1.50,
+                    'spotting_efficiency': 0.50,
                     'track_efficiency': 0.75,
                 },
             }
@@ -184,10 +260,9 @@ class Rating:
                     (blocked_efficiency), 2)
 
             if rating_version == 'mBRT1_0':
-                rating = round(((damage_efficiency + kill_efficiency +
-                                 travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
+                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 10))}%'
                 player_data['rating'] = rating
-                player_data['rating_value'] = rating
+                player_data['rating_value'] = float(rating.replace('%', ''))
                 player_data['damage_efficiency'] = round(
                     (damage_efficiency), 2)
                 player_data['kill_efficiency'] = round(
@@ -218,7 +293,41 @@ class Rating:
                 player_data['blocked_efficiency'] = round(
                     (blocked_efficiency), 2)
 
-            # print(
-            #     f'[{player_id}] {tank_name}, DMG:{damage_efficiency}({damage_made})[{damage_blocked}], KILLS:{kill_efficiency}({kills}), DIST:{travel_efficiency}({distance_travelled}), SHOTS: {shot_efficiency}({shots_fired}), SPOT: {spotting_efficiency}({enemies_spotted}), TRACK: {track_efficiency}, vRT: {rating}')
+            if rating_version == 'mBRT1_1':
+                rating = round(((damage_efficiency + kill_efficiency + travel_efficiency +
+                                 shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 10))
+                player_data['rating'] = rating
+                player_data['rating_value'] = float(rating.replace('%', ''))
+                player_data['damage_efficiency'] = round(
+                    (damage_efficiency), 2)
+                player_data['kill_efficiency'] = round(
+                    (kill_efficiency), 2)
+                player_data['shot_efficiency'] = round(
+                    (shot_efficiency), 2)
+                player_data['spotting_efficiency'] = round(
+                    (spotting_efficiency), 2)
+                player_data['track_efficiency'] = round(
+                    (track_efficiency), 2)
+                player_data['blocked_efficiency'] = round(
+                    (blocked_efficiency), 2)
+
+            if rating_version == 'mBRT1_1A':
+                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) / 7 * 100))}%'
+                player_data['rating'] = rating
+                player_data['rating_value'] = float(rating.replace('%', ''))
+                player_data['damage_efficiency'] = round(
+                    (damage_efficiency), 2)
+                player_data['kill_efficiency'] = round(
+                    (kill_efficiency), 2)
+                player_data['shot_efficiency'] = round(
+                    (shot_efficiency), 2)
+                player_data['spotting_efficiency'] = round(
+                    (spotting_efficiency), 2)
+                player_data['track_efficiency'] = round(
+                    (track_efficiency), 2)
+                player_data['blocked_efficiency'] = round(
+                    (blocked_efficiency), 2)
+
+            # print(f'[{player_name}] {tank_name}, DMG:{damage_efficiency}({damage_made})[{damage_blocked}], KILLS:{kill_efficiency}({kills}), DIST:{travel_efficiency}({distance_travelled}), SHOTS: {shot_efficiency}({shots_fired}), SPOT: {spotting_efficiency}({enemies_spotted}), TRACK: {track_efficiency}, vRT: {rating}')
 
         return self.replay_data

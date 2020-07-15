@@ -58,6 +58,7 @@ class blitz_aftermath_replays(commands.Cog):
                     replays.append(attachment.url)
 
             if replays:
+                rating = 'mBRT1_1A'
                 stats = ['kills', 'damage', 'player_wr', 'rating']
                 stats_bot = None
 
@@ -67,7 +68,7 @@ class blitz_aftermath_replays(commands.Cog):
                 if debug == False:
                     try:
                         image_file, replay_id, replay_link = get_image(
-                            replays, stats=stats)
+                            replays, stats=stats, rating=rating)
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
                         embed.set_footer(text=f"MD5: {replay_id}")
@@ -83,7 +84,7 @@ class blitz_aftermath_replays(commands.Cog):
                     await message.channel.send(embed=embed, file=image_file)
                 else:
                     image_file, replay_id, replay_link = get_image(
-                        replays, stats=stats)
+                        replays, stats=stats, rating=rating)
                     embed = discord.Embed(
                         title='Download replay', url=replay_link, description=embed_desc)
                     embed.set_footer(text=f"MD5: {replay_id}")
@@ -128,7 +129,7 @@ class blitz_aftermath_replays(commands.Cog):
 
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link = get_image(
-                    replays, rating='mBRT1_0', stats=stats)
+                    replays, rating='mBRT1_1', stats=stats)
 
                 embed = discord.Embed(
                     title='Download replay', url=replay_link)
