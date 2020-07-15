@@ -47,46 +47,7 @@ class Render():
         self.protagonist_id = self.battle_summary.get('protagonist')
         self.protagonist_name = self.replay_data.get(
             'players').get(str(self.protagonist_id)).get('nickname')
-
-        self.all_players = []
-
-        self.best_rating = 0
-        self.longest_stat = 0
-        self.longest_stat_bottom = 0
-        self.longest_name = ''
-        self.team_rating = [0, 0]
-
-        players_data = self.replay_data.get('players')
-        self.players_data = sorted(
-            players_data.values(), key=itemgetter('rating_value'), reverse=True)
-
-        for player in self.players_data:
-            data = player
-            self.all_players.append(player)
-
-            if self.best_rating < data.get('rating_value'):
-                self.best_rating = data.get('rating_value')
-
-            for stat in self.stats:
-                if len(f'{self.longest_stat}') < len(f'{data.get(stat)}'):
-                    self.longest_stat = player.get(stat)
-
-            for stat in self.stats_bottom:
-                if len(f'{self.longest_stat_bottom}') < len(f'{data.get(stat)}'):
-                    self.longest_stat_bottom = player.get(stat)
-
-            clan_tag = f'[{data.get("clan_tag")}]' or ''
-
-            if len(self.longest_name) < len(data.get('nickname') + clan_tag + ' '):
-                self.longest_name = data.get('nickname') + ' ' + clan_tag
-
-            if len(self.longest_name) < (len(data.get('player_vehicle')) + 2):
-                self.longest_name = data.get('player_vehicle')
-
-            if data.get('team') == 2:
-                self.team_rating[1] += player.get('rating_value')
-            else:
-                self.team_rating[0] += player.get('rating_value')
+        self.players_data = self.replay_data.get('players')
 
     def image(self, bg=1, brand=1, darken=1, mapname=1):
         """
@@ -111,41 +72,6 @@ class Render():
         self.bottom_stats_font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font_fat.ttf", int(self.font_size))
 
-        player_card_margin = 60
-        self.text_margin_w = self.font_size
-        self.text_margin_h = 5
-        # Will bhe devided by 2
-        self.platoon_icon_margin = 28
-        # Height of each player card
-        self.image_step = 54
-        self.map_name_margin = self.image_step * 2 * mapname
-
-        # Width of each player card
-        text_check = Image.new('RGBA', (0, 0), (0, 0, 0, 0))
-        text_check = ImageDraw.Draw(text_check)
-        longest_name, _ = text_check.textsize(
-            self.longest_name, self.font)
-        longest_stat, _ = text_check.textsize(
-            f'{self.longest_stat}', self.font)
-        for stat in self.stats:
-            text_w, _ = text_check.textsize(
-                f'{self.players_data[0].get(stat)}', font=self.font)
-            self.global_stat_total_width += text_w + self.text_margin_w
-
-        self.player_card_w = int(self.platoon_icon_margin + longest_name +
-                                 (self.text_margin_w * 2) + self.global_stat_total_width)
-
-        frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
-        frame_h = int(((int(len(self.all_players) / 2) + 4))
-                      * self.image_step) + self.map_name_margin
-
-        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
-        self.image = frame
-        self.image_w, self.image_h = frame.size
-        self.draw_frame = ImageDraw.Draw(self.image)
-        self.platoon_image = Image.open(
-            './cogs/replays/render/icons/platoon.png')
-
         self.font_color_base = (255, 255, 255)
         self.font_color_nickname = (255, 255, 255)
         self.font_color_nickname_dead = (180, 180, 180)
@@ -158,6 +84,82 @@ class Render():
         self.player_card_color = (80, 80, 80, 200)
         self.result_back_color = (80, 80, 80, 0)
         self.map_font_color = (110, 110, 110, 255)
+
+        player_card_margin = 60
+        self.text_margin_w = self.font_size
+        self.text_margin_h = 5
+        # Will bhe devided by 2
+        self.platoon_icon_margin = 28
+        # Height of each player card
+        self.image_step = 54
+        self.map_name_margin = self.image_step * 2 * mapname
+
+        # Width of each player card
+        text_check = Image.new('RGBA', (0, 0), (0, 0, 0, 0))
+        text_check = ImageDraw.Draw(text_check)
+
+        self.all_players = []
+        self.best_rating = 0
+        self.team_rating = [0, 0]
+        self.longest_name = 0
+        self.longest_stat = 0
+
+        self.players_data = sorted(
+            self.players_data.values(), key=itemgetter('rating_value'), reverse=True)
+
+        for player in self.players_data:
+            self.all_players.append(player)
+
+            if self.best_rating < player.get('rating_value'):
+                self.best_rating = player.get('rating_value')
+
+            full_name = f'{player.get("nickname")} [{player.get("clan_tag")}]'
+            vehicle_name = f'{player.get("player_vehicle")}  '
+
+            full_name_w, _ = text_check.textsize(
+                full_name, self.font)
+            vehicle_name_w, _ = text_check.textsize(
+                vehicle_name, self.font)
+
+            if full_name_w > self.longest_name:
+                self.longest_name = full_name_w
+            elif vehicle_name_w > self.longest_name:
+                self.longest_name = vehicle_name_w
+
+            if player.get('team') == 2:
+                self.team_rating[1] += player.get('rating_value')
+            else:
+                self.team_rating[0] += player.get('rating_value')
+
+            for stat in self.stats:
+                stat_font = self.get_font(None)
+                stat_str = f'{player.get(stat)}'
+                text_w, _ = text_check.textsize(stat_str, font=stat_font)
+                max_width = self.global_stat_max_width.get(stat) or 0
+                if text_w > max_width:
+                    self.global_stat_max_width[stat] = text_w
+
+        longest_stat, _ = text_check.textsize(
+            f'{self.longest_stat}', self.font)
+
+        for stat in self.stats:
+            text_w, _ = text_check.textsize(
+                f'{self.players_data[0].get(stat)}', font=self.font)
+            self.global_stat_total_width += text_w + self.text_margin_w
+
+        self.player_card_w = int(self.platoon_icon_margin + self.longest_name +
+                                 (self.text_margin_w * 2) + self.global_stat_total_width)
+
+        frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
+        frame_h = int(((int(len(self.all_players) / 2) + 4))
+                      * self.image_step) + self.map_name_margin
+
+        frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
+        self.image = frame
+        self.image_w, self.image_h = frame.size
+        self.draw_frame = ImageDraw.Draw(self.image)
+        self.platoon_image = Image.open(
+            './cogs/replays/render/icons/platoon.png')
 
         # Margin from frame border
         self.image_min_w = int((self.image_w - (self.player_card_w * 2)) / 3)
@@ -221,16 +223,6 @@ class Render():
             self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
                                  fill=result_font_color, font=self.font_title)
 
-        for player in self.all_players:
-            for stat in self.stats:
-                stat_font = self.get_font(f'{stat}')
-                stat_str = f'{player.get(stat)}'
-                text_w, _ = self.draw_frame.textsize(stat_str, font=stat_font)
-                max_width = self.global_stat_max_width.get(stat) or 0
-
-                if text_w > max_width:
-                    self.global_stat_max_width[stat] = text_w
-
         step = [0, 0]
         for player in self.all_players:
             step[player.get('team') - 1] += 1
@@ -250,8 +242,12 @@ class Render():
         self.draw_ui_top()
         self.draw_ui_bot()
 
-        error_rate = self.player_card_w - longest_name - \
+        error_rate = self.player_card_w - self.longest_name - \
             self.global_stat_total_width - self.platoon_icon_margin
+
+        if error_rate < 0:
+            raise Exception(
+                'Negative error_rate detected. UI will not render correctly')
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
