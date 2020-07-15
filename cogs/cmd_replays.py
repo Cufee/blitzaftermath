@@ -124,8 +124,7 @@ class blitz_aftermath_replays(commands.Cog):
             if payload.emoji.name == '📈':
                 replays = []
 
-                stats = ['kill_efficiency', 'damage_efficiency',
-                         'shot_efficiency', 'spotting_efficiency']
+                stats = ['kills', 'damage', 'player_wr', 'rating']
 
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link = get_image(
