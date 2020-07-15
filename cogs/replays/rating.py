@@ -295,7 +295,7 @@ class Rating:
 
             if rating_version == 'mBRT1_1':
                 rating = round(((damage_efficiency + kill_efficiency + travel_efficiency +
-                                 shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 10))
+                                 shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
                 player_data['rating'] = rating
                 player_data['rating_value'] = rating
                 player_data['damage_efficiency'] = round(
