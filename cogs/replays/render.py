@@ -29,6 +29,11 @@ class Render():
         self.battle_summary = self.replay_data.get(
             'battle_summary')
         self.replay_id = replay_id
+        self.room_type = self.battle_summary.get('room_type')
+
+        if self.room_type == 5:
+            self.stats = ['engagement_rating', 'spotting_rating',
+                          'survival_rating', 'assistance_rating', 'kill_bonus']
 
         # Replay Details
         self.room_type = self.battle_summary.get('room_type')
@@ -453,7 +458,7 @@ class Render():
         draw = ImageDraw.Draw(player_card)
 
         # Draw platoons
-        if platoon:
+        if platoon and self.room_type != 5:
             platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()
