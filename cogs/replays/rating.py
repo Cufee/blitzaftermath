@@ -11,6 +11,9 @@ class Rating:
 
         self.eff_multiplyers = {
             'mBRT1_0': {
+                'multiplier': 100,
+                'string_format': 'RATING',
+                'detailed_string_format': '+RATING',
                 'lightTank': {
                     'damage_efficiency': 1,
                     'blocked_efficiency': 0,
@@ -49,6 +52,9 @@ class Rating:
                 },
             },
             'sBRT1_0': {
+                'detailed_string_format': '+RATING',
+                'string_format': 'RATING',
+                'multiplier': 100,
                 'lightTank': {
                     'damage_efficiency': 0.5,
                     'blocked_efficiency': 0,
@@ -87,6 +93,9 @@ class Rating:
                 },
             },
             'mBRT1_1': {
+                'detailed_string_format': '+RATING',
+                'string_format': 'RATING',
+                'multiplier': 100,
                 'lightTank': {
                     'damage_efficiency': 1.5,
                     'blocked_efficiency': 0.25,
@@ -125,6 +134,9 @@ class Rating:
                 },
             },
             'mBRT1_1A': {
+                'detailed_string_format': 'RATING%',
+                'string_format': 'RATING%',
+                'multiplier': (7/100),
                 'lightTank': {
                     'damage_efficiency': 1.5,
                     'blocked_efficiency': 0.25,
@@ -220,15 +232,20 @@ class Rating:
         self.avg_damage = (
             self.total_dmg[0] + self.total_dmg[1]) / self.players_count
 
-    def calculate_rating(self, rating_version):
+    def get_brt(self, rating_version='mBRT1_1'):
 
         for player in self.replay_data.get('players'):
             player_data = self.replay_data.get('players').get(player)
             player_name = player_data.get('nickname')
+            player_team_id = player_data.get('team') - 1
 
             survived_bool = True
             if player_data.get('performance').get('hitpoints_left') == 0:
                 survived_bool = False
+
+            tank_hp_avg = self.tank_hp_avg[player_team_id]
+            shots_avg_damage = self.shots_avg_dmg[player_team_id]
+            travel_avg = self.average_distance_travelled
 
             shots_fired = player_data.get('performance').get('shots_made')
             if shots_fired == 0:
@@ -239,7 +256,7 @@ class Rating:
                 'performance').get('enemies_destroyed')
             time_alive = player_data.get('performance').get('time_alive')
             damage_blocked = player_data.get(
-                'performance').get('damage_blocked') or shots_avg_dmg * player_data.get(
+                'performance').get('damage_blocked') or shots_avg_damage * player_data.get(
                 'performance').get('hits_bounced')
             distance_travelled = player_data.get(
                 'performance').get('distance_travelled')
@@ -262,129 +279,70 @@ class Rating:
 
             hp_left = player_data.get('performance').get('hitpoints_left')
 
-            damage_efficiency = ((damage_made + damage_assisted) / tank_hp_avg) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('damage_efficiency')
+            enemies = self.players_lists[0]
+            if player_team_id == 0:
+                enemies = self.players_lists[1]
 
-            kill_efficiency = (kills / 7) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('kill_efficiency')
+            lighttank_count = self.lighttank_count[player_team_id]
+            if lighttank_count == 0:
+                lighttank_count = self.mediumtank_count[player_team_id]
 
-            travel_efficiency = (distance_travelled / travel_avg) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('travel_efficiency')
+            damage_efficiency = round((((damage_made + damage_assisted) / tank_hp_avg) *
+                                       self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('damage_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            shot_efficiency = ((shots_penetrated) /
-                               (shots_fired)) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('shot_efficiency')
+            kill_efficiency = round(((kills / (len(enemies))) *
+                                     self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('kill_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            spotting_efficiency = ((enemies_spotted) / (players_count / 2)) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('spotting_efficiency')
+            travel_efficiency = round(((distance_travelled / travel_avg) *
+                                       self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('travel_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            blocked_efficiency = (damage_blocked / tank_hp_avg) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('blocked_efficiency')
+            shot_efficiency = round((((shots_penetrated) /
+                                      (shots_fired)) *
+                                     self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('shot_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            track_efficiency = (damage_assisted_track / tank_hp_avg) * \
-                self.eff_multiplyers.get(rating_version).get(
-                    tank_type).get('track_efficiency')
+            spotting_efficiency = round((((enemies_spotted) / (len(enemies)) * lighttank_count) *
+                                         self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('spotting_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            if rating_version == 'bBRT1_0':
-                rating = round(((damage_efficiency + kill_efficiency +
-                                 travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
-                player_data['rating'] = rating
-                player_data['rating_value'] = rating
-                player_data['damage_efficiency'] = round(
-                    (damage_efficiency), 2)
-                player_data['kill_efficiency'] = round(
-                    (kill_efficiency), 2)
-                player_data['shot_efficiency'] = round(
-                    (shot_efficiency), 2)
-                player_data['spotting_efficiency'] = round(
-                    (spotting_efficiency), 2)
-                player_data['track_efficiency'] = round(
-                    (track_efficiency), 2)
-                player_data['blocked_efficiency'] = round(
-                    (blocked_efficiency), 2)
+            blocked_efficiency = round(((damage_blocked / tank_hp_avg) *
+                                        self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('blocked_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            if rating_version == 'mBRT1_0':
-                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 10))}%'
-                player_data['rating'] = rating
-                player_data['rating_value'] = float(rating.replace('%', ''))
-                player_data['damage_efficiency'] = round(
-                    (damage_efficiency), 2)
-                player_data['kill_efficiency'] = round(
-                    (kill_efficiency), 2)
-                player_data['shot_efficiency'] = round(
-                    (shot_efficiency), 2)
-                player_data['spotting_efficiency'] = round(
-                    (spotting_efficiency), 2)
-                player_data['track_efficiency'] = round(
-                    (track_efficiency), 2)
-                player_data['blocked_efficiency'] = round(
-                    (blocked_efficiency), 2)
+            track_efficiency = round(((damage_assisted_track / tank_hp_avg) *
+                                      self.eff_multiplyers.get(rating_version).get(
+                tank_type).get('track_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            if rating_version == 'sBRT1_0':
-                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) / 7 * 100))}%'
-                player_data['rating'] = rating
-                player_data['rating_value'] = float(rating.replace('%', ''))
-                player_data['damage_efficiency'] = round(
-                    (damage_efficiency), 2)
-                player_data['kill_efficiency'] = round(
-                    (kill_efficiency), 2)
-                player_data['shot_efficiency'] = round(
-                    (shot_efficiency), 2)
-                player_data['spotting_efficiency'] = round(
-                    (spotting_efficiency), 2)
-                player_data['track_efficiency'] = round(
-                    (track_efficiency), 2)
-                player_data['blocked_efficiency'] = round(
-                    (blocked_efficiency), 2)
+            rating = round(((damage_efficiency + kill_efficiency +
+                             travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency)))
 
-            if rating_version == 'mBRT1_1':
-                rating = round(((damage_efficiency + kill_efficiency + travel_efficiency +
-                                 shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) * 100))
-                player_data['rating'] = rating
-                player_data['rating_value'] = rating
-                player_data['damage_efficiency'] = round(
-                    (damage_efficiency), 2)
-                player_data['kill_efficiency'] = round(
-                    (kill_efficiency), 2)
-                player_data['shot_efficiency'] = round(
-                    (shot_efficiency), 2)
-                player_data['spotting_efficiency'] = round(
-                    (spotting_efficiency), 2)
-                player_data['track_efficiency'] = round(
-                    (track_efficiency), 2)
-                player_data['blocked_efficiency'] = round(
-                    (blocked_efficiency), 2)
+            player_data['rating_value'] = rating
+            player_data['rating'] = self.eff_multiplyers.get(
+                rating_version).get('string_format').replace('RATING', str(rating))
+            player_data['damage_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(damage_efficiency))
+            player_data['kill_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(kill_efficiency))
+            player_data['shot_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(shot_efficiency))
+            player_data['spotting_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(spotting_efficiency))
+            player_data['track_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(track_efficiency))
+            player_data['blocked_rating'] = self.eff_multiplyers.get(
+                rating_version).get('detailed_string_format').replace('RATING', str(blocked_efficiency))
 
-            if rating_version == 'mBRT1_1A':
-                rating = f'{round(((damage_efficiency + kill_efficiency + travel_efficiency + shot_efficiency + spotting_efficiency + track_efficiency + blocked_efficiency) / 7 * 100))}%'
-                player_data['rating'] = rating
-                player_data['rating_value'] = float(rating.replace('%', ''))
-                player_data['damage_efficiency'] = round(
-                    (damage_efficiency), 2)
-                player_data['kill_efficiency'] = round(
-                    (kill_efficiency), 2)
-                player_data['shot_efficiency'] = round(
-                    (shot_efficiency), 2)
-                player_data['spotting_efficiency'] = round(
-                    (spotting_efficiency), 2)
-                player_data['track_efficiency'] = round(
-                    (track_efficiency), 2)
-                player_data['blocked_efficiency'] = round(
-                    (blocked_efficiency), 2)
+            # print(
+            #     f'{player_name}[DMG:{(damage_made + damage_assisted)}][BLK:{round((damage_blocked / tank_hp_avg), 2)}][SHT:{round(((shots_penetrated) / (shots_fired)), 2)}]')
 
-            print(f'[{player_name}] {tank_name}, DMG:{damage_efficiency}({damage_made})[{damage_blocked}], KILLS:{kill_efficiency}({kills}), DIST:{travel_efficiency}({distance_travelled}), SHOTS: {shot_efficiency}({shots_fired}), SPOT: {spotting_efficiency}({enemies_spotted}), TRACK: {track_efficiency}, vRT: {rating}')
+            # print(f'[{player_name}] {tank_name}, DMG:{damage_efficiency}({damage_made})[{damage_blocked}], KILLS:{kill_efficiency}({kills}), DIST:{travel_efficiency}({distance_travelled}), SHOTS: {shot_efficiency}({shots_fired}), SPOT: {spotting_efficiency}({enemies_spotted}), TRACK: {track_efficiency}, vRT: {rating}')
 
         return self.replay_data
 
-    def get_vbr(self, version=None):
-        if not version:
-            version = '1_0'
+    def get_vbr(self, version='1_0'):
 
         for player in self.replay_data.get('players'):
             player_data = self.replay_data.get('players').get(player)
@@ -479,7 +437,7 @@ class Rating:
 
             player_data['rating'] = rating
             player_data['rating_value'] = rating
-            player_data['kill_bonus'] = f'+{round(kill_bonus * 100)}'
+            player_data['kill_rating'] = f'+{round(kill_bonus * 100)}'
             player_data['engagement_rating'] = f'+{round(engagement_rating * 100)}'
             player_data['spotting_rating'] = f'+{round(spotting_rating * 100)}'
             player_data['survival_rating'] = f'+{round(survival_rating * 100)}'

@@ -22,9 +22,6 @@ class Render():
         if not stats_bottom:
             self.stats_bottom = ['kills', 'damage', 'player_wr', 'rating']
 
-        self.global_stat_max_width = {}
-        self.global_stat_total_width = 0
-
         self.replay_data = replay_data
         self.battle_summary = self.replay_data.get(
             'battle_summary')
@@ -32,8 +29,8 @@ class Render():
         self.room_type = self.battle_summary.get('room_type')
 
         if self.room_type == 5:
-            self.stats = ['engagement_rating', 'spotting_rating',
-                          'survival_rating', 'assistance_rating', 'kill_bonus']
+            self.stats = ['damage_rating', 'kill_rating',
+                          'shot_rating', 'spotting_rating', 'track_rating', 'blocked_rating']
 
         # Replay Details
         self.room_type = self.battle_summary.get('room_type')
@@ -109,6 +106,9 @@ class Render():
         self.longest_name = 0
         self.longest_stat = 0
 
+        self.global_stat_max_width = {}
+        self.global_stat_total_width = 0
+
         self.players_data = sorted(
             self.players_data.values(), key=itemgetter('rating_value'), reverse=True)
 
@@ -148,12 +148,11 @@ class Render():
             f'{self.longest_stat}', self.font)
 
         for stat in self.stats:
-            text_w, _ = text_check.textsize(
-                f'{self.players_data[0].get(stat)}', font=self.font)
-            self.global_stat_total_width += text_w + self.text_margin_w
+            max_width = self.global_stat_max_width.get(stat) or 0
+            self.global_stat_total_width += (text_w + max_width)
 
         self.player_card_w = int(self.platoon_icon_margin + self.longest_name +
-                                 (self.text_margin_w * 2) + self.global_stat_total_width)
+                                 (self.text_margin_w) + self.global_stat_total_width)
 
         frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
         frame_h = int(((int(len(self.all_players) / 2) + 4))
