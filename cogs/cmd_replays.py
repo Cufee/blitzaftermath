@@ -6,7 +6,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 
 enabled_channels = [719831153162321981, 719875141047418962]
-debug = False
+debug = True
 
 
 def get_image(urls, rating='sBRT1_0', stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):

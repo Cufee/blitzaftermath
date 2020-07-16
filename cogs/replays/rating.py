@@ -167,6 +167,7 @@ class Rating:
         self.total_dmg = [0, 0]      # Total by team
         self.total_shots = [0, 0]    # Total by team
         self.damage_recieved = [0, 0]
+        self.tatal_shots_made = [0, 0]
 
         self.players_count = round(len(self.replay_data.get('players')))
         self.lighttank_count = [0, 0]
@@ -187,6 +188,8 @@ class Rating:
                 'performance').get('damage_received')
             self.total_shots[player_team] += player_data.get(
                 'performance').get('shots_pen')
+            self.tatal_shots_made[player_team] += player_data.get(
+                'performance').get('shots_made')
 
             self.average_vehicle_alpha_efficiency += player_data.get(
                 'vehicle_alpha_efficiency')
@@ -204,6 +207,9 @@ class Rating:
         self.average_distance_travelled = self.average_distance_travelled / self.players_count
         self.avg_damage_recieved = [(self.damage_recieved[0] / len(
             self.players_lists[0])), (self.damage_recieved[1] / len(self.players_lists[0]))]
+
+        self.avg_shots_made = [
+            (self.tatal_shots_made[0] / len(self.players_lists[0])), (self.tatal_shots_made[1] / len(self.players_lists[1]))]
 
         self.tank_hp_avg = [(self.total_dmg[0] /
                              len(self.players_lists[0])), (self.total_dmg[1] / len(self.players_lists[1]))]
@@ -446,18 +452,18 @@ class Rating:
             if player_team_id == 0:
                 enemie_team = 1
 
-            # expected_damage = round((
-            #     (shots_fired * vehicle_alpha_efficiency) + 1), 2)
-
-            expected_damage = round(self.avg_damage)
+            damage_efficiency = round((damage_made / (self.avg_damage)), 2)
 
             shot_efficiency = shots_penetrated / shots_fired
+
+            # Not working as expected, need to counter platyers who made 1 shot
+            alpha_efficiency = (vehicle_alpha_efficiency)
 
             kill_bonus = round(
                 (kills / (self.battle_duration / 60)), 2)
 
-            engagement_rating = round(((shot_efficiency * (vehicle_alpha_efficiency / self.average_vehicle_alpha_efficiency)) + (
-                (distance_travelled) / self.average_distance_travelled) + (damage_made / expected_damage) + kill_bonus), 2)
+            engagement_rating = round(((shot_efficiency) * (
+                (distance_travelled) / self.average_distance_travelled) * (damage_efficiency) + kill_bonus), 2)
 
             spotting_rating = round((enemies_spotted *
                                      lighttank_count / len(enemies)), 2)
@@ -478,7 +484,11 @@ class Rating:
             player_data['spotting_rating'] = f'+{round(spotting_rating * 100)}'
             player_data['survival_rating'] = f'+{round(survival_rating * 100)}'
             player_data['assistance_rating'] = f'+{round(assistance_rating * 100)}'
+
+            print(
+                f'[{player_name}] -> ENGR:{engagement_rating} / SHT:{shot_efficiency} / DMGE:{damage_efficiency} / TRVL:{(distance_travelled) / self.average_distance_travelled} / KB:{kill_bonus}')
+
             # print(
-            #     f'[{player_name}] R:{rating} ER:{round((engagement_rating), 2)}(AE:{round((vehicle_alpha_efficiency), 2)}([{shot_efficiency}]{shots_fired}/{shots_penetrated}), aAE:{round((self.average_vehicle_alpha_efficiency), 2)}, ED:{expected_damage}) SR:{spotting_rating} SPR:{spotting_rating} SRVR:{survival_rating}(TA:{time_alive}, DR:{damage_received}, DB:{damage_blocked}) AR:{assistance_rating}')
+            #     f'[{player_name}] R:{rating} ER:{round((engagement_rating), 2)} DE:[{damage_efficiency}](AE:{round((vehicle_alpha_efficiency), 2)}([{shot_efficiency}]{shots_fired}/{shots_penetrated}), aAE:{round((self.average_vehicle_alpha_efficiency), 2)}, ED:{expected_damage}) SR:{spotting_rating} SPR:{spotting_rating} SRVR:{survival_rating}(TA:{time_alive}, DR:{damage_received}, DB:{damage_blocked}) AR:{assistance_rating}')
 
         return self.replay_data

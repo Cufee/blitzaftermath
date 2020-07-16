@@ -49,7 +49,8 @@ class Replay:
         replay_data = data.get('data')
         winner_team = replay_data.get('summary').get('winner_team')
         battle_type = replay_data.get('summary').get('battle_type')
-        battle_duration = replay_data.get('summary').get('battle_duration')
+        self.battle_duration = replay_data.get(
+            'summary').get('battle_duration')
         battle_result = replay_data.get('summary').get('battle_result')
         battle_start_time = replay_data.get(
             'summary').get('battle_start_time')
@@ -70,7 +71,7 @@ class Replay:
             "winner_team": winner_team,
             "battle_result": battle_result,
             "battle_type": battle_type,
-            "battle_duration": battle_duration,
+            "battle_duration": self.battle_duration,
             "battle_start_timestamp": battle_start_time,
             "exp_total": exp_total,
             "mastery_badge": mastery_badge,
@@ -132,12 +133,14 @@ class Replay:
             vehicle_turret_id = player.get('turret_id')
             vehicle_chassis_id = player.get('chassis_id')
 
+            time_alive = player.get('time_alive')
+
             shots_made = player.get('shots_made')
             if shots_made == 0:
                 shots_made = 1
 
             vehicle_alpha_efficiency = player.get(
-                'damage_made') / shots_made
+                'damage_made') * (time_alive / self.battle_duration)
 
             vehicle_best_armor = 0
             for module in vehicle_profile.get('armor'):
