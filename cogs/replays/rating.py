@@ -304,7 +304,7 @@ class Rating:
                                      self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('shot_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            spotting_efficiency = round((((enemies_spotted) / (len(enemies)) * lighttank_count) *
+            spotting_efficiency = round((((enemies_spotted) / (len(enemies)) * (lighttank_count / 2)) *
                                          self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('spotting_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
