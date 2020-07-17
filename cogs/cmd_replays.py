@@ -132,66 +132,66 @@ class blitz_aftermath_replays(commands.Cog):
         if message.author == self.client.user:
             return
         attachments = message.attachments
-        guild_id = str(message.guild.id)
-        guild_name = str(message.guild.name)
-
-        guild_settings = get_guild_settings(guild_id, guild_name)
-        if guild_settings.get('status_code') != 200:
-            return
-
-        enabled_channels = guild_settings.get('enabled_channels')
-        stats = guild_settings.get('stats')
-        guild_is_premium = guild_settings.get('guild_is_premium')
-
-        # Verify channel
-        if str(message.channel.id) not in enabled_channels:
-            return
-
         replays = []
         if attachments:
-            print('valid message')
+            guild_id = str(message.guild.id)
+            guild_name = str(message.guild.name)
 
-            for attachment in attachments:
-                if attachment.url.endswith('.wotbreplay'):
-                    replays.append(attachment.url)
+            guild_settings = get_guild_settings(guild_id, guild_name)
+            if guild_settings.get('status_code') != 200:
+                return
 
-            if replays:
-                rating = 'mBRT1_1A'
-                stats_bot = None
+            enabled_channels = guild_settings.get('enabled_channels')
+            stats = guild_settings.get('stats')
+            guild_is_premium = guild_settings.get('guild_is_premium')
 
-                embed_desc = (
-                    f'React with {self.emoji_02} for a transparent picture\n\
-                     React with {self.emoji_01} for more detailed performance results\n\
-                    ')
+            # Verify channel
+            if str(message.channel.id) in enabled_channels:
+                print('valid message')
 
-                if debug == False:
-                    try:
+                for attachment in attachments:
+                    if attachment.url.endswith('.wotbreplay'):
+                        replays.append(attachment.url)
+
+                if replays:
+                    rating = 'mBRT1_1A'
+                    stats_bot = None
+
+                    embed_desc = (
+                        f'React with {self.emoji_02} for a transparent picture\n\
+                        React with {self.emoji_01} for more detailed performance results\n\
+                        ')
+
+                    if debug == False:
+                        try:
+                            image_file, replay_id, replay_link = get_image(
+                                replays, stats=stats, rating=rating)
+                            embed = discord.Embed(
+                                title='Download replay', url=replay_link, description=embed_desc)
+                            embed.set_footer(text=f"MD5: {replay_id}")
+
+                        except:
+                            image_file = None
+                            embed = discord.Embed()
+                            embed.set_author(name='Aftermath')
+                            embed.add_field(
+                                name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
+
+                        # Send final message
+                        image_message = await message.channel.send(embed=embed, file=image_file)
+                        await image_message.add_reaction(self.emoji_02)
+                        await image_message.add_reaction(self.emoji_01)
+
+                    else:
                         image_file, replay_id, replay_link = get_image(
                             replays, stats=stats, rating=rating)
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
                         embed.set_footer(text=f"MD5: {replay_id}")
-
-                    except:
-                        image_file = None
-                        embed = discord.Embed()
-                        embed.set_author(name='Aftermath')
-                        embed.add_field(
-                            name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
-
-                    # Send final message
-                    image_message = await message.channel.send(embed=embed, file=image_file)
-                    await image_message.add_reaction(self.emoji_02)
-                    await image_message.add_reaction(self.emoji_01)
-
-                else:
-                    image_file, replay_id, replay_link = get_image(
-                        replays, stats=stats, rating=rating)
-                    embed = discord.Embed(
-                        title='Download replay', url=replay_link, description=embed_desc)
-                    embed.set_footer(text=f"MD5: {replay_id}")
-                    await message.channel.send(embed=embed, file=image_file)
-                    return
+                        await message.channel.send(embed=embed, file=image_file)
+                        return
+            else:
+                return
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
