@@ -183,8 +183,10 @@ class blitz_aftermath_replays(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        guild_id = str(payload.guild.id)
-        guild_name = str(payload.guild.name)
+        guild = discord.utils.find(
+            lambda g: g.id == payload.guild_id, self.client.guilds)
+        guild_id = str(guild.id)
+        guild_name = str(guild.name)
         channel = self.client.get_channel(payload.channel_id)
 
         guild_settings = get_guild_settings(guild_id, guild_name)
