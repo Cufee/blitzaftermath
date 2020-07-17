@@ -188,7 +188,6 @@ class blitz_aftermath_replays(commands.Cog):
         guild_id = str(guild.id)
         guild_name = str(guild.name)
         channel = self.client.get_channel(payload.channel_id)
-
         guild_settings = get_guild_settings(guild_id, guild_name)
         if guild_settings.get('status_code') != 200:
             await channel.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
@@ -198,7 +197,7 @@ class blitz_aftermath_replays(commands.Cog):
         stats = guild_settings.get('stats')
         guild_is_premium = guild_settings.get('guild_is_premium')
 
-        if payload.channel_id not in enabled_channels:
+        if str(payload.channel_id) not in enabled_channels:
             return
         else:
             message = await channel.fetch_message(payload.message_id)
