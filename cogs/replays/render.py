@@ -27,6 +27,7 @@ class Render():
             'battle_summary')
         self.replay_id = replay_id
         self.room_type = self.battle_summary.get('room_type')
+        self.room_type_str = self.battle_summary.get('room_type_str')
 
         if self.room_type == 5:
             self.stats = ['damage_rating', 'kill_rating',
@@ -36,6 +37,8 @@ class Render():
         self.room_type = self.battle_summary.get('room_type')
         self.battle_result_num = self.battle_summary.get('battle_result')
         self.map_name = self.replay_data.get('battle_summary').get('map_name')
+        self.mastery_badge = self.replay_data.get(
+            'battle_summary').get('mastery_badge')
         self.battle_start_time = self.battle_summary.get(
             'battle_start_timestamp')
 
@@ -51,7 +54,7 @@ class Render():
             'players').get(str(self.protagonist_id)).get('nickname')
         self.players_data = self.replay_data.get('players')
 
-    def image(self, bg=1, brand=1, darken=1, mapname=1):
+    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1):
         """
         bg - Draw background image \n
         brand - Draw branding \n
@@ -95,6 +98,10 @@ class Render():
         # Height of each player card
         self.image_step = 54
         self.map_name_margin = self.image_step * 2 * mapname
+
+        mastery_badge_size = round(self.image_step * 1.5)
+        self.mastery_badge_margin = (
+            mastery_badge_size * 2 * mapname) + self.image_step
 
         # Width of each player card
         text_check = Image.new('RGBA', (0, 0), (0, 0, 0, 0))
@@ -156,7 +163,7 @@ class Render():
 
         frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
         frame_h = int(((int(len(self.all_players) / 2) + 4))
-                      * self.image_step) + self.map_name_margin
+                      * self.image_step) + self.map_name_margin + self.mastery_badge_margin
 
         frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
         self.image = frame
@@ -227,6 +234,21 @@ class Render():
             self.draw_frame.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
                                  fill=result_font_color, font=self.font_title)
 
+        if mapname == 0 and mastery == 1 and self.mastery_badge > 0:
+            # Draw Mastery badge
+            mastery_badge_icon = Image.open(
+                f'./cogs/replays/render/icons/mastery_badge_{self.mastery_badge}.png')
+            mastery_badge_icon = mastery_badge_icon.resize(
+                (mastery_badge_size, mastery_badge_size))
+
+            self.image_min_h = self.mastery_badge_margin + self.image_step
+            mastery_badge_icon_w = int((self.image_w - mastery_badge_size) / 2)
+            mastery_badge_icon_h = int(
+                (self.image_min_h - mastery_badge_size) / 2)
+
+            self.image.paste(mastery_badge_icon, box=(
+                mastery_badge_icon_w, mastery_badge_icon_h), mask=mastery_badge_icon.split()[3])
+
         step = [0, 0]
         for player in self.all_players:
             step[player.get('team') - 1] += 1
@@ -277,8 +299,9 @@ class Render():
         draw_bot = ImageDraw.Draw(team_card_bot)
 
         # Get map name and battle result text sizes
+        map_name_str = f'{self.map_name} {self.room_type_str}'
         map_name_w, map_name_h = draw_bot.textsize(
-            self.map_name, font=self.font)
+            map_name_str, font=self.font)
         battle_result_w, battle_result_h = draw_bot.textsize(
             self.battle_result, font=self.font)
 
@@ -307,7 +330,7 @@ class Render():
 
         draw_bot.text((battle_result_draw_w, battle_result_draw_h), self.battle_result,
                       self.font_color_base, font=self.font)
-        draw_bot.text((map_name_draw_w, map_name_draw_h), self.map_name,
+        draw_bot.text((map_name_draw_w, map_name_draw_h), map_name_str,
                       self.font_color_base, font=self.font)
 
         protagonist_card_unique = Image.new(
@@ -457,7 +480,7 @@ class Render():
         draw = ImageDraw.Draw(player_card)
 
         # Draw platoons
-        if platoon and self.room_type != 5:
+        if platoon:
             platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()

@@ -6,13 +6,13 @@ import rapidjson
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
+from cogs.api.api import Api
+
+debug = True
+Api = Api()
 
 
-API_URL_BASE = 'http://127.0.0.1:5000'
-debug = False
-
-
-def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=1):
+def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=0):
     # Send replay to WoTInspector
     replays_list_data = Replay(urls).process_replays()
     replay_data = replays_list_data.get(
@@ -26,86 +26,6 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
         replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
 
     return image_file, replay_id, replay_link
-
-
-def get_guild_settings(guild_id, guild_name):
-    url = API_URL_BASE + '/guild/' + guild_id
-    res = requests.get(url)
-    enabled_channels = []
-    stats = []
-
-    # If guild is not found, add it
-    if res.status_code == 404:
-        url = API_URL_BASE + '/guild'
-        guild = {
-            'guild_id': guild_id,
-            'guild_name': guild_name
-        }
-        new_res = requests.post(url, json=guild)
-    elif res.status_code == 200:
-        new_res = res
-    else:
-        new_res = res
-        return {"status_code": new_res.status_code}
-
-    if new_res.status_code == 200:
-        res_dict = rapidjson.loads(new_res.text)
-        enabled_channels_res = res_dict.get('guild_channels_replays')
-        guild_is_premium = res_dict.get('guild_is_premium')
-        guild_name_cache = res_dict.get('guild_name')
-        stats_res = res_dict.get('guild_render_fields')
-
-        if enabled_channels_res:
-            if ';' in enabled_channels_res:
-                enabled_channels = enabled_channels_res.split(';')
-            else:
-                enabled_channels = [enabled_channels_res]
-        if stats_res:
-            if ';' in stats_res:
-                stats = stats_res.split(';')
-            else:
-                stats = [stats_res]
-
-        # Update guild name cache
-        if guild_name_cache != guild_name:
-            url = 'http://127.0.0.1:5000/guild/' + guild_id
-            guild = {
-                'guild_name': guild_name
-            }
-            res = requests.put(url, json=guild)
-
-        new_guild_obj = {
-            "status_code": res.status_code,
-            "enabled_channels": enabled_channels,
-            "guild_is_premium": guild_is_premium,
-            "stats": stats
-        }
-
-        return new_guild_obj
-
-    else:
-        return {"status_code": res.status_code}
-
-
-def update_guild_settins(guild_id, dict):
-    url = API_URL_BASE + '/guild/' + guild_id
-    res = requests.get(url)
-    if res.status_code != 200:
-        return {"status_code": res.status_code}
-    current_settings = rapidjson.loads(res.text)
-    new_settings = {}
-    dict_keys = dict.keys()
-    for key in dict_keys:
-        values = dict.get(key)
-        if isinstance(values, list):
-            values = ';'.join(values)
-        new_settings[key] = values
-
-    put_res = requests.put(url, json=new_settings)
-    if put_res.status_code == 200:
-        return True
-    else:
-        return {"status_code": put_res.status_code}
 
 
 class blitz_aftermath_replays(commands.Cog):
@@ -137,7 +57,7 @@ class blitz_aftermath_replays(commands.Cog):
             guild_id = str(message.guild.id)
             guild_name = str(message.guild.name)
 
-            guild_settings = get_guild_settings(guild_id, guild_name)
+            guild_settings = Api.guild_get(guild_id, guild_name)
             if guild_settings.get('status_code') != 200:
                 return
 
@@ -206,7 +126,7 @@ class blitz_aftermath_replays(commands.Cog):
         guild_id = str(guild.id)
         guild_name = str(guild.name)
         channel = self.client.get_channel(payload.channel_id)
-        guild_settings = get_guild_settings(guild_id, guild_name)
+        guild_settings = Api.guild_get(guild_id, guild_name)
         if guild_settings.get('status_code') != 200:
             await channel.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
             return
@@ -227,11 +147,6 @@ class blitz_aftermath_replays(commands.Cog):
                 image_file, replay_id, replay_link = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
-                # embed = discord.Embed(
-                #     title='Download replay', url=replay_link)
-                # embed.set_footer(text=f"MD5: {replay_id}")
-
-                # stats_message = await channel.send(embed=embed, file=image_file)
                 stats_message = await channel.send(file=image_file)
                 return
 
@@ -271,7 +186,7 @@ class blitz_aftermath_replays(commands.Cog):
         user_id = str(ctx.author.id)
         user = ctx.author
 
-        guild_settings = get_guild_settings(guild_id, guild_name)
+        guild_settings = Api.guild_get(guild_id, guild_name)
         if guild_settings.get('status_code') != 200:
             await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
             return
@@ -298,7 +213,7 @@ class blitz_aftermath_replays(commands.Cog):
             new_enabled_channels = enabled_channels.copy()
             new_enabled_channels.append(channel_id)
             new_settings = {'guild_channels_replays': new_enabled_channels}
-            res = update_guild_settins(guild_id, new_settings)
+            res = Api.guild_put(guild_id, new_settings)
             if res:
                 await ctx.send(f'Roger that! I am now watching #{channel_name} for WoT Blitz replays.', delete_after=30)
                 return
@@ -320,7 +235,7 @@ class blitz_aftermath_replays(commands.Cog):
         user_id = str(ctx.author.id)
         user = ctx.author
 
-        guild_settings = get_guild_settings(guild_id, guild_name)
+        guild_settings = Api.guild_get(guild_id, guild_name)
         if guild_settings.get('status_code') != 200:
             await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
             return
@@ -331,7 +246,7 @@ class blitz_aftermath_replays(commands.Cog):
             new_enabled_channels = enabled_channels.copy()
             new_enabled_channels.remove(channel_id)
             new_settings = {'guild_channels_replays': new_enabled_channels}
-            res = update_guild_settins(guild_id, new_settings)
+            res = Api.guild_put(guild_id, new_settings)
             if res:
                 await ctx.send(f'Roger that! I am not watching #{channel_name} anymore.', delete_after=30)
                 return
@@ -355,13 +270,13 @@ class blitz_aftermath_replays(commands.Cog):
         user_id = str(ctx.author.id)
         user = ctx.author
 
-        guild_settings = get_guild_settings(guild_id, guild_name)
+        guild_settings = Api.guild_get(guild_id, guild_name)
         if guild_settings.get('status_code') != 200:
             await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
             return
 
         new_settings = {'guild_channels_replays': [channel_id]}
-        res = update_guild_settins(guild_id, new_settings)
+        res = Api.guild_put(guild_id, new_settings)
         if res:
             await ctx.send(f'Roger that! I am now watching #{channel_name} for WoT Blitz replays and nothing else!', delete_after=30)
             return

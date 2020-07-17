@@ -55,7 +55,7 @@ class Replay:
         battle_start_time = replay_data.get(
             'summary').get('battle_start_time')
         map_name = replay_data.get('summary').get('map_name')
-        room_type = replay_data.get('summary').get('room_type')
+        room_type = replay_data.get('summary').get('battle_type')
         protagonist = replay_data.get('summary').get('protagonist')
         exp_total = replay_data.get('summary').get('exp_total')
         credits_total = replay_data.get('summary').get('credits_total')
@@ -63,6 +63,12 @@ class Replay:
 
         allies = replay_data.get('summary').get('allies')
         enemies = replay_data.get('summary').get('enemies')
+
+        room_type_str = ''
+        if room_type == 0:
+            room_type_str = '(Encounter)'
+        if room_type == 1:
+            room_type_str = '(Supremacy)'
 
         battle_summary = {
             "protagonist": protagonist,
@@ -77,7 +83,8 @@ class Replay:
             "mastery_badge": mastery_badge,
             "credits_total": credits_total,
             "map_name": map_name,
-            "room_type": room_type
+            "room_type": room_type,
+            "room_type_str": room_type_str
         }
 
         return battle_summary
