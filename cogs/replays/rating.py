@@ -243,7 +243,7 @@ class Rating:
             if player_data.get('performance').get('hitpoints_left') == 0:
                 survived_bool = False
 
-            tank_hp_avg = self.tank_hp_avg[player_team_id]
+            tank_hp_avg = (self.tank_hp_avg[1] + self.tank_hp_avg[0]) / 2
             shots_avg_damage = self.shots_avg_dmg[player_team_id]
             travel_avg = self.average_distance_travelled
 
