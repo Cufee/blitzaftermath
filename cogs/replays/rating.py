@@ -287,7 +287,7 @@ class Rating:
             if lighttank_count == 0:
                 lighttank_count = self.mediumtank_count[player_team_id]
 
-            damage_efficiency = round((((damage_made + damage_assisted) / tank_hp_avg) *
+            damage_efficiency = round((((damage_made) / tank_hp_avg) *
                                        self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('damage_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
@@ -312,7 +312,7 @@ class Rating:
                                         self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('blocked_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
-            track_efficiency = round(((damage_assisted_track / tank_hp_avg) *
+            track_efficiency = round((((damage_assisted_track + damage_assisted) / tank_hp_avg) *
                                       self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('track_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
 
