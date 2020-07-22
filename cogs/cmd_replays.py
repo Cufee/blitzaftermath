@@ -78,9 +78,7 @@ class blitz_aftermath_replays(commands.Cog):
                     stats_bot = None
 
                     embed_desc = (
-                        f'React with {self.emoji_02} for a transparent picture\n\
-                        React with {self.emoji_01} for more detailed performance results\n\
-                        ')
+                        f'React with {self.emoji_02} for a transparent picture\nReact with {self.emoji_01} for a detailed Rating breakdown\n')
 
                     if debug == False:
                         try:

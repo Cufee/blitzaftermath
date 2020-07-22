@@ -13,14 +13,19 @@ class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
         self.convert_to_num = compile(r'[^\d.]')
 
-        self.stats = stats
-        self.stats_bottom = stats_bottom
-
-        # Stats to include for each player by default
-        if not stats:
-            self.stats = ['kills', 'damage', 'player_wr', 'rating']
-        if not stats_bottom:
-            self.stats_bottom = ['kills', 'damage', 'player_wr', 'rating']
+        if stats:
+            self.stats_reversed = stats.copy()
+            stats.reverse()
+            self.stats = stats
+        else:
+            self.stats = ['rating', 'player_wr', 'damage_made', 'kills']
+            self.stats_reversed = self.stats.copy()
+            self.stats_reversed.reverse()
+        if stats_bottom:
+            stats_bottom.reverse()
+            self.stats_bottom = stats_bottom
+        else:
+            self.stats_bottom = ['credits_total', 'exp_total']
 
         self.replay_data = replay_data
         self.battle_summary = self.replay_data.get(
@@ -54,13 +59,16 @@ class Render():
             'players').get(str(self.protagonist_id)).get('nickname')
         self.players_data = self.replay_data.get('players')
 
-    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1):
+    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1, detailed_colors=1):
         """
         bg - Draw background image \n
         brand - Draw branding \n
         darken - Draw dark bg overlay \n
         mapname - Draw map name and result \n
         """
+
+        self.detailed_colors = detailed_colors
+
         self.font_size = 16
         self.font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", self.font_size)
@@ -108,7 +116,6 @@ class Render():
         text_check = ImageDraw.Draw(text_check)
 
         self.all_players = []
-        self.best_rating = 0
         self.team_rating = [0, 0]
         self.longest_name = 0
         self.longest_stat = 0
@@ -116,14 +123,13 @@ class Render():
         self.global_stat_max_width = {}
         self.global_stat_total_width = 0
 
+        self.best_rating = self.replay_data.get('best_rating', None)
+        self.rating_descr = self.replay_data.get('rating_descr', None)
         self.players_data = sorted(
             self.players_data.values(), key=itemgetter('rating_value'), reverse=True)
 
         for player in self.players_data:
             self.all_players.append(player)
-
-            if self.best_rating < player.get('rating_value'):
-                self.best_rating = player.get('rating_value')
 
             full_name = f'{player.get("nickname")} [{player.get("clan_tag")}]'
             vehicle_name = f'{player.get("player_vehicle")}  '
@@ -154,12 +160,17 @@ class Render():
         longest_stat, _ = text_check.textsize(
             f'{self.longest_stat}', self.font)
 
+        total_width = self.platoon_icon_margin
         for stat in self.stats:
-            max_width = self.global_stat_max_width.get(stat) or 0
-            self.global_stat_total_width += (text_w + max_width)
+            stat_value = str(self.best_rating.get(
+                stat, self.players_data[0].get(stat)))
+            text_w, _ = text_check.textsize(stat_value, font=stat_font)
+            offset = (text_w + (self.text_margin_w))
+            total_width += offset
+            print(stat, stat_value, offset, total_width)
 
         self.player_card_w = int(self.platoon_icon_margin + self.longest_name +
-                                 (self.text_margin_w) + self.global_stat_total_width)
+                                 (self.text_margin_w) + total_width)
 
         frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
         frame_h = int(((int(len(self.all_players) / 2) + 4))
@@ -338,10 +349,8 @@ class Render():
         protagonist_card_w, protagonist_card_h = protagonist_card_unique.size
         draw_bot_pr_card = ImageDraw.Draw(protagonist_card_unique)
 
-        bottom_icons = ['credits_total', 'exp_total']
-
         last_icon_pos = 0
-        for icon in bottom_icons:
+        for icon in self.stats_bottom:
             icon_name = icon
             icon_value = self.battle_summary.get(icon_name)
             icon_size = int(team_card_h / 2)
@@ -379,6 +388,50 @@ class Render():
             protagonist_card_draw_w, protagonist_card_draw_h), mask=protagonist_card_unique.split()[3])
         self.image.paste(team_card_bot, box=(
             bot_card_draw_w, bot_card_draw_h), mask=team_card_bot.split()[3])
+
+        # Draw icon key
+        icon_key_card = Image.new(
+            'RGBA', (self.image_w, (self.image_step)), (51, 51, 51, 0))
+        draw_icon_key = ImageDraw.Draw(icon_key_card)
+        icon_key_card_w, icon_key_card_h = icon_key_card.size
+
+        # Draw a name for each icon
+        last_key_icon_pos = 0
+        for icon in self.stats:
+            key_icon_size = int(icon_key_card_h / 2)
+            try:
+                key_icon = Image.open(
+                    f'./cogs/replays/render/icons/{icon}.png')
+            except:
+                key_icon = Image.open(
+                    './cogs/replays/render/icons/default_icon.png')
+            key_icon = key_icon.resize((key_icon_size, key_icon_size))
+
+            key_icon_descr_str = self.rating_descr.get(
+                f'{icon}_descr', 'Unknown')
+            key_icon_descr_w, key_icon_descr_h = draw_bot.textsize(
+                key_icon_descr_str, font=self.bottom_stats_font)
+
+            key_icon_draw_w = last_key_icon_pos
+            key_icon_draw_h = int((icon_key_card_h - key_icon_size) / 2)
+            icon_key_card.paste(key_icon, box=(
+                key_icon_draw_w, key_icon_draw_h), mask=key_icon.split()[3])
+
+            key_descr_draw_w = key_icon_draw_w + icon_size + self.text_margin_w
+            key_descr_draw_h = int((icon_key_card_h - key_icon_descr_h) / 2)
+            draw_icon_key.text((key_descr_draw_w, key_descr_draw_h), key_icon_descr_str,
+                               self.font_color_base, font=self.bottom_stats_font)
+
+            key_icon_budle_width = key_icon_size + key_icon_descr_w
+            last_key_icon_pos += key_icon_budle_width + key_icon_size
+
+        # Paste card to frame
+        icon_key_card_draw_w = int(
+            (icon_key_card_w - (last_key_icon_pos - key_icon_size)) / 2)
+        icon_key_card_draw_h = self.image_h - self.image_step
+        self.image.paste(icon_key_card, box=(
+            icon_key_card_draw_w, icon_key_card_draw_h), mask=icon_key_card.split()[3])
+
         return
 
     def draw_ui_top(self):
@@ -424,7 +477,7 @@ class Render():
                 player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
 
             last_stat_pos = 0
-            for icon in self.stats:
+            for icon in self.stats_reversed:
                 icon_name = icon
                 try:
                     icon = Image.open(
@@ -551,15 +604,15 @@ class Render():
 
         # Render performance stats
         last_stat_pos = 0
-        for stat in self.stats:
-            stat_value_raw = player.get(stat)
+        for stat in self.stats_reversed:
+            stat_value_raw = player.get(stat, -1)
 
             stat_value = stat_value_raw
             if not self.is_number(stat_value_raw):
                 stat_value = self.convert_to_num.sub('', stat_value_raw)
 
             stat_max_width = self.global_stat_max_width.get(
-                stat)
+                stat, 0)
             stat_str = f'{stat_value_raw}'
 
             stat_font = self.get_font(f'{stat}')
@@ -576,8 +629,16 @@ class Render():
             draw.text((stat_draw_w, stat_draw_h), stat_str,
                       stat_font_color, font=stat_font)
 
-            if stat == 'rating':
-                rating_percent = float(stat_value) / self.best_rating * 100
+            # if stat == 'rating':
+            if 'rating' in stat and self.best_rating.get(stat) and float(player.get(stat)) > 0 and self.detailed_colors == 1:
+                best_value = self.best_rating.get(stat)
+
+                best_value_w, _ = draw.textsize(
+                    str(best_value), font=stat_font)
+                stat_str_w, _ = draw.textsize(
+                    stat_str, font=stat_font)
+
+                rating_percent = float(stat_value) / best_value * 100
                 if rating_percent > 90:
                     stat_color = (201, 101, 219)
                 elif rating_percent > 75:
@@ -590,10 +651,10 @@ class Render():
                     stat_color = (219, 109, 101)
 
                 rating_box_w1 = int(
-                    player_card_w - self.text_margin_w - stat_max_width - last_stat_pos) - (self.text_margin_w / 2)
-                rating_box_h1 = stat_draw_h
-                rating_box_w2 = rating_box_w1 - 3
-                rating_box_h2 = rating_box_h1 + stat_text_h + 2
+                    player_card_w - self.text_margin_w - (best_value_w) - last_stat_pos - 1)
+                rating_box_h1 = stat_draw_h + stat_text_h + 3
+                rating_box_w2 = rating_box_w1 + best_value_w + 1
+                rating_box_h2 = rating_box_h1 + 2
 
                 draw.rectangle([(rating_box_w1, rating_box_h1),
                                 (rating_box_w2, rating_box_h2)], fill=stat_color)
