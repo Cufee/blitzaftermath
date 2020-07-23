@@ -144,7 +144,7 @@ class blitz_aftermath_replays(commands.Cog):
                          'shot_rating', 'spotting_rating', 'track_rating', 'blocked_rating']
 
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link = get_image(
+                image_file, replay_id, replay_link, room_type = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
                 stats_message = await channel.send(file=image_file)
@@ -154,7 +154,7 @@ class blitz_aftermath_replays(commands.Cog):
                 print('Sending DM')
                 replays = []
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link = get_image(
+                image_file, replay_id, replay_link, room_type = get_image(
                     replays, bg=0, brand=0, darken=0, mapname=0)
 
                 embed = discord.Embed(
