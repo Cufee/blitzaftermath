@@ -8,7 +8,6 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 from cogs.api.api import Api
 
-debug = True
 Api = Api()
 
 
@@ -22,10 +21,17 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
     replay_data = Rating(
         replay_data).get_brt()
 
+    room_type = replay_data.get(
+            'battle_summary').get('room_type')\
+            if room_type == 5:
+        stats = ['rating', 'time_alive', 'damage_blocked',
+                 'damage_made', 'accuracy']
+        stats_bottom = []
+
     image_file = Render(
         replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
 
-    return image_file, replay_id, replay_link
+    return image_file, replay_id, replay_link, room_type
 
 
 class blitz_aftermath_replays(commands.Cog):
@@ -76,38 +82,33 @@ class blitz_aftermath_replays(commands.Cog):
                 if replays:
                     rating = 'mBRT1_1A'
                     stats_bot = None
-
-                    embed_desc = (
-                        f'React with {self.emoji_02} for a transparent picture\nReact with {self.emoji_01} for a detailed Rating breakdown\n')
-
-                    if debug == False:
-                        try:
-                            image_file, replay_id, replay_link = get_image(
-                                replays, stats=stats, rating=rating)
-                            embed = discord.Embed(
-                                title='Download replay', url=replay_link, description=embed_desc)
-                            embed.set_footer(text=f"MD5: {replay_id}")
-
-                        except:
-                            image_file = None
-                            embed = discord.Embed()
-                            embed.set_author(name='Aftermath')
-                            embed.add_field(
-                                name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
-
-                        # Send final message
-                        image_message = await message.channel.send(embed=embed, file=image_file)
-                        await image_message.add_reaction(self.emoji_02)
-                        await image_message.add_reaction(self.emoji_01)
-
-                    else:
-                        image_file, replay_id, replay_link = get_image(
+                    try:
+                        image_file, replay_id, replay_link, room_type = get_image(
                             replays, stats=stats, rating=rating)
+
+                        embed_desc = (
+                            f'React with {self.emoji_02} for a transparent picture\nReact with {self.emoji_01} for a detailed Rating breakdown\n')
+                        if room_type == 5:
+                            embed_desc = f'React with {self.emoji_02} for a transparent picture'
+
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
                         embed.set_footer(text=f"MD5: {replay_id}")
-                        await message.channel.send(embed=embed, file=image_file)
-                        return
+
+                    except Exception as e:
+                        image_file = None
+                        embed = discord.Embed()
+                        embed.set_author(name='Aftermath')
+                        embed.add_field(
+                            name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
+                        raise Exception(e)
+
+                    # Send final message
+                    image_message = await message.channel.send(embed=embed, file=image_file)
+
+                    await image_message.add_reaction(self.emoji_02)
+                    if room_type != 5:
+                        await image_message.add_reaction(self.emoji_01)
             else:
                 return
 

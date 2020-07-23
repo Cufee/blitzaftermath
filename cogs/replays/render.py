@@ -21,11 +21,6 @@ class Render():
         self.battle_type = self.battle_summary.get('battle_type')
         self.battle_type_str = self.battle_summary.get('battle_type_str')
 
-        if self.room_type == 5:
-            stats = ['rating', 'time_alive', 'damage_blocked',
-                     'damage_made', 'accuracy']
-            stats_bottom = []
-
         if stats:
             self.stats = stats.copy()
             stats.reverse()
@@ -60,7 +55,7 @@ class Render():
             'players').get(str(self.protagonist_id)).get('nickname')
         self.players_data = self.replay_data.get('players')
 
-    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1, detailed_colors=1):
+    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1, detailed_colors=1, hpbars=1):
         """
         bg - Draw background image \n
         brand - Draw branding \n
@@ -69,6 +64,7 @@ class Render():
         """
 
         self.detailed_colors = detailed_colors
+        self.hpbars = hpbars
 
         self.font_size = 16
         self.font = ImageFont.truetype(
@@ -168,7 +164,6 @@ class Render():
             text_w, _ = text_check.textsize(stat_value, font=stat_font)
             offset = (text_w + (self.text_margin_w))
             total_width += offset
-            print(stat, stat_value, offset, total_width)
 
         self.player_card_w = int(self.platoon_icon_margin + self.longest_name +
                                  (self.text_margin_w) + total_width)
@@ -522,6 +517,11 @@ class Render():
         vehicle = player.get('player_vehicle')
         vehicle_battles = player.get('vehicle_battles')
         vehicle_wr = player.get('vehicle_wr')
+        damage_recieved = player.get(
+            'performance').get('damage_received')
+        hp_left = player.get('performance').get('hitpoints_left')
+        total_hp = hp_left + damage_recieved
+        hp_percent = round((hp_left / total_hp), 2)
 
         clan_tag = ''
         if clan:
@@ -533,6 +533,32 @@ class Render():
         player_card_w, player_card_h = player_card.size
 
         draw = ImageDraw.Draw(player_card)
+
+        # Draw HP Bars
+        hp_bar_w = 3 * self.hpbars
+        if self.hpbars == 1:
+            hp_bar_base_color = (100, 100, 100, 200)
+            if team == 1:
+                hp_bar_color = (123, 219, 101, 200)
+            else:
+                hp_bar_color = (219, 109, 101, 200)
+
+            hp_bar_base_h = int((self.font_size * 2))
+            hp_bar_h = int(hp_percent * hp_bar_base_h)
+
+            # Draw HP bars bg
+            hp_bars_base_draw_w1 = self.platoon_icon_margin
+            hp_bars_base_draw_h1 = self.text_margin_h
+            hp_bars_base_draw_w2 = hp_bars_base_draw_w1 + hp_bar_w
+            hp_bars_base_draw_h2 = hp_bars_base_draw_h1 + hp_bar_base_h + 1
+            draw.rectangle([(hp_bars_base_draw_w1, hp_bars_base_draw_h1),
+                            (hp_bars_base_draw_w2, hp_bars_base_draw_h2)], fill=hp_bar_base_color)
+
+            if survived:
+                hp_bars_draw_h1 = hp_bars_base_draw_h2 - hp_bar_h
+                hp_bars_draw_h2 = hp_bars_base_draw_h2
+                draw.rectangle([(hp_bars_base_draw_w1, hp_bars_draw_h1),
+                                (hp_bars_base_draw_w2, hp_bars_draw_h2)], fill=hp_bar_color)
 
         # Draw platoons
         if platoon and self.room_type != 5:
@@ -578,11 +604,11 @@ class Render():
         clan_text_w, clan_text_h = draw.textsize(clan_str, font=name_font)
 
         draw_w = self.platoon_icon_margin
-        tank_draw_w = self.platoon_icon_margin
+        tank_draw_w = int(self.platoon_icon_margin + (hp_bar_w * 3))
         tank_draw_h = self.text_margin_h
-        name_draw_w = self.platoon_icon_margin
+        name_draw_w = int(self.platoon_icon_margin + (hp_bar_w * 3))
         name_draw_h = int(
-            (player_card_h - (tank_text_h + name_text_h + self.text_margin_h)) + tank_text_h)
+            player_card_h - name_text_h - self.text_margin_h)
         clan_draw_w = int(name_draw_w + name_text_w + (self.font_size / 2))
         clan_draw_h = name_draw_h
 

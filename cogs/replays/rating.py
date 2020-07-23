@@ -293,6 +293,7 @@ class Rating:
 
             damage_made = player_data.get(
                 'performance').get('damage_made')
+
             player_rating['damage_made'] = round(damage_made)
 
             kills = player_data.get(
@@ -303,9 +304,12 @@ class Rating:
             tank_name = player_data.get('player_vehicle')
             # Not used, unable to pull vehicle chars without spamming requests to WG API
             tank_hp = 2000
-            travel_avg = 1000  # How long a tank should travel on average
+            travel_avg = self.average_distance_travelled
 
+            damage_recieved = player_data.get(
+                'performance').get('damage_received')
             hp_left = player_data.get('performance').get('hitpoints_left')
+            total_hp = hp_left + damage_recieved
 
             enemies = self.players_lists[0]
             if player_team_id == 0:
