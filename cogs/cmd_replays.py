@@ -101,6 +101,7 @@ class blitz_aftermath_replays(commands.Cog):
                         embed.set_author(name='Aftermath')
                         embed.add_field(
                             name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
+                        embed.set_footer(text=f"Error: {e}")
                         raise Exception(e)
 
                     # Send final message
