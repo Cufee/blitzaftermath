@@ -360,9 +360,12 @@ class Rating:
 
                 player_data[rating_name] = self.eff_multiplyers.get(
                     rating_version).get('string_format').replace('RATING', str(rating_value))
-
-                if len(str(best_rating.get(rating_name, 0))) < len(str(rating_value)):
-                    best_rating[rating_name] = rating_value
+                try:
+                    if best_rating.get(rating_name, 0) < rating_value:
+                        best_rating[rating_name] = rating_value
+                except:
+                    if len(str(best_rating.get(rating_name, 0))) < len(str(rating_value)):
+                        best_rating[rating_name] = rating_value
 
         rating_descr['rating_descr'] = 'Total Rating'
         rating_descr['blocked_rating_descr'] = 'Damage Blocked'
