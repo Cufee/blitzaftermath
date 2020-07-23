@@ -262,7 +262,9 @@ class Rating:
             shots_penetrated = player_data.get(
                 'performance').get('shots_pen')
 
-            player_rating['accuracy'] = f'{shots_penetrated}/{shots_fired}'
+            player_rating['accuracy'] = f'{round(((shots_penetrated / shots_fired) * 100))}%'
+            player_rating['accuracy_value'] = round(
+                ((shots_penetrated / shots_fired) * 100))
 
             time_alive = player_data.get('performance').get('time_alive')
             player_rating['time_alive'] = round((time_alive / 60), 1)
@@ -355,7 +357,6 @@ class Rating:
 
             for rating_name in player_rating:
                 rating_value = player_rating.get(rating_name)
-
                 player_data[f'{rating_name}_value'] = rating_value
 
                 player_data[rating_name] = self.eff_multiplyers.get(
@@ -364,7 +365,7 @@ class Rating:
                     if best_rating.get(rating_name, 0) < rating_value:
                         best_rating[rating_name] = rating_value
                 except:
-                    if len(str(best_rating.get(rating_name, 0))) < len(str(rating_value)):
+                    if best_rating.get(rating_name, 0) < player_rating.get(f'{rating_name}_value'):
                         best_rating[rating_name] = rating_value
 
         rating_descr['rating_descr'] = 'Total Rating'
@@ -372,7 +373,7 @@ class Rating:
         rating_descr['track_rating_descr'] = 'Damage from Spotting'
         rating_descr['spotting_rating_descr'] = 'Spotting'
         rating_descr['shot_rating_descr'] = 'Accuracy'
-        rating_descr['accuracy_descr'] = 'Shots Hit/Pen'
+        rating_descr['accuracy_descr'] = 'Accuracy %'
         rating_descr['travel_rating_descr'] = 'Movement'
         rating_descr['kill_rating_descr'] = 'Kills'
         rating_descr['damage_rating_descr'] = 'Damage'
