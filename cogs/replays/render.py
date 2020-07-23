@@ -13,33 +13,34 @@ class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
         self.convert_to_num = compile(r'[^\d.]')
 
-        if stats:
-            self.stats_reversed = stats.copy()
-            stats.reverse()
-            self.stats = stats
-        else:
-            self.stats = ['rating', 'player_wr', 'damage_made', 'kills']
-            self.stats_reversed = self.stats.copy()
-            self.stats_reversed.reverse()
-        if stats_bottom:
-            stats_bottom.reverse()
-            self.stats_bottom = stats_bottom
-        else:
-            self.stats_bottom = ['credits_total', 'exp_total']
-
         self.replay_data = replay_data
         self.battle_summary = self.replay_data.get(
             'battle_summary')
         self.replay_id = replay_id
         self.room_type = self.battle_summary.get('room_type')
-        self.room_type_str = self.battle_summary.get('room_type_str')
+        self.battle_type = self.battle_summary.get('battle_type')
+        self.battle_type_str = self.battle_summary.get('battle_type_str')
 
         if self.room_type == 5:
-            self.stats = ['damage_rating', 'kill_rating',
-                          'shot_rating', 'spotting_rating', 'track_rating', 'blocked_rating']
+            stats = ['rating', 'time_alive', 'damage_blocked',
+                     'damage_made', 'accuracy']
+            stats_bottom = []
+
+        if stats:
+            self.stats = stats.copy()
+            stats.reverse()
+            self.stats_reversed = stats.copy()
+        else:
+            stats = ['rating', 'player_wr', 'damage_made', 'kills']
+            self.stats = stats.copy()
+            stats.reverse()
+            self.stats_reversed = stats.copy()
+        if stats_bottom:
+            self.stats_bottom = stats_bottom
+        else:
+            self.stats_bottom = ['credits_total', 'exp_total']
 
         # Replay Details
-        self.room_type = self.battle_summary.get('room_type')
         self.battle_result_num = self.battle_summary.get('battle_result')
         self.map_name = self.replay_data.get('battle_summary').get('map_name')
         self.mastery_badge = self.replay_data.get(
@@ -285,6 +286,7 @@ class Render():
         if error_rate < 0:
             raise Exception(
                 'Negative error_rate detected. UI will not render correctly')
+            return
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
@@ -310,7 +312,7 @@ class Render():
         draw_bot = ImageDraw.Draw(team_card_bot)
 
         # Get map name and battle result text sizes
-        map_name_str = f'{self.map_name} {self.room_type_str}'
+        map_name_str = f'{self.map_name} {self.battle_type_str}'
         map_name_w, map_name_h = draw_bot.textsize(
             map_name_str, font=self.font)
         battle_result_w, battle_result_h = draw_bot.textsize(
@@ -488,7 +490,7 @@ class Render():
                 icon = icon.resize((icon_frame_w, icon_frame_h))
                 icon_w, icon_h = icon.size
                 max_width = self.global_stat_max_width.get(
-                    icon_name) or self.global_stat_max_width.get('damage')
+                    icon_name, self.global_stat_max_width.get('damage_made'))
 
                 draw_w = int(
                     ((team_card_w - self.text_margin_w - max_width - last_stat_pos) + ((max_width - icon_w) / 2)))
@@ -533,7 +535,7 @@ class Render():
         draw = ImageDraw.Draw(player_card)
 
         # Draw platoons
-        if platoon:
+        if platoon and self.room_type != 5:
             platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()

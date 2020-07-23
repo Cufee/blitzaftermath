@@ -262,37 +262,40 @@ class Rating:
             shots_penetrated = player_data.get(
                 'performance').get('shots_pen')
 
+            player_rating['accuracy'] = f'{shots_penetrated}/{shots_fired}'
+
             time_alive = player_data.get('performance').get('time_alive')
-            player_rating['time_alive'] = time_alive
+            player_rating['time_alive'] = round((time_alive / 60), 1)
 
             damage_blocked = player_data.get(
                 'performance').get('damage_blocked') or shots_avg_damage * player_data.get(
                 'performance').get('hits_bounced')
-            player_rating['damage_blocked'] = damage_blocked
+            player_rating['damage_blocked'] = round(damage_blocked)
 
             distance_travelled = player_data.get(
                 'performance').get('distance_travelled')
-            player_rating['distance_travelled'] = distance_travelled
+            player_rating['distance_travelled'] = round(distance_travelled)
 
             damage_assisted = player_data.get(
                 'performance').get('damage_assisted')
-            player_rating['damage_assisted'] = damage_assisted
+            player_rating['damage_assisted'] = round(damage_assisted)
 
             damage_assisted_track = player_data.get(
                 'performance').get('damage_assisted_track')
-            player_rating['damage_assisted_track'] = damage_assisted_track
+            player_rating['damage_assisted_track'] = round(
+                damage_assisted_track)
 
             enemies_spotted = player_data.get(
                 'performance').get('enemies_spotted')
-            player_rating['enemies_spotted'] = enemies_spotted
+            player_rating['enemies_spotted'] = round(enemies_spotted)
 
             damage_made = player_data.get(
                 'performance').get('damage_made')
-            player_rating['damage_made'] = damage_made
+            player_rating['damage_made'] = round(damage_made)
 
             kills = player_data.get(
                 'performance').get('enemies_destroyed')
-            player_rating['kills'] = kills
+            player_rating['kills'] = round(kills)
 
             tank_type = player_data.get('player_vehicle_type')
             tank_name = player_data.get('player_vehicle')
@@ -358,7 +361,7 @@ class Rating:
                 player_data[rating_name] = self.eff_multiplyers.get(
                     rating_version).get('string_format').replace('RATING', str(rating_value))
 
-                if best_rating.get(rating_name, 0) < rating_value:
+                if len(str(best_rating.get(rating_name, 0))) < len(str(rating_value)):
                     best_rating[rating_name] = rating_value
 
         rating_descr['rating_descr'] = 'Total Rating'
@@ -366,13 +369,14 @@ class Rating:
         rating_descr['track_rating_descr'] = 'Damage from Spotting'
         rating_descr['spotting_rating_descr'] = 'Spotting'
         rating_descr['shot_rating_descr'] = 'Accuracy'
+        rating_descr['accuracy_descr'] = 'Shots Hit/Pen'
         rating_descr['travel_rating_descr'] = 'Movement'
         rating_descr['kill_rating_descr'] = 'Kills'
         rating_descr['damage_rating_descr'] = 'Damage'
         rating_descr['kills_descr'] = 'Kills'
         rating_descr['damage_made_descr'] = 'Damage Made'
         rating_descr['player_wr_descr'] = 'Winrate'
-        rating_descr['time_alive_descr'] = 'Time Alive'
+        rating_descr['time_alive_descr'] = 'Time Alive (min)'
         rating_descr['damage_blocked_descr'] = 'Damage Blocked'
         rating_descr['distance_travelled_descr'] = 'Distance Travelled'
         rating_descr['damage_assisted_descr'] = 'Damage from Spotting'

@@ -8,7 +8,7 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 from cogs.api.api import Api
 
-debug = False
+debug = True
 Api = Api()
 
 
