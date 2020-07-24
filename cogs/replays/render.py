@@ -115,6 +115,7 @@ class Render():
         text_check = ImageDraw.Draw(text_check)
 
         self.all_players = []
+        self.team_length_all = [0, 0]
         self.team_rating = [0, 0]
         self.longest_name = 0
         self.longest_stat = 0
@@ -145,8 +146,10 @@ class Render():
 
             if player.get('team') == 2:
                 self.team_rating[1] += player.get('rating_value')
+                self.team_length_all[1] += 1
             else:
                 self.team_rating[0] += player.get('rating_value')
+                self.team_length_all[0] += 1
 
             for stat in self.stats:
                 stat_font = self.get_font(None)
@@ -158,6 +161,11 @@ class Render():
 
         longest_stat, _ = text_check.textsize(
             f'{self.longest_stat}', self.font)
+
+        if self.team_length_all[0] > self.team_length_all[1]:
+            self.larger_team = self.team_length_all[0]
+        else:
+            self.larger_team = self.team_length_all[1]
 
         total_width = self.platoon_icon_margin
         for stat in self.stats:
@@ -171,7 +179,7 @@ class Render():
                                  (self.text_margin_w) + total_width)
 
         frame_w = (self.player_card_w * 2) + (player_card_margin * 3)
-        frame_h = int(((int(len(self.all_players) / 2) + 4))
+        frame_h = int((ceil((len(self.all_players) / 2) + 4))
                       * self.image_step) + self.map_name_margin + self.mastery_badge_margin
 
         frame = Image.new('RGBA', (frame_w, frame_h), (0, 0, 0, 0))
@@ -184,7 +192,7 @@ class Render():
         # Margin from frame border
         self.image_min_w = int((self.image_w - (self.player_card_w * 2)) / 3)
         self.image_min_h = int(
-            (frame_h - ((len(self.all_players) / 2) + 2) * self.image_step) / 2)
+            (frame_h - (ceil((self.larger_team) + 2)) * self.image_step) / 2)
 
         self.enemy_team_offset_w = self.player_card_w + self.image_min_w
 
@@ -303,7 +311,7 @@ class Render():
         bot_team_card_w, bot_team_card_h = team_card_bot.size
         bot_card_draw_w = self.image_min_w
         bot_card_draw_h = self.image_min_h + \
-            (self.image_step * (ceil((len(self.all_players) / 2) + 1)))
+            (self.image_step * (ceil((self.larger_team) + 1)))
 
         # Draw bottom battle results
         draw_bot = ImageDraw.Draw(team_card_bot)
