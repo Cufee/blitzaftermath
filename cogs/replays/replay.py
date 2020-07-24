@@ -22,6 +22,7 @@ class Replay:
 
         self.battle_type_key = {
             1: 'Regular Battle',
+            2: 'Training Room',
             5: 'Tournament',
             7: 'Rating',
             24: 'Gravity Force',
@@ -73,9 +74,9 @@ class Replay:
         enemies = replay_data.get('summary').get('enemies')
 
         battle_type_str = ''
-        if room_type == 0:
+        if battle_type == 0:
             battle_type_str = '(Encounter)'
-        if room_type == 1:
+        if battle_type == 1:
             battle_type_str = '(Supremacy)'
 
         battle_summary = {

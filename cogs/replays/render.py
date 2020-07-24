@@ -23,6 +23,11 @@ class Render():
         self.battle_type = self.battle_summary.get('battle_type')
         self.battle_type_str = self.battle_summary.get('battle_type_str')
 
+        # Disable some UI when in special battle modes, like Training rooms
+        self.room_type_mod = 1
+        if self.room_type == 2 or self.room_type == 7:
+            self.room_type_mod = 0
+
         if stats:
             self.stats = stats.copy()
             stats.reverse()
@@ -32,10 +37,13 @@ class Render():
             self.stats = stats.copy()
             stats.reverse()
             self.stats_reversed = stats.copy()
+
         if stats_bottom:
             self.stats_bottom = stats_bottom
-        else:
+        elif not stats_bottom and self.room_type_mod == 1:
             self.stats_bottom = ['credits_total', 'exp_total']
+        else:
+            self.stats_bottom = []
 
         # Replay Details
         self.battle_result_num = self.battle_summary.get('battle_result')
@@ -101,7 +109,8 @@ class Render():
         self.text_margin_w = self.font_size
         self.text_margin_h = 5
         # Will bhe devided by 2
-        self.platoon_icon_margin = 28
+        self.platoon_icon_margin = self.text_margin_w + \
+            ((28 - self.text_margin_w) * (self.room_type_mod))
         # Height of each player card
         self.image_step = 54
         self.map_name_margin = self.image_step * 2 * mapname
@@ -304,6 +313,7 @@ class Render():
     def draw_ui_bot(self):
         team_card_w = (self.player_card_w * 2) + self.image_min_w
         team_card_h = self.image_step - (self.text_margin_h * 2)
+        icon_size = int(team_card_h / 2)
 
         # Draw bottom team card
         team_card_bot = Image.new(
@@ -360,7 +370,6 @@ class Render():
         for icon in self.stats_bottom:
             icon_name = icon
             icon_value = self.battle_summary.get(icon_name)
-            icon_size = int(team_card_h / 2)
             stat_value = str(self.battle_summary.get(icon))
 
             icon = Image.open(f'./cogs/replays/render/icons/{icon_name}.png')
@@ -388,11 +397,12 @@ class Render():
 
         # Add bottom card to UI
         protagonist_card_draw_w = int(
-            (bot_team_card_w - (last_icon_pos - icon_w)) / 2)
+            (bot_team_card_w - (last_icon_pos - icon_size)) / 2)
         protagonist_card_draw_h = 0
 
         team_card_bot.paste(protagonist_card_unique, box=(
             protagonist_card_draw_w, protagonist_card_draw_h), mask=protagonist_card_unique.split()[3])
+
         self.image.paste(team_card_bot, box=(
             bot_card_draw_w, bot_card_draw_h), mask=team_card_bot.split()[3])
 
@@ -571,7 +581,7 @@ class Render():
                                 (hp_bars_base_draw_w2, hp_bars_draw_h2)], fill=hp_bar_color)
 
         # Draw platoons
-        if platoon and self.room_type != 5 and self.room_type != 7:
+        if platoon and self.room_type_mod == 1:
             platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()

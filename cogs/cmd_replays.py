@@ -24,15 +24,17 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
 
     room_type = replay_data.get(
         'battle_summary').get('room_type')
-    if room_type == 5:
+    room_type_mod = 0
+    if room_type == 5 or room_type == 2:
         stats = ['rating', 'time_alive', 'damage_blocked',
                  'damage_made', 'accuracy']
         stats_bottom = []
+        room_type_mod = 1
 
     image_file = Render(
         replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
 
-    return image_file, replay_id, replay_link, room_type
+    return image_file, replay_id, replay_link, room_type_mod
 
 
 class blitz_aftermath_replays(commands.Cog):
@@ -84,13 +86,12 @@ class blitz_aftermath_replays(commands.Cog):
                     rating = 'mBRT1_1A'
                     stats_bot = None
                     try:
-                        image_file, replay_id, replay_link, room_type = get_image(
+                        image_file, replay_id, replay_link, room_type_mod = get_image(
                             replays, stats=stats, rating=rating)
 
-                        embed_desc = (
-                            f'React with {self.emoji_02} for a transparent picture\nReact with {self.emoji_01} for a detailed Rating breakdown\n')
-                        if room_type == 5:
-                            embed_desc = f'React with {self.emoji_02} for a transparent picture'
+                        embed_desc = f'React with {self.emoji_02} for a transparent picture'
+                        if room_type_mod == 0:
+                            embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
 
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
@@ -100,7 +101,7 @@ class blitz_aftermath_replays(commands.Cog):
                         image_message = await message.channel.send(embed=embed, file=image_file)
 
                         await image_message.add_reaction(self.emoji_02)
-                        if room_type != 5:
+                        if room_type_mod == 0:
                             await image_message.add_reaction(self.emoji_01)
 
                     except Exception as e:
@@ -151,7 +152,7 @@ class blitz_aftermath_replays(commands.Cog):
                          'shot_rating', 'spotting_rating', 'track_rating', 'blocked_rating']
 
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, room_type = get_image(
+                image_file, replay_id, replay_link, room_type_mod = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
                 stats_message = await channel.send(file=image_file)
@@ -161,7 +162,7 @@ class blitz_aftermath_replays(commands.Cog):
                 print('Sending DM')
                 replays = []
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, room_type = get_image(
+                image_file, replay_id, replay_link, room_type_mod = get_image(
                     replays, bg=0, brand=0, darken=0, mapname=0)
 
                 embed = discord.Embed(
