@@ -21,11 +21,14 @@ class Replay:
         self.replays = {}
 
         self.room_type_key = {
+            0: 'Unknown',
             1: 'Regular Battle',
             2: 'Training Room',
             4: 'Tournament Battle',
             5: 'Tournament Battle',
             7: 'Rating Battle',
+            8: 'Mad Games',
+            22: 'Realistic Battle',
             24: 'Gravity Force',
         }
         # Will default to extended results screen
@@ -68,7 +71,7 @@ class Replay:
         map_name = replay_data.get('summary').get('map_name')
         room_type = replay_data.get('summary').get('room_type')
         room_type_str = self.room_type_key.get(
-            int(room_type), 'Special Battle')
+            int(room_type), 'Missing, please report')
         protagonist = replay_data.get('summary').get('protagonist')
         exp_total = replay_data.get('summary').get('exp_total')
         credits_total = replay_data.get('summary').get('credits_total')

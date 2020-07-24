@@ -190,26 +190,36 @@ class Rating:
 
         self.average_vehicle_alpha_efficiency = 0
         self.average_distance_travelled = 0
+        self.team_points_total = [300, 300]
 
         for player in self.replay_data.get('players'):
             player_data = self.replay_data.get('players').get(player)
 
             player_team = player_data.get('team') - 1
+            if player_team == 0:
+                enemy_team = 1
+            else:
+                enemy_team = 0
+
+            self.team_points_total[player_team] += player_data.get(
+                'performance').get('wp_points_earned') or 0
+            self.team_points_total[enemy_team] -= player_data.get(
+                'performance').get('wp_points_stolen') or 0
 
             self.total_dmg[player_team] += player_data.get(
-                'performance').get('damage_made')
+                'performance').get('damage_made') or 0
 
             self.damage_recieved[player_team] += player_data.get(
-                'performance').get('damage_received')
+                'performance').get('damage_received') or 0
             self.total_shots[player_team] += player_data.get(
-                'performance').get('shots_pen')
+                'performance').get('shots_pen') or 0
             self.tatal_shots_made[player_team] += player_data.get(
-                'performance').get('shots_made')
+                'performance').get('shots_made') or 0
 
             self.average_vehicle_alpha_efficiency += player_data.get(
-                'vehicle_alpha_efficiency')
+                'vehicle_alpha_efficiency') or 0
             self.average_distance_travelled += player_data.get(
-                'performance').get('distance_travelled')
+                'performance').get('distance_travelled') or 0
 
             if player_data.get('player_vehicle_type') == 'lightTank':
                 self.lighttank_count[player_team] += 1
@@ -243,6 +253,11 @@ class Rating:
         self.avg_damage = (
             self.total_dmg[0] + self.total_dmg[1]) / self.players_count
 
+        self.team_points = {
+            0: self.team_points_total[0],
+            1: self.team_points_total[1],
+        }
+
     def get_brt(self, rating_version='mBRT1_1'):
         best_rating = {}
         rating_descr = {}
@@ -265,18 +280,23 @@ class Rating:
             shots_avg_damage = self.shots_avg_dmg[player_team_id]
             travel_avg = self.average_distance_travelled
 
-            shots_fired = player_data.get('performance').get('shots_made')
+            shots_fired = player_data.get('performance').get('shots_made') or 1
             if shots_fired == 0:
                 shots_fired = 1
 
             shots_penetrated = player_data.get(
-                'performance').get('shots_pen', 0)
+                'performance').get('shots_pen') or 0
 
             player_rating['accuracy'] = f'{round(((shots_penetrated / shots_fired) * 100))}%'
             player_rating['accuracy_value'] = round(
                 ((shots_penetrated / shots_fired) * 100))
 
-            time_alive = player_data.get('performance').get('time_alive', 0)
+            player_rating['wp_points_earned'] = player_data.get(
+                'performance').get('wp_points_earned') or 0
+            player_rating['wp_points_stolen'] = player_data.get(
+                'performance').get('wp_points_stolen') or 0
+
+            time_alive = player_data.get('performance').get('time_alive') or 0
             player_rating['time_alive'] = round((time_alive / 60), 1)
 
             damage_blocked = player_data.get(
@@ -317,8 +337,8 @@ class Rating:
             travel_avg = self.average_distance_travelled
 
             damage_recieved = player_data.get(
-                'performance').get('damage_received', 1)
-            hp_left = player_data.get('performance').get('hitpoints_left', 1)
+                'performance').get('damage_received') or 1
+            hp_left = player_data.get('performance').get('hitpoints_left') or 1
             total_hp = hp_left + damage_recieved
 
             enemies = self.players_lists[0]
@@ -400,8 +420,11 @@ class Rating:
         rating_descr['damage_assisted_descr'] = 'Damage from Spotting'
         rating_descr['damage_assisted_track_descr'] = 'Damage from Tracking'
         rating_descr['enemies_spotted_descr'] = 'Vehicles Spotted'
+        rating_descr['wp_points_earned_descr'] = 'Points Earned'
+        rating_descr['wp_points_stolen_descr'] = 'Points Denied'
 
         self.replay_data['best_rating'] = best_rating
+        self.replay_data['team_points'] = self.team_points
         self.replay_data['rating_descr'] = rating_descr
         # print(dumps(self.replay_data, indent=2))
 

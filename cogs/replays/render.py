@@ -135,6 +135,7 @@ class Render():
         self.global_stat_max_width = {}
         self.global_stat_total_width = 0
 
+        self.team_points = self.replay_data.get('team_points', {0: 0, 1: 0})
         self.best_rating = self.replay_data.get('best_rating', None)
         self.rating_descr = self.replay_data.get('rating_descr', None)
         self.players_data = sorted(
@@ -470,6 +471,7 @@ class Render():
 
         for team in [0, 1]:
             team_rating = self.team_rating[team]
+
             team_offs = self.image_min_w + \
                 (self.enemy_team_offset_w * team)
 
@@ -479,6 +481,7 @@ class Render():
             team_card = Image.new(
                 'RGBA', (card_width, (card_height)), (0, 0, 0, 0))
             team_card_w, team_card_h = team_card.size
+            team_card_draw = ImageDraw.Draw(team_card)
 
             icon_frame_w = icon_frame_h = int(
                 (card_height * 2 / 3) - self.text_margin_h)
@@ -493,6 +496,16 @@ class Render():
 
             player_list_draw_w = self.platoon_icon_margin
             icons_draw_h = int((team_card_h - player_list_h) / 2)
+
+            # Draw Team points if battle type is Supremacy
+            if self.battle_type == 1:
+                team_points = f'Points: {self.team_points.get(team)}'
+                points_w, points_h = team_card_draw.textsize(
+                    team_points, font=self.bottom_stats_font)
+                points_draw_w = player_list_draw_w + player_list_w + self.text_margin_w
+                points_draw_h = int((team_card_h - points_h) / 2)
+                team_card_draw.text((points_draw_w, points_draw_h), team_points,
+                                    self.font_color_base, font=self.bottom_stats_font)
 
             team_card.paste(player_list, box=(
                 player_list_draw_w, icons_draw_h), mask=player_list.split()[3])
