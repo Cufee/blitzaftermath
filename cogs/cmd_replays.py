@@ -115,7 +115,7 @@ class blitz_aftermath_replays(commands.Cog):
                         # Report the error
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n{replays}\n```{e}```')
+                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n{replays}\n```{e}```', delete_after=60)
             else:
                 return
 
