@@ -115,9 +115,10 @@ class blitz_aftermath_replays(commands.Cog):
                         await message.channel.send(embed=embed, file=image_file, delete_after=60)
 
                         # Report the error
+                        channel_invite = await message.channel.create_invite(max_age=300)
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```')
+                        await dm_channel.send(f'An error occured in {guild_name} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
             else:
                 return
 
