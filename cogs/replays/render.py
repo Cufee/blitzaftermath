@@ -23,10 +23,12 @@ class Render():
         self.room_type_str = f'({self.battle_summary.get("room_type_str")})'
         self.battle_type = self.battle_summary.get('battle_type')
         self.battle_type_str = self.battle_summary.get('battle_type_str')
+        self.special_room_types = self.battle_summary.get(
+            'special_room_types', [])
 
         # Disable some UI when in special battle modes, like Training rooms
         self.room_type_mod = 1
-        if self.room_type == 2 or self.room_type == 7 or self.room_type == 5:
+        if self.room_type in self.special_room_types:
             self.room_type_mod = 0
 
         if stats:

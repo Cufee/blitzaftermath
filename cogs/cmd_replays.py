@@ -25,7 +25,10 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
     room_type = replay_data.get(
         'battle_summary').get('room_type')
     room_type_mod = 0
-    if room_type == 5 or room_type == 2:
+    special_room_types = replay_data.get(
+        'battle_summary').get(
+        'special_room_types', [])
+    if room_type in special_room_types:
         stats = ['rating', 'time_alive', 'damage_blocked',
                  'damage_made', 'accuracy']
         stats_bottom = []

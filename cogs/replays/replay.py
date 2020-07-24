@@ -23,10 +23,13 @@ class Replay:
         self.room_type_key = {
             1: 'Regular Battle',
             2: 'Training Room',
+            4: 'Tournament Battle',
             5: 'Tournament Battle',
             7: 'Rating Battle',
             24: 'Gravity Force',
         }
+        # Will default to extended results screen
+        self.special_room_types = [2, 4, 5, 7]
 
     def process_replays(self):
         for url in self.api_urls:
@@ -94,6 +97,7 @@ class Replay:
             "map_name": map_name,
             "room_type": room_type,
             "room_type_str": room_type_str,
+            "special_room_types": self.special_room_types,
             "battle_type": battle_type,
             "battle_type_str": battle_type_str,
         }
