@@ -95,21 +95,27 @@ class blitz_aftermath_replays(commands.Cog):
                             title='Download replay', url=replay_link, description=embed_desc)
                         embed.set_footer(text=f"MD5: {replay_id}")
 
+                        # Send final message
+                        image_message = await message.channel.send(embed=embed, file=image_file)
+
+                        await image_message.add_reaction(self.emoji_02)
+                        if room_type != 5:
+                            await image_message.add_reaction(self.emoji_01)
+
                     except Exception as e:
                         image_file = None
                         embed = discord.Embed()
                         embed.set_author(name='Aftermath')
                         embed.add_field(
-                            name="Something failed...", value="I ran into an issue processing this replay, please let @Vovko know :)", inline=False)
-                        embed.set_footer(text=f"Error: {e}")
-                        raise Exception(e)
+                            name="Something failed...", value="This may occur when a replay file is incomplete or Wargaming API is not accessible, please try again in a few minutes.", inline=False)
+                        embed.set_footer(
+                            text=f"I ran into an issue processing this replay, this will be reported automatically.")
+                        await message.channel.send(embed=embed, file=image_file)
 
-                    # Send final message
-                    image_message = await message.channel.send(embed=embed, file=image_file)
-
-                    await image_message.add_reaction(self.emoji_02)
-                    if room_type != 5:
-                        await image_message.add_reaction(self.emoji_01)
+                        # Report the error
+                        owner_member = self.client.get_user(202905960405139456)
+                        dm_channel = await owner_member.create_dm()
+                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n{replays}\n```{e}```')
             else:
                 return
 
