@@ -2,6 +2,7 @@ from discord.ext import commands, tasks
 import discord
 import requests
 import rapidjson
+import traceback
 
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
@@ -115,7 +116,7 @@ class blitz_aftermath_replays(commands.Cog):
                         # Report the error
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n{replays}\n```{e}```', delete_after=60)
+                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```', delete_after=60)
             else:
                 return
 

@@ -20,6 +20,13 @@ class Replay:
 
         self.replays = {}
 
+        self.battle_type_key = {
+            1: 'Regular Battle',
+            5: 'Tournament',
+            7: 'Rating',
+            24: 'Gravity Force',
+        }
+
     def process_replays(self):
         for url in self.api_urls:
             replay_data = rapidjson.loads(requests.get(url).text)
@@ -55,8 +62,8 @@ class Replay:
         battle_start_time = replay_data.get(
             'summary').get('battle_start_time')
         map_name = replay_data.get('summary').get('map_name')
-        battle_type = replay_data.get('summary').get('battle_type')
         room_type = replay_data.get('summary').get('room_type')
+        room_type_name = self.battle_type_key.get(int(room_type), None)
         protagonist = replay_data.get('summary').get('protagonist')
         exp_total = replay_data.get('summary').get('exp_total')
         credits_total = replay_data.get('summary').get('credits_total')

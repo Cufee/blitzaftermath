@@ -217,6 +217,12 @@ class Rating:
             if player_data.get('player_vehicle_type') == 'mediumTank':
                 self.mediumtank_count[player_team] += 1
 
+        # Handle future 0 Division errors
+        if len(self.players_lists[0]) == 0 or len(self.players_lists[1]) == 0:
+            self.avg_damage_recieved = [0, 0]
+        if self.total_shots[0] == 0 or self.total_shots[1] == 0:
+            self.total_shots = [1, 1]
+
         self.average_vehicle_alpha_efficiency = self.average_vehicle_alpha_efficiency / \
             self.players_count
         self.average_distance_travelled = self.average_distance_travelled / self.players_count
