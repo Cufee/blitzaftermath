@@ -229,27 +229,6 @@ class Render():
             self.draw_frame = ImageDraw.Draw(self.image)
 
         if brand == 1:
-            # branding_w = int((frame_w - frame_w) / 2)
-            # branding_h = int((frame_h - frame_h) / 2)
-            # overlay_brand_am = Image.open(
-            #     './cogs/replays/render/aftermath_frame.png')
-            # try:
-            #     overlay_brand_wi = Image.open(
-            #         './cogs/replays/render/wot_inspector.png')
-            #     raw_brand_wi_w, raw_brand_wi_h = overlay_brand_wi.size
-            #     brand_ratio = raw_brand_wi_h / raw_brand_wi_w
-            #     overlay_brand_wi.resize(
-            #         (int(raw_brand_wi_w * brand_ratio), (raw_brand_wi_h * brand_ratio)))
-
-            #     overlay_brand_wi_w, overlay_brand_wi_h = overlay_brand_wi.size
-            #     print(brand_ratio, overlay_brand_wi_w, overlay_brand_wi_h)
-            #     wi_branding_w = self.text_margin_w
-            #     wi_branding_h = frame_h - overlay_brand_wi_h - self.text_margin_h
-            #     self.image.paste(overlay_brand_wi, box=(
-            #         wi_branding_w, wi_branding_h), mask=overlay_brand_wi.split()[3])
-            # except:
-            #     pass
-
             overlay_brand_wi = Image.open(
                 './cogs/replays/render/wot_inspector.png')
             raw_brand_wi_w, raw_brand_wi_h = overlay_brand_wi.size
