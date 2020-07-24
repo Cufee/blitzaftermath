@@ -20,12 +20,13 @@ class Render():
             'battle_summary')
         self.replay_id = replay_id
         self.room_type = self.battle_summary.get('room_type')
+        self.room_type_str = f'({self.battle_summary.get("room_type_str")})'
         self.battle_type = self.battle_summary.get('battle_type')
         self.battle_type_str = self.battle_summary.get('battle_type_str')
 
         # Disable some UI when in special battle modes, like Training rooms
         self.room_type_mod = 1
-        if self.room_type == 2 or self.room_type == 7:
+        if self.room_type == 2 or self.room_type == 7 or self.room_type == 5:
             self.room_type_mod = 0
 
         if stats:
@@ -247,7 +248,7 @@ class Render():
             if self.battle_result_num == 2:
                 result_font_color = self.font_color_base
 
-            battle_result_str = f'{self.battle_result}'
+            battle_result_str = {self.battle_result}
             result_text_w, result_text_h = self.draw_frame.textsize(
                 battle_result_str, font=self.font_title)
 
@@ -328,10 +329,11 @@ class Render():
 
         # Get map name and battle result text sizes
         map_name_str = f'{self.map_name} {self.battle_type_str}'
+        battle_result_str = f'{self.battle_result} {self.room_type_str}'
         map_name_w, map_name_h = draw_bot.textsize(
             map_name_str, font=self.font)
         battle_result_w, battle_result_h = draw_bot.textsize(
-            self.battle_result, font=self.font)
+            battle_result_str, font=self.font)
 
         # Get battle start time text sizes
         battle_date, battle_time = self.battle_start_time.split(' ')
@@ -356,7 +358,7 @@ class Render():
         draw_bot.text((battle_time_draw_w, battle_time_draw_h), battle_time,
                       self.font_color_base, font=self.font)
 
-        draw_bot.text((battle_result_draw_w, battle_result_draw_h), self.battle_result,
+        draw_bot.text((battle_result_draw_w, battle_result_draw_h), battle_result_str,
                       self.font_color_base, font=self.font)
         draw_bot.text((map_name_draw_w, map_name_draw_h), map_name_str,
                       self.font_color_base, font=self.font)

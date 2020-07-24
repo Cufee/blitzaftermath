@@ -20,11 +20,11 @@ class Replay:
 
         self.replays = {}
 
-        self.battle_type_key = {
+        self.room_type_key = {
             1: 'Regular Battle',
             2: 'Training Room',
-            5: 'Tournament',
-            7: 'Rating',
+            5: 'Tournament Battle',
+            7: 'Rating Battle',
             24: 'Gravity Force',
         }
 
@@ -64,7 +64,8 @@ class Replay:
             'summary').get('battle_start_time')
         map_name = replay_data.get('summary').get('map_name')
         room_type = replay_data.get('summary').get('room_type')
-        room_type_name = self.battle_type_key.get(int(room_type), None)
+        room_type_str = self.room_type_key.get(
+            int(room_type), 'Special Battle')
         protagonist = replay_data.get('summary').get('protagonist')
         exp_total = replay_data.get('summary').get('exp_total')
         credits_total = replay_data.get('summary').get('credits_total')
@@ -85,7 +86,6 @@ class Replay:
             "allies": allies,
             "winner_team": winner_team,
             "battle_result": battle_result,
-            "battle_type": battle_type,
             "battle_duration": self.battle_duration,
             "battle_start_timestamp": battle_start_time,
             "exp_total": exp_total,
@@ -93,8 +93,9 @@ class Replay:
             "credits_total": credits_total,
             "map_name": map_name,
             "room_type": room_type,
+            "room_type_str": room_type_str,
             "battle_type": battle_type,
-            "battle_type_str": battle_type_str
+            "battle_type_str": battle_type_str,
         }
 
         return battle_summary
