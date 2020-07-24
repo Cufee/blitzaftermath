@@ -167,7 +167,7 @@ class blitz_aftermath_replays(commands.Cog):
                 replays = []
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link, room_type_mod = get_image(
-                    replays, bg=0, brand=0, darken=0, mapname=0)
+                    replays, bg=0, brand=1, darken=0, mapname=0)
 
                 embed = discord.Embed(
                     title='Download replay', url=replay_link)

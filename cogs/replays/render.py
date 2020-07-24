@@ -229,12 +229,39 @@ class Render():
             self.draw_frame = ImageDraw.Draw(self.image)
 
         if brand == 1:
-            branding_w = int((frame_w - frame_w) / 2)
-            branding_h = int((frame_h - frame_h) / 2)
-            overlay_brand_am = Image.open(
-                './cogs/replays/render/aftermath_frame.png')
-            frame.paste(overlay_brand_am, box=(
-                branding_w, branding_h), mask=overlay_brand_am.split()[3])
+            # branding_w = int((frame_w - frame_w) / 2)
+            # branding_h = int((frame_h - frame_h) / 2)
+            # overlay_brand_am = Image.open(
+            #     './cogs/replays/render/aftermath_frame.png')
+            # try:
+            #     overlay_brand_wi = Image.open(
+            #         './cogs/replays/render/wot_inspector.png')
+            #     raw_brand_wi_w, raw_brand_wi_h = overlay_brand_wi.size
+            #     brand_ratio = raw_brand_wi_h / raw_brand_wi_w
+            #     overlay_brand_wi.resize(
+            #         (int(raw_brand_wi_w * brand_ratio), (raw_brand_wi_h * brand_ratio)))
+
+            #     overlay_brand_wi_w, overlay_brand_wi_h = overlay_brand_wi.size
+            #     print(brand_ratio, overlay_brand_wi_w, overlay_brand_wi_h)
+            #     wi_branding_w = self.text_margin_w
+            #     wi_branding_h = frame_h - overlay_brand_wi_h - self.text_margin_h
+            #     self.image.paste(overlay_brand_wi, box=(
+            #         wi_branding_w, wi_branding_h), mask=overlay_brand_wi.split()[3])
+            # except:
+            #     pass
+
+            overlay_brand_wi = Image.open(
+                './cogs/replays/render/wot_inspector.png')
+            raw_brand_wi_w, raw_brand_wi_h = overlay_brand_wi.size
+            brand_ratio = (self.image_step / 2) / raw_brand_wi_h
+            overlay_brand_wi = overlay_brand_wi.resize(
+                (int(raw_brand_wi_w * brand_ratio), int((raw_brand_wi_h * brand_ratio))))
+            overlay_brand_wi_w, overlay_brand_wi_h = overlay_brand_wi.size
+
+            wi_branding_h = self.text_margin_w
+            wi_branding_w = frame_w - wi_branding_h - overlay_brand_wi_w
+            self.image.paste(overlay_brand_wi, box=(
+                wi_branding_w, wi_branding_h), mask=overlay_brand_wi.split()[3])
 
         if darken == 1:
             overlay_dark = Image.new(
@@ -499,7 +526,7 @@ class Render():
 
             # Draw Team points if battle type is Supremacy
             if self.battle_type == 1:
-                team_points = f'Points: {self.team_points.get(team)}'
+                team_points = f'Points: ~{self.team_points.get(team)}'
                 points_w, points_h = team_card_draw.textsize(
                     team_points, font=self.bottom_stats_font)
                 points_draw_w = player_list_draw_w + player_list_w + self.text_margin_w
