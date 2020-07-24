@@ -32,11 +32,15 @@ class Replay:
             24: 'Gravity Force',
         }
         # Will default to extended results screen
-        self.special_room_types = [2, 4, 5, 7]
+        self.special_room_types = [2, 4, 5]
 
     def process_replays(self):
         for url in self.api_urls:
             replay_data = rapidjson.loads(requests.get(url).text)
+
+            if not replay_data:
+                raise Exception('Unable to reach WoTInspector API')
+
             replay_id = replay_data.get('data').get(
                 'view_url').replace(self.base_view_url, '')
 
@@ -125,6 +129,9 @@ class Replay:
         players_stats = rapidjson.loads(requests.get(
             wg_api_domain + self.wg_api_url_end + player_ids_all_str).text).get('data')
 
+        if not players_stats:
+            raise Exception('Unable to reach WG API (Fetching player data)')
+
         # Get all vehicle data from WG API
         vehicles_all = []
         for player in players_all:
@@ -135,6 +142,9 @@ class Replay:
                                      for vehicle in vehicles_all))
         vehicles_all_data = rapidjson.loads(requests.get(
             wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str).text).get('data')
+
+        if not vehicles_all_data:
+            raise Exception('Unable to reach WG API (Fetching vehicle data)')
 
         for player in players_all:
             player_id = str(player.get('dbid'))
