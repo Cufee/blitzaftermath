@@ -218,8 +218,10 @@ class Rating:
                 self.mediumtank_count[player_team] += 1
 
         # Handle future 0 Division errors
-        if len(self.players_lists[0]) == 0 or len(self.players_lists[1]) == 0:
-            self.avg_damage_recieved = [0, 0]
+        if len(self.players_lists[1]) == 0:
+            self.players_lists = [
+                [self.players_lists[0]], ['NA']]
+
         if self.total_shots[0] == 0 or self.total_shots[1] == 0:
             self.total_shots = [1, 1]
 
@@ -258,6 +260,8 @@ class Rating:
                 survived_bool = False
 
             tank_hp_avg = (self.tank_hp_avg[1] + self.tank_hp_avg[0]) / 2
+            if tank_hp_avg == 0:
+                tank_hp_avg = 1
             shots_avg_damage = self.shots_avg_dmg[player_team_id]
             travel_avg = self.average_distance_travelled
 
@@ -266,55 +270,55 @@ class Rating:
                 shots_fired = 1
 
             shots_penetrated = player_data.get(
-                'performance').get('shots_pen')
+                'performance').get('shots_pen', 0)
 
             player_rating['accuracy'] = f'{round(((shots_penetrated / shots_fired) * 100))}%'
             player_rating['accuracy_value'] = round(
                 ((shots_penetrated / shots_fired) * 100))
 
-            time_alive = player_data.get('performance').get('time_alive')
+            time_alive = player_data.get('performance').get('time_alive', 0)
             player_rating['time_alive'] = round((time_alive / 60), 1)
 
             damage_blocked = player_data.get(
                 'performance').get('damage_blocked') or shots_avg_damage * player_data.get(
-                'performance').get('hits_bounced')
+                'performance').get('hits_bounced') or 0
             player_rating['damage_blocked'] = round(damage_blocked)
 
             distance_travelled = player_data.get(
-                'performance').get('distance_travelled')
+                'performance').get('distance_travelled') or 0
             player_rating['distance_travelled'] = round(distance_travelled)
 
             damage_assisted = player_data.get(
-                'performance').get('damage_assisted')
+                'performance').get('damage_assisted') or 0
             player_rating['damage_assisted'] = round(damage_assisted)
 
             damage_assisted_track = player_data.get(
-                'performance').get('damage_assisted_track')
+                'performance').get('damage_assisted_track') or 0
             player_rating['damage_assisted_track'] = round(
                 damage_assisted_track)
 
             enemies_spotted = player_data.get(
-                'performance').get('enemies_spotted')
+                'performance').get('enemies_spotted') or 0
             player_rating['enemies_spotted'] = round(enemies_spotted)
 
             damage_made = player_data.get(
-                'performance').get('damage_made')
+                'performance').get('damage_made') or 0
 
             player_rating['damage_made'] = round(damage_made)
 
             kills = player_data.get(
-                'performance').get('enemies_destroyed')
+                'performance').get('enemies_destroyed') or 0
             player_rating['kills'] = round(kills)
 
-            tank_type = player_data.get('player_vehicle_type')
-            tank_name = player_data.get('player_vehicle')
+            tank_type = player_data.get('player_vehicle_type', 'mediumTank')
+            tank_name = player_data.get('player_vehicle', 'Unknown')
             # Not used, unable to pull vehicle chars without spamming requests to WG API
             tank_hp = 2000
             travel_avg = self.average_distance_travelled
 
             damage_recieved = player_data.get(
-                'performance').get('damage_received')
-            hp_left = player_data.get('performance').get('hitpoints_left')
+                'performance').get('damage_received', 1)
+            hp_left = player_data.get('performance').get('hitpoints_left', 1)
             total_hp = hp_left + damage_recieved
 
             enemies = self.players_lists[0]

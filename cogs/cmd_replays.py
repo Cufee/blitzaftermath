@@ -111,12 +111,12 @@ class blitz_aftermath_replays(commands.Cog):
                             name="Something failed...", value="This may occur when a replay file is incomplete or Wargaming API is not accessible, please try again in a few minutes.", inline=False)
                         embed.set_footer(
                             text=f"I ran into an issue processing this replay, this will be reported automatically.")
-                        await message.channel.send(embed=embed, file=image_file)
+                        await message.channel.send(embed=embed, file=image_file, delete_after=60)
 
                         # Report the error
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```', delete_after=60)
+                        await dm_channel.send(f'An error occured in {guild_name}({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```')
             else:
                 return
 

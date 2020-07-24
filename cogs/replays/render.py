@@ -8,6 +8,8 @@ from io import BytesIO
 
 from re import compile, sub
 
+from math import ceil, floor
+
 
 class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
@@ -138,7 +140,7 @@ class Render():
 
             if full_name_w > self.longest_name:
                 self.longest_name = full_name_w
-            elif vehicle_name_w > self.longest_name:
+            if vehicle_name_w > self.longest_name:
                 self.longest_name = vehicle_name_w
 
             if player.get('team') == 2:
@@ -301,7 +303,7 @@ class Render():
         bot_team_card_w, bot_team_card_h = team_card_bot.size
         bot_card_draw_w = self.image_min_w
         bot_card_draw_h = self.image_min_h + \
-            (self.image_step * ((int(len(self.all_players) / 2) + 1)))
+            (self.image_step * (ceil((len(self.all_players) / 2) + 1)))
 
         # Draw bottom battle results
         draw_bot = ImageDraw.Draw(team_card_bot)
@@ -561,7 +563,7 @@ class Render():
                                 (hp_bars_base_draw_w2, hp_bars_draw_h2)], fill=hp_bar_color)
 
         # Draw platoons
-        if platoon and self.room_type != 5:
+        if platoon and self.room_type != 5 and self.room_type != 7:
             platoon_font = self.font_platoon
             platoon_font_color = self.font_color_base
             platoon_img = self.platoon_image.copy()
@@ -619,7 +621,7 @@ class Render():
         draw.text((clan_draw_w, clan_draw_h), clan_str,
                   font_color_info, font=name_font)
 
-        if hero_bonus_exp > 0:
+        if hero_bonus_exp and hero_bonus_exp > 0:
             hero_icon = Image.open(
                 f'./cogs/replays/render/icons/hero_icon.png')
             hero_icon = hero_icon.resize((self.font_size, self.font_size))
