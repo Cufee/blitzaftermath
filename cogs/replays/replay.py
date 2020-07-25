@@ -168,14 +168,15 @@ class Replay:
             vehicle_turret_id = player.get('turret_id')
             vehicle_chassis_id = player.get('chassis_id')
 
-            time_alive = player.get('time_alive')
+            time_alive = player.get('time_alive') or 1
 
-            shots_made = player.get('shots_made')
+            shots_made = player.get('shots_made') or 1
             if shots_made == 0:
                 shots_made = 1
 
-            vehicle_alpha_efficiency = player.get(
-                'damage_made') * (time_alive / self.battle_duration)
+            damage_made = player.get('damage_made') or 0
+            vehicle_alpha_efficiency = damage_made * \
+                (time_alive / self.battle_duration)
 
             vehicle_best_armor = 0
             for module in vehicle_profile.get('armor'):
@@ -196,7 +197,7 @@ class Replay:
             player_vehicle = vehicle.get('name')
             player_vehicle_type = vehicle.get('type')
             player_vehicle_tier = vehicle.get('tier')
-            hp_left = player.get('hitpoints_left')
+            hp_left = player.get('hitpoints_left') or 0
             survived = True
             if hp_left <= 0:
                 survived = False
@@ -219,6 +220,9 @@ class Replay:
             if platoon_number:
                 platoon_str = f'{platoon_number}'
 
+            kills = player.get('enemies_destroyed') or 0
+            hero_bonus_exp = player.get('hero_bonus_exp') or 0
+
             player_data = {
                 player_id: {
                     'nickname': nickname,
@@ -229,10 +233,10 @@ class Replay:
                     'vehicle_alpha_efficiency': vehicle_alpha_efficiency,
                     'performance': player,
                     'stats': stats,
-                    'damage': player.get('damage_made'),
-                    'kills': player.get('enemies_destroyed'),
+                    'damage': damage_made,
+                    'kills': kills,
                     'survived': survived,
-                    'hero_bonus_exp': player.get('hero_bonus_exp'),
+                    'hero_bonus_exp': hero_bonus_exp,
                     'platoon_str': platoon_str,
                     'player_vehicle': player_vehicle,
                     'player_vehicle_type': player_vehicle_type,

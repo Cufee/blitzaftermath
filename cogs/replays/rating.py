@@ -270,6 +270,12 @@ class Rating:
             player_team_id = player_data.get('team') - 1
             player_wr = player_data.get('player_wr')
 
+            performance = player_data.get(
+                'performance') or None
+            if not performance:
+                raise Exception(
+                    'Player performance not avaialable or None. Unable to calculate rating')
+
             survived_bool = True
             if player_data.get('performance').get('hitpoints_left') == 0:
                 survived_bool = False
@@ -277,9 +283,10 @@ class Rating:
             tank_hp_avg = (self.tank_hp_avg[1] + self.tank_hp_avg[0]) / 2
             if tank_hp_avg == 0:
                 tank_hp_avg = 1
-            shots_avg_damage = self.shots_avg_dmg[player_team_id]
-            travel_avg = self.average_distance_travelled
-
+            shots_avg_damage = self.shots_avg_dmg[player_team_id] or 1
+            travel_avg = self.average_distance_travelled or 500
+            if travel_avg == 0:
+                travel_avg == 500
             shots_fired = player_data.get('performance').get('shots_made') or 1
             if shots_fired == 0:
                 shots_fired = 1
@@ -299,9 +306,10 @@ class Rating:
             time_alive = player_data.get('performance').get('time_alive') or 0
             player_rating['time_alive'] = round((time_alive / 60), 1)
 
-            damage_blocked = player_data.get(
-                'performance').get('damage_blocked') or shots_avg_damage * player_data.get(
-                'performance').get('hits_bounced') or 0
+            hits_bounced = performance.get('hits_bounced') or 0
+
+            damage_blocked = performance.get(
+                'damage_blocked') or shots_avg_damage * hits_bounced
             player_rating['damage_blocked'] = round(damage_blocked)
 
             distance_travelled = player_data.get(
@@ -334,7 +342,6 @@ class Rating:
             tank_name = player_data.get('player_vehicle', 'Unknown')
             # Not used, unable to pull vehicle chars without spamming requests to WG API
             tank_hp = 2000
-            travel_avg = self.average_distance_travelled
 
             damage_recieved = player_data.get(
                 'performance').get('damage_received') or 1

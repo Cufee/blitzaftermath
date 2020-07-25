@@ -50,11 +50,12 @@ class Render():
 
         # Replay Details
         self.battle_result_num = self.battle_summary.get('battle_result')
-        self.map_name = self.replay_data.get('battle_summary').get('map_name')
+        self.map_name = self.replay_data.get(
+            'battle_summary').get('map_name') or 'Unknown'
         self.mastery_badge = self.replay_data.get(
-            'battle_summary').get('mastery_badge')
+            'battle_summary').get('mastery_badge') or 0
         self.battle_start_time = self.battle_summary.get(
-            'battle_start_timestamp')
+            'battle_start_timestamp') or 'Unknown'
 
         self.battle_result = 'Defeat'
         if self.battle_result_num == 1:
@@ -546,23 +547,23 @@ class Render():
         """
         Renders a complete [player_card]
         """
-        rating = player.get('rating')
-        rating_value = player.get('rating_value')
-        survived = player.get('survived')
-        hero_bonus_exp = player.get('hero_bonus_exp')
-        damage = player.get('damage')
-        kills = player.get('kills')
-        platoon = player.get('platoon_str')
-        team = player.get('team')
-        nickname = player.get('nickname')
-        player_wr = player.get('player_wr')
-        clan = player.get("clan_tag")
-        vehicle = player.get('player_vehicle')
-        vehicle_battles = player.get('vehicle_battles')
-        vehicle_wr = player.get('vehicle_wr')
+        rating = player.get('rating') or 0
+        rating_value = player.get('rating_value') or 0
+        survived = player.get('survived') or 0
+        hero_bonus_exp = player.get('hero_bonus_exp') or 0
+        damage = player.get('damage') or 0
+        kills = player.get('kills') or 0
+        platoon = player.get('platoon_str') or 0
+        team = player.get('team') or 0
+        nickname = player.get('nickname') or 0
+        player_wr = player.get('player_wr') or 0
+        clan = player.get("clan_tag") or 0
+        vehicle = player.get('player_vehicle') or 0
+        vehicle_battles = player.get('vehicle_battles') or 0
+        vehicle_wr = player.get('vehicle_wr') or 0
         damage_recieved = player.get(
-            'performance').get('damage_received')
-        hp_left = player.get('performance').get('hitpoints_left')
+            'performance').get('damage_received') or 1
+        hp_left = player.get('performance').get('hitpoints_left') or 0
         total_hp = hp_left + damage_recieved
         hp_percent = round((hp_left / total_hp), 2)
 
