@@ -60,7 +60,7 @@ class Render():
         self.battle_result = 'Defeat'
         if self.battle_result_num == 1:
             self.battle_result = 'Victory'
-        if self.battle_result_num == 2:
+        if self.battle_result_num == 0:
             self.battle_result = 'Draw'
 
         # Protagonist performance
@@ -258,7 +258,7 @@ class Render():
             if self.battle_result_num == 2:
                 result_font_color = self.font_color_base
 
-            battle_result_str = {self.battle_result}
+            battle_result_str = f'{self.battle_result}'
             result_text_w, result_text_h = self.draw_frame.textsize(
                 battle_result_str, font=self.font_title)
 
@@ -311,7 +311,6 @@ class Render():
         if error_rate < 0:
             raise Exception(
                 'Negative error_rate detected. UI will not render correctly')
-            return
 
         final_buffer = BytesIO()
         self.image.save(final_buffer, 'png')
