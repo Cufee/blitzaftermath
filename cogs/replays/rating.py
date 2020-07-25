@@ -423,7 +423,7 @@ class Rating:
         rating_descr['player_wr_descr'] = 'Winrate'
         rating_descr['time_alive_descr'] = 'Time Alive (min)'
         rating_descr['damage_blocked_descr'] = 'Damage Blocked'
-        rating_descr['distance_travelled_descr'] = 'Distance Travelled'
+        rating_descr['distance_travelled_descr'] = 'Distance Traveled'
         rating_descr['damage_assisted_descr'] = 'Spotting Damage'
         rating_descr['damage_assisted_track_descr'] = 'Damage from Tracking'
         rating_descr['enemies_spotted_descr'] = 'Vehicles Spotted'
