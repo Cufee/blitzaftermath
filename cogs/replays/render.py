@@ -57,11 +57,12 @@ class Render():
         self.battle_start_time = self.battle_summary.get(
             'battle_start_timestamp') or 'Unknown'
 
-        self.battle_result = 'Defeat'
         if self.battle_result_num == 1:
             self.battle_result = 'Victory'
-        if self.battle_result_num == 0:
+        elif self.battle_result_num == 0:
             self.battle_result = 'Draw'
+        else:
+            self.battle_result = 'Defeat'
 
         # Protagonist performance
         self.protagonist_id = self.battle_summary.get('protagonist')
