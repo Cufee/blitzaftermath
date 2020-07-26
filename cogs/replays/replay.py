@@ -10,7 +10,7 @@ class Replay:
         self.wg_tank_stats_api_url_end = f'/wotb/tanks/stats/?&application_id={self.wg_app_token}&fields=all&account_id='
 
         self.base_view_url = 'https://replays.wotinspector.com/en/view/'
-        self.base_api_url = 'https://wotinspector.com/api/replay/upload/?details=full&url='
+        self.base_api_url = 'https://wotinspector.com/api/replay/upload/?details=full&private=1&title=Aftermath&url='
 
         self.replay_urls = replay_urls
         self.api_urls = []
