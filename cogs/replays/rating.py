@@ -409,7 +409,7 @@ class Rating:
                     if best_rating.get(rating_name, 0) < player_rating.get(f'{rating_name}_value'):
                         best_rating[rating_name] = rating_value
 
-        rating_descr['rating_descr'] = 'Total Rating'
+        rating_descr['rating_descr'] = 'Aftermath Rating'
         rating_descr['blocked_rating_descr'] = 'Damage Blocked'
         rating_descr['track_rating_descr'] = 'Spotting Damage'
         rating_descr['spotting_rating_descr'] = 'Spotting'

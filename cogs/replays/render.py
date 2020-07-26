@@ -680,8 +680,9 @@ class Render():
             stat_value_raw = player.get(stat, -1)
 
             stat_value = stat_value_raw
-            if not self.is_number(stat_value_raw):
-                stat_value = self.convert_to_num.sub('', stat_value_raw)
+            if not stat_value_raw.isnumeric():
+                # stat_value = self.convert_to_num.sub('', stat_value_raw)
+                stat_value = player.get(f'{stat}_value', -1)
 
             stat_max_width = self.global_stat_max_width.get(
                 stat, 0)

@@ -95,6 +95,7 @@ class blitz_aftermath_replays(commands.Cog):
                         embed_desc = f'React with {self.emoji_02} for a transparent picture'
                         if room_type_mod == 0:
                             embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
+                        embed_desc += f'React with {self.emoji_10} to learn more about Aftermath Rating'
 
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
@@ -106,6 +107,7 @@ class blitz_aftermath_replays(commands.Cog):
                         await image_message.add_reaction(self.emoji_02)
                         if room_type_mod == 0:
                             await image_message.add_reaction(self.emoji_01)
+                        await image_message.add_reaction(self.emoji_10)
 
                     except Exception as e:
                         image_file = None
@@ -152,6 +154,8 @@ class blitz_aftermath_replays(commands.Cog):
         if str(payload.channel_id) in enabled_channels:
             message = await channel.fetch_message(payload.message_id)
             message_channel = message.channel
+
+            # Detailed Rating reaction
             if payload.emoji == self.emoji_01:
                 replays = []
 
@@ -162,12 +166,13 @@ class blitz_aftermath_replays(commands.Cog):
                 image_file, replay_id, replay_link, room_type_mod = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
-                stats_message = await channel.send(file=image_file)
+                stats_message = await channel.send('Here is a Rating breakdown for this battle.', file=image_file)
                 for reaction in message.reactions:
                     if reaction.emoji == self.emoji_01:
                         await reaction.clear()
                 return
 
+            # Transparent picture reaction
             elif payload.emoji == self.emoji_02:
                 print('Sending DM')
                 replays = []
@@ -180,8 +185,26 @@ class blitz_aftermath_replays(commands.Cog):
                 embed.set_footer(text=f"MD5: {replay_id}")
 
                 dm_channel = await member.create_dm()
-                await dm_channel.send(embed=embed, file=image_file)
+                try:
+                    await dm_channel.send(embed=embed, file=image_file)
+                except:
+                    print('DM failed')
+                    await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
                 return
+
+            elif payload.emoji == self.emoji_10:
+                embed = discord.Embed()
+                embed.add_field(
+                    name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_02} to the original message.", inline=False)
+
+                dm_channel = await member.create_dm()
+                try:
+                    await dm_channel.send(embed=embed)
+                except:
+                    print('DM failed')
+                    await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
+                return
+
             else:
                 return
         else:
