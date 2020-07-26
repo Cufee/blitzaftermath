@@ -115,6 +115,8 @@ class blitz_aftermath_replays(commands.Cog):
                             name="Something failed...", value="This may occur when a replay file is incomplete or Wargaming API is not accessible, please try again in a few minutes.", inline=False)
                         embed.set_footer(
                             text=f"I ran into an issue processing this replay, this will be reported automatically.")
+                        embed.set_footer(
+                            text=f"{e}\nThis was reported automatically.")
                         await message.channel.send(embed=embed, file=image_file, delete_after=60)
 
                         # Report the error
@@ -149,6 +151,7 @@ class blitz_aftermath_replays(commands.Cog):
 
         if str(payload.channel_id) in enabled_channels:
             message = await channel.fetch_message(payload.message_id)
+            message_channel = message.channel
             if payload.emoji == self.emoji_01:
                 replays = []
 
@@ -160,6 +163,9 @@ class blitz_aftermath_replays(commands.Cog):
                     replays, rating='mBRT1_1', stats=stats)
 
                 stats_message = await channel.send(file=image_file)
+                for reaction in message.reactions:
+                    if reaction.emoji == self.emoji_01:
+                        await reaction.clear()
                 return
 
             elif payload.emoji == self.emoji_02:
