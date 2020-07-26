@@ -60,9 +60,9 @@ class Render():
         if self.battle_result_num == 1:
             self.battle_result = 'Victory'
         elif self.battle_result_num == 0:
-            self.battle_result = 'Draw'
-        else:
             self.battle_result = 'Defeat'
+        else:
+            self.battle_result = 'Draw'
 
         # Protagonist performance
         self.protagonist_id = self.battle_summary.get('protagonist')
