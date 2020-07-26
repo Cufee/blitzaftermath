@@ -95,7 +95,7 @@ class blitz_aftermath_replays(commands.Cog):
                         embed_desc = f'React with {self.emoji_02} for a transparent picture'
                         if room_type_mod == 0:
                             embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
-                        embed_desc += f'React with {self.emoji_10} to learn more about Aftermath Rating'
+                        embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
 
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
