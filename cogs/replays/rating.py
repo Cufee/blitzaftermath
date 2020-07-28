@@ -102,11 +102,11 @@ class Rating:
                 'lightTank': {
                     'damage_efficiency': 1.5,
                     'blocked_efficiency': 0.25,
-                    'kill_efficiency': 0.75,
-                    'travel_efficiency': 1.25,
+                    'kill_efficiency': 1.0,
+                    'travel_efficiency': 0.75,
                     'shot_efficiency': 0.75,
                     'spotting_efficiency': 2.0,
-                    'track_efficiency': 0.5,
+                    'track_efficiency': 0.75,
                 },
                 'heavyTank': {
                     'damage_efficiency': 1.5,
@@ -316,14 +316,15 @@ class Rating:
                 'performance').get('distance_travelled') or 0
             player_rating['distance_travelled'] = round(distance_travelled)
 
-            damage_assisted = player_data.get(
-                'performance').get('damage_assisted') or 0
-            player_rating['damage_assisted'] = round(damage_assisted)
-
             damage_assisted_track = player_data.get(
                 'performance').get('damage_assisted_track') or 0
-            player_rating['damage_assisted_track'] = round(
-                damage_assisted_track)
+
+            damage_assisted = player_data.get(
+                'performance').get('damage_assisted') or 0
+
+            damage_assisted_total = round(
+                damage_assisted + damage_assisted_track)
+            player_rating['damage_assisted'] = damage_assisted_total
 
             enemies_spotted = player_data.get(
                 'performance').get('enemies_spotted') or 0
@@ -366,7 +367,7 @@ class Rating:
                 tank_type).get('kill_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
             player_rating['kill_rating'] = kill_rating
 
-            travel_rating = round(((distance_travelled / travel_avg) *
+            travel_rating = round(((distance_travelled / (travel_avg * 1.5)) *
                                    self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('travel_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
             player_rating['travel_rating'] = travel_rating
@@ -387,13 +388,13 @@ class Rating:
                 tank_type).get('blocked_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
             player_rating['blocked_rating'] = blocked_rating
 
-            track_rating = round((((damage_assisted_track + damage_assisted) / tank_hp_avg) *
-                                  self.eff_multiplyers.get(rating_version).get(
+            assist_rating = round((((damage_assisted_total) / tank_hp_avg) *
+                                   self.eff_multiplyers.get(rating_version).get(
                 tank_type).get('track_efficiency') * (self.eff_multiplyers.get(rating_version).get('multiplier'))))
-            player_rating['track_rating'] = track_rating
+            player_rating['assist_rating'] = assist_rating
 
             rating = round(((damage_rating + kill_rating +
-                             travel_rating + shot_rating + spotting_rating + track_rating + blocked_rating)))
+                             travel_rating + shot_rating + spotting_rating + assist_rating + blocked_rating)))
             player_rating['rating'] = rating
 
             for rating_name in player_rating:
@@ -411,7 +412,7 @@ class Rating:
 
         rating_descr['rating_descr'] = 'Aftermath Rating'
         rating_descr['blocked_rating_descr'] = 'Damage Blocked'
-        rating_descr['track_rating_descr'] = 'Spotting Damage'
+        rating_descr['assist_rating_descr'] = 'Assited Damage'
         rating_descr['spotting_rating_descr'] = 'Spotting'
         rating_descr['shot_rating_descr'] = 'Accuracy'
         rating_descr['accuracy_descr'] = 'Accuracy %'
@@ -423,9 +424,8 @@ class Rating:
         rating_descr['player_wr_descr'] = 'Winrate'
         rating_descr['time_alive_descr'] = 'Time Alive (min)'
         rating_descr['damage_blocked_descr'] = 'Damage Blocked'
-        rating_descr['distance_travelled_descr'] = 'Distance Traveled'
-        rating_descr['damage_assisted_descr'] = 'Spotting Damage'
-        rating_descr['damage_assisted_track_descr'] = 'Damage from Tracking'
+        rating_descr['distance_travelled_descr'] = 'Distance Traveled (m)'
+        rating_descr['damage_assisted_descr'] = 'Assited Damage'
         rating_descr['enemies_spotted_descr'] = 'Vehicles Spotted'
         rating_descr['wp_points_earned_descr'] = 'Points Earned'
         rating_descr['wp_points_stolen_descr'] = 'Points Denied'

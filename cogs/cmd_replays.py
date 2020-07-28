@@ -12,7 +12,7 @@ from cogs.api.api import Api
 Api = Api()
 
 
-def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=0):
+def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=0, raw=0):
     # Send replay to WoTInspector
     replays_list_data = Replay(urls).process_replays()
     replay_data = replays_list_data.get(
@@ -28,7 +28,7 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
     special_room_types = replay_data.get(
         'battle_summary').get(
         'special_room_types', [])
-    if room_type in special_room_types:
+    if room_type in special_room_types and raw == 0:
         stats = ['rating', 'time_alive', 'damage_blocked',
                  'damage_made', 'accuracy']
         stats_bottom = []
@@ -48,6 +48,8 @@ class blitz_aftermath_replays(commands.Cog):
             733729140611612722)
         self.emoji_02 = self.client.get_emoji(
             733730453084700693)
+        self.emoji_03 = self.client.get_emoji(
+            737794899721846804)
         self.emoji_10 = self.client.get_emoji(
             733729140234256436)
 
@@ -93,6 +95,7 @@ class blitz_aftermath_replays(commands.Cog):
                             replays, stats=stats, rating=rating)
 
                         embed_desc = f'React with {self.emoji_02} for a transparent picture'
+                        embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
                         if room_type_mod == 0:
                             embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
                         embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
@@ -105,6 +108,7 @@ class blitz_aftermath_replays(commands.Cog):
                         image_message = await message.channel.send(embed=embed, file=image_file)
 
                         await image_message.add_reaction(self.emoji_02)
+                        await image_message.add_reaction(self.emoji_03)
                         if room_type_mod == 0:
                             await image_message.add_reaction(self.emoji_01)
                         await image_message.add_reaction(self.emoji_10)
@@ -157,19 +161,36 @@ class blitz_aftermath_replays(commands.Cog):
 
             # Detailed Rating reaction
             if payload.emoji == self.emoji_01:
-                replays = []
+                for reaction in message.reactions:
+                    if reaction.emoji == self.emoji_01:
+                        await reaction.clear()
 
-                stats = ['damage_rating', 'kill_rating',
-                         'shot_rating', 'spotting_rating', 'track_rating', 'blocked_rating']
+                replays = []
+                stats = ['damage_rating', 'kill_rating', 'travel_rating',
+                         'shot_rating', 'spotting_rating', 'assist_rating', 'blocked_rating']
 
                 replays.append(message.embeds[0].url)
                 image_file, replay_id, replay_link, room_type_mod = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
-                stats_message = await channel.send('Here is a Rating breakdown for this battle.', file=image_file)
+                stats_message = await channel.send('Here is a Rating breakdown for this battle:', file=image_file)
+                return
+
+            # Detailed performance reaction
+            if payload.emoji == self.emoji_03:
                 for reaction in message.reactions:
-                    if reaction.emoji == self.emoji_01:
+                    if reaction.emoji == self.emoji_03:
                         await reaction.clear()
+
+                replays = []
+                stats = ['player_wr', 'damage_made', 'kills', 'damage_blocked', 'damage_assisted',
+                         'enemies_spotted', 'distance_travelled', 'time_alive']
+
+                replays.append(message.embeds[0].url)
+                image_file, replay_id, replay_link, room_type_mod = get_image(
+                    replays, rating='mBRT1_1', stats=stats, raw=1)
+
+                stats_message = await channel.send('Here is a detailed performance breakdown for each player:', file=image_file)
                 return
 
             # Transparent picture reaction
@@ -204,7 +225,6 @@ class blitz_aftermath_replays(commands.Cog):
                     print('DM failed')
                     await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
                 return
-
             else:
                 return
         else:
