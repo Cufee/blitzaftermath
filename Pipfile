@@ -7,12 +7,11 @@ verify_ssl = true
 autopep8 = "*"
 
 [packages]
-discord = "*"
+"discord.py" = "*"
 python-rapidjson = "*"
-requests = "*"
-imgkit = "*"
-wkhtmltopdf = "*"
 pillow = "*"
+pymongo = "*"
+dnspython = "*"
 
 [requires]
 python_version = "3.8"
