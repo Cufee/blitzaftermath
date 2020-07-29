@@ -146,9 +146,9 @@ class blitz_aftermath_contest(commands.Cog):
                 'default_clan_id': None,
             }
             response = guilds.insert_one(new_guild_settings)
-            await channel.send(f'Enabled in {guild_name}\n```{response}```')
+            await channel.send(f'Enabled in {guild_name}\n```{response}```', delete_after=10)
         else:
-            await channel.send(f'Already enabled in {guild_name}')
+            await channel.send(f'Already enabled in {guild_name}', delete_after=10)
 
     # Commands
     @commands.command(aliases=['c-add'])
@@ -170,7 +170,7 @@ class blitz_aftermath_contest(commands.Cog):
             res_json = rapidjson.loads(res.text)
             clan_id = res_json.get('data')[0].get('clan_id') or None
         except Exception as e:
-            await message.channel.send(f'I was not able to find anything matching {clan_name} on {clan_realm} [{status_code}]\n```{e}```')
+            await message.channel.send(f'I was not able to find anything matching {clan_name} on {clan_realm} [{status_code}]\n```{e}```', delete_after=30)
 
         if clan_id:
             clan = clans.find_one({'clan_id': clan_id})
@@ -181,9 +181,9 @@ class blitz_aftermath_contest(commands.Cog):
                     'clan_realm': clan_realm,
                 }
                 response = clans.insert_one(new_clan)
-                await channel.send(f'Enabled for {clan_name}\n```{response}```')
+                await channel.send(f'Enabled for {clan_name}\n```{response}```', delete_after=10)
             else:
-                await channel.send(f'Already enabled for {clan_name}')
+                await channel.send(f'Already enabled for {clan_name}', delete_after=10)
 
     # Commands
     @commands.command(aliases=['c-upd'])
@@ -232,7 +232,7 @@ class blitz_aftermath_contest(commands.Cog):
                 await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of mastery over the past {(time_delta.seconds // 3600)} hours')
 
             except Exception as e:
-                await message.channel.send(f'Oh no, something did not work!\n```{e}```')
+                await message.channel.send(f'Oh no, something did not work!\n```{e}```', delete_after=15)
 
         return
 
