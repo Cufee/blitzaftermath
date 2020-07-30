@@ -287,7 +287,7 @@ class blitz_aftermath_contest(commands.Cog):
                     if newclan == False:
                         await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
                     else:
-                        await message.channel.send(f"I was not tracking {clan_name}. I will add them to my list, any future achievements will be tracked now.", delete_after=30)
+                        await message.channel.send(f"I was not tracking {clan_name}. I will add them to my list, any future achievements will be tracked now.")
 
             except Exception as e:
                 print(e, str(traceback.format_exc()))
