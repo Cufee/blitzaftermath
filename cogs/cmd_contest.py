@@ -262,8 +262,9 @@ class blitz_aftermath_contest(commands.Cog):
                     return
                 finally:
                     current_marks = list(clan_marks.find(
-                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or None
-                    if not current_marks:
+                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or 0
+                    if current_marks == None:
+                        print(current_marks)
                         raise Exception(f'Failed to pull data for {clan_name}')
                     last_marks_dict = list(clan_marks.find(
                         {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
