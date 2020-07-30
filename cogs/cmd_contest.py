@@ -37,9 +37,12 @@ def get_wg_api_domain(realm):
         player_realm = 'na'
         api_domain = 'http://api.wotblitz.com'
 
-    else:
+    elif realm == 'ASIA':
         player_realm = 'asia'
         api_domain = 'http://api.wotblitz.asia'
+
+    else:
+        api_domain = None
 
     return api_domain
 
@@ -68,6 +71,8 @@ async def update_clan_marks(clan_id=None, clan_realm=None, channel=None):
     clan_entries = []
     for realm in clan_ids.keys():
         api_domain = get_wg_api_domain(realm)
+        if not api_domain:
+            continue
         all_clan_ids = clan_ids.get(realm, [])
         if not all_clan_ids:
             continue
@@ -179,6 +184,8 @@ class blitz_aftermath_contest(commands.Cog):
             clan_realm = clan_id_list[1].upper() or None
 
             api_domain = get_wg_api_domain(clan_realm)
+            if not api_domain:
+                raise Exception(f'{clan_realm} is not valid realm')
             url = api_domain + wg_clan_api_url_base + clan_name
             res = requests.get(url)
             status_code = res.status_code
