@@ -245,7 +245,7 @@ class blitz_aftermath_contest(commands.Cog):
 
                 time_delta = datetime.utcnow() - last_marks_time
 
-                await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of mastery over the past {(time_delta.seconds // 3600)} hours')
+                await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
 
             except Exception as e:
                 print(e, str(traceback.format_exc()))
@@ -258,6 +258,7 @@ class blitz_aftermath_contest(commands.Cog):
     async def myclan(self, message, clan_str):
         if message.author == self.client.user:
             return
+        await message.delete()
         guild_id = message.guild.id
         guild_settings = guilds.find_one({'guild_id': guild_id})
 
@@ -279,7 +280,7 @@ class blitz_aftermath_contest(commands.Cog):
 
             new_default_clan_id = clan_id
 
-            await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_name}')
+            await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_name}', delete_after=30)
 
 
 def setup(client):
