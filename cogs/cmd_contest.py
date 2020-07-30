@@ -248,8 +248,9 @@ class blitz_aftermath_contest(commands.Cog):
         else:
             try:
                 try:
+                    await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
                     current_marks = list(clan_marks.find(
-                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or None
+                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total')
                 except:
                     new_clan = {
                         'clan_id': clan_id,
