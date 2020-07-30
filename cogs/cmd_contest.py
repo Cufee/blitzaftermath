@@ -260,7 +260,6 @@ class blitz_aftermath_contest(commands.Cog):
                     }
                     response = clans.insert_one(new_clan)
                     await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
-                    await message.channel.send(f'Enabled for {clan_name}. Tracking will start in 1 hour.', delete_after=30)
                     newclan = True
                     return
                 finally:
@@ -278,7 +277,7 @@ class blitz_aftermath_contest(commands.Cog):
                     if newclan == False:
                         await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
                     else:
-                        await message.channel.send(f"I was not tracking {clan_name}. I will add them to my list, any future achievements will be tracked now.")
+                        await message.channel.send(f"I was not tracking {clan_name}. I will add them to my list, any future achievements will be tracked now.", delete_after=30)
 
             except Exception as e:
                 print(e, str(traceback.format_exc()))
