@@ -17,6 +17,7 @@ clan_marks = db.marksOfMastery
 wg_api_url_base = '/wotb/clans/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&clan_id='
 wg_player_api_url_base = '/wotb/account/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 wg_clan_api_url_base = '/wotb/clans/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search='
+wg_clan_info_api_url_base = '/wotb/clans/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&clan_id='
 
 
 def get_wg_api_domain(realm):
@@ -71,16 +72,23 @@ async def update_clan_marks(clan_id=None, channel=None):
 
         all_clan_ids_str = ','.join(str(i) for i in all_clan_ids)
 
-        url = api_domain + wg_api_url_base + all_clan_ids_str
+        url = api_domain + wg_clan_info_api_url_base + all_clan_ids_str
         res = requests.get(url)
-        res_json = rapidjson.loads(res.text)
-        if res.status_code != 200:
+        clans_res_json = rapidjson.loads(res.text)
+        # print(rapidjson.dumps(res_json, indent=2))
+        if res.status_code != 200 or not clans_res_json:
             raise Exception(
                 f'WG api responded with {res["status_code"]}\n{res.status}')
 
         for clan_id in all_clan_ids:
             badges_total = 0
-            members = res_json.get('data').get(
+            res_data = clans_res_json.get('data')
+            clan_data = res_data.get(str(clan_id))
+            if not clan_data:
+                print(f'Failed to update for {clan_id}')
+                continue
+
+            members = res_data.get(
                 str(clan_id)).get('members_ids') or []
             members_str = ','.join(str(m) for m in members)
 
@@ -105,7 +113,7 @@ async def update_clan_marks(clan_id=None, channel=None):
 
         result = clan_marks.insert_many(clan_entries)
     if channel:
-        await channel.send(f'Updated Mastery marks for {len(clan_ids)} clans.')
+        await channel.send(f'Updated Mastery marks for {len(clan_entries)} clans.')
     return result
 
 
@@ -210,7 +218,7 @@ class blitz_aftermath_contest(commands.Cog):
         else:
             clan_str_list = clan_str.split('@')
             clan_name = clan_str_list[0]
-            clan_realm = clan_str_list[1]
+            clan_realm = clan_str_list[1].upper()
             clan = clans.find_one({"$and": [{"clan_name": clan_name},
                                             {"clan_realm": clan_realm}]})
             clan_id = clan.get('clan_id') or None
