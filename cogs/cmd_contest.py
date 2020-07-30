@@ -131,7 +131,7 @@ class blitz_aftermath_contest(commands.Cog):
     async def on_ready(self):
         print(f'[Beta] Aftermath Contest cog is ready.')
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=8)
     async def printer(self):
         await update_clan_marks()
 
@@ -248,9 +248,10 @@ class blitz_aftermath_contest(commands.Cog):
         else:
             try:
                 try:
-                    await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
                     current_marks = list(clan_marks.find(
                         {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total')
+                    await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
+                    newclan = False
                 except:
                     new_clan = {
                         'clan_id': clan_id,
@@ -260,6 +261,7 @@ class blitz_aftermath_contest(commands.Cog):
                     response = clans.insert_one(new_clan)
                     await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
                     await message.channel.send(f'Enabled for {clan_name}. Tracking will start in 1 hour.', delete_after=30)
+                    newclan = True
                     return
                 finally:
                     current_marks = list(clan_marks.find(
@@ -273,7 +275,10 @@ class blitz_aftermath_contest(commands.Cog):
                     last_marks_time = last_marks_dict.get('timestamp')
                     time_delta = datetime.utcnow() - last_marks_time
 
-                    await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
+                    if newclan == False:
+                        await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
+                    else:
+                        await message.channel.send(f"I was not tracking {clan_name}. I will add them to my list, any future achievements will be tracked now.")
 
             except Exception as e:
                 print(e, str(traceback.format_exc()))
