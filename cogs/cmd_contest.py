@@ -50,17 +50,19 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-async def update_clan_marks(clan_id=None, channel=None):
+async def update_clan_marks(clan_id=None, clan_realm=None, channel=None):
     clan_ids = {}
 
-    if clan_id:
-        all_clan_ids = [clan_id]
+    if clan_id and clan_realm:
+        clan_ids[clan_realm] = [clan_id]
     else:
         for clan in clans.find():
             clan_realm = clan.get('clan_realm')
             clan_ids_list = clan_ids.get(clan_realm, [])
             clan_ids_list.append(clan.get('clan_id'))
             clan_ids[clan_realm] = (clan_ids_list)
+
+    print(clan_ids)
 
     if not clan_ids:
         return
@@ -116,6 +118,7 @@ async def update_clan_marks(clan_id=None, channel=None):
         result = clan_marks.insert_many(clan_entries)
     if channel:
         await channel.send(f'Updated Mastery marks for {len(clan_entries)} clans.')
+    print(f'Updated {len(clan_entries)} clans.')
     return result
 
 
@@ -225,27 +228,50 @@ class blitz_aftermath_contest(commands.Cog):
             clan_str_list = clan_str.split('@')
             clan_name = clan_str_list[0]
             clan_realm = clan_str_list[1].upper()
-            clan = clans.find_one({"$and": [{"clan_name": clan_name},
-                                            {"clan_realm": clan_realm}]})
-            clan_id = clan.get('clan_id') or None
+
+            try:
+                clan = clans.find_one({"$and": [{"clan_name": clan_name},
+                                                {"clan_realm": clan_realm}]})
+                clan_id = clan.get('clan_id', None)
+            except:
+                api_domain = get_wg_api_domain(clan_realm)
+                url = api_domain + wg_clan_api_url_base + clan_name
+                res = requests.get(url)
+                if res.status_code != 200:
+                    await message.channel.send(f'Unable to find a clan named {clan_name} on {clan_realm}')
+                    return
+                else:
+                    res_json = rapidjson.loads(res.text)
+                    clan_id = res_json.get('data')[0].get('clan_id') or None
 
         if not clan_id:
             await message.channel.send(f'Unable to find {clan_name} on {clan_realm}')
             return
         else:
             try:
-                current_marks = list(clan_marks.find(
-                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total')
-                last_marks_dict = list(clan_marks.find(
-                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
-                last_marks = last_marks_dict.get('badges_total')
-                last_marks_time = last_marks_dict.get('timestamp')
+                try:
+                    current_marks = list(clan_marks.find(
+                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or None
+                except:
+                    new_clan = {
+                        'clan_id': clan_id,
+                        'clan_name': clan_name,
+                        'clan_realm': clan_realm,
+                    }
+                    response = clans.insert_one(new_clan)
+                    await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
+                    await message.channel.send(f'Enabled for {clan_name}. Tracking will start in 1 hour.', delete_after=30)
+                    return
+                finally:
+                    current_marks = list(clan_marks.find(
+                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or None
+                    last_marks_dict = list(clan_marks.find(
+                        {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
+                    last_marks = last_marks_dict.get('badges_total')
+                    last_marks_time = last_marks_dict.get('timestamp')
+                    time_delta = datetime.utcnow() - last_marks_time
 
-                print(last_marks_time, datetime.utcnow())
-
-                time_delta = datetime.utcnow() - last_marks_time
-
-                await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
+                    await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of Mastery over the past {(time_delta.seconds // 3600)} hours')
 
             except Exception as e:
                 print(e, str(traceback.format_exc()))
