@@ -257,7 +257,7 @@ class blitz_aftermath_contest(commands.Cog):
             except:
                 pass
             clan_aces = get_clan_marks(clan_id=clan_id)
-            await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers *since 4:00PM on July 30th*.')
+            await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
         except Exception as e:
             print(str(traceback.format_exc()))
             await message.channel.send(f'Something did not work.\n```{e}```')
