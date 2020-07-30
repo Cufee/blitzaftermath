@@ -49,7 +49,7 @@ def get_wg_api_domain(realm):
     return api_domain
 
 
-async def update_clan_marks(clan_id=None, channel=None):
+async def update_clan_marks(clan_id=None, channel=None, force=False):
 
     clan_ids = {
         'NA': [],
@@ -134,7 +134,7 @@ async def update_clan_marks(clan_id=None, channel=None):
                 if not last_aces:
                     last_aces = current_player_aces
 
-                if current_player_aces == last_aces:
+                if current_player_aces == last_aces and force == False:
                     continue
 
                 aces_gained = current_player_aces - last_aces
@@ -152,7 +152,7 @@ async def update_clan_marks(clan_id=None, channel=None):
 
             # Update clan record
             last_clan_aces = clan_db_data.get('clan_aces') or 0
-            if last_clan_aces == (last_clan_aces + clan_aces_gained):
+            if last_clan_aces == (last_clan_aces + clan_aces_gained) and force == False:
                 continue
 
             clan_update = {
@@ -210,7 +210,7 @@ class blitz_aftermath_contest(commands.Cog):
         # await message.delete()
         guild_id = message.guild.id
 
-        if clan_id_str:
+        if clan_id_str and clan_id_str != 'force':
             clan_list = (clan_id_str.upper()).split('@')
             clan_name = clan_list[0]
             clan_realm = clan_list[1]
@@ -221,6 +221,8 @@ class blitz_aftermath_contest(commands.Cog):
                 return
             clan_id = clan_data.get('clan_id', 0)
             result_clans, result_players = await update_clan_marks(clan_id=clan_id)
+        elif clan_id_str == 'force':
+            result_clans, result_players = await update_clan_marks(force=True)
         else:
             result_clans, result_players = await update_clan_marks()
 
