@@ -62,10 +62,8 @@ async def update_clan_marks(clan_id=None, clan_realm=None, channel=None):
             clan_ids_list.append(clan.get('clan_id'))
             clan_ids[clan_realm] = (clan_ids_list)
 
-    print(clan_ids)
-
     if not clan_ids:
-        return
+        raise Exception('No clanIds provided.')
 
     clan_entries = []
     for realm in clan_ids.keys():
@@ -265,6 +263,8 @@ class blitz_aftermath_contest(commands.Cog):
                 finally:
                     current_marks = list(clan_marks.find(
                         {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total') or None
+                    if not current_marks:
+                        raise Exception(f'Failed to pull data for {clan_name}')
                     last_marks_dict = list(clan_marks.find(
                         {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
                     last_marks = last_marks_dict.get('badges_total')
