@@ -212,10 +212,10 @@ class blitz_aftermath_contest(commands.Cog):
 
         if clan_id_str and clan_id_str != 'force':
             clan_list = (clan_id_str.upper()).split('@')
-            clan_name = clan_list[0]
+            clan_tag = clan_list[0]
             clan_realm = clan_list[1]
             lan_data = clans.find_one(
-                {'clan_name': clan_name, 'clan_realm': clan_realm})
+                {'clan_tag': clan_tag, 'clan_realm': clan_realm})
             if not clan_data:
                 await message.channel.send('Not found')
                 return
@@ -237,10 +237,10 @@ class blitz_aftermath_contest(commands.Cog):
         try:
             if clan_id_str:
                 clan_list = (clan_id_str.upper()).split('@')
-                clan_name = clan_list[0]
+                clan_tag = clan_list[0]
                 clan_realm = clan_list[1]
                 clan_data = clans.find_one(
-                    {'clan_name': clan_name, 'clan_realm': clan_realm})
+                    {'clan_tag': clan_tag, 'clan_realm': clan_realm})
                 clan_id = clan_data.get('clan_id')
             else:
                 guild_settings = guilds.find_one({'guild_id': guild_id})
@@ -251,18 +251,19 @@ class blitz_aftermath_contest(commands.Cog):
                 clan_id = guild_settings.get('default_clan_id')
                 clan_data = clan_data = clans.find_one(
                     {'clan_id': clan_id})
-                clan_name = clan_data.get('clan_tag')
+                clan_tag = clan_data.get('clan_tag')
             try:
                 await update_clan_marks(clan_id=clan_id)
             except:
                 pass
             clan_aces = get_clan_marks(clan_id=clan_id)
-            await message.channel.send(f'Players in [{clan_name}] earned {clan_aces} Ace Tankers *since 4:00PM on July 30th*.')
+            await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers *since 4:00PM on July 30th*.')
         except Exception as e:
+            print(str(traceback.format_exc()))
             await message.channel.send(f'Something did not work.\n```{e}```')
 
     # Commands
-    @commands.command(aliases=['c-init'])
+    @ commands.command(aliases=['c-init'])
     async def c_init(self, message):
         if message.author == self.client.user:
             return
@@ -285,7 +286,7 @@ class blitz_aftermath_contest(commands.Cog):
             await channel.send(f'Already enabled in {guild_name}', delete_after=10)
 
     # Commands
-    @commands.command(aliases=['c-add'])
+    @ commands.command(aliases=['c-add'])
     async def addclan(self, message, clan_id):
         if message.author == self.client.user:
             return
@@ -295,19 +296,19 @@ class blitz_aftermath_contest(commands.Cog):
         status_code = None
         try:
             clan_id_list = (clan_id.upper()).split('@')
-            clan_name = clan_id_list[0]
+            clan_tag = clan_id_list[0]
             clan_realm = clan_id_list[1] or None
 
             api_domain = get_wg_api_domain(clan_realm)
             if not api_domain:
                 raise Exception(f'{clan_realm} is not valid realm')
-            url = api_domain + wg_clan_api_url_base + clan_name
+            url = api_domain + wg_clan_api_url_base + clan_tag
             res = requests.get(url)
             status_code = res.status_code
             res_json = rapidjson.loads(res.text)
             clan_id = res_json.get('data')[0].get('clan_id') or None
         except Exception as e:
-            await message.channel.send(f'I was not able to find anything matching {clan_name} on {clan_realm} [{status_code}]\n```{e}```', delete_after=30)
+            await message.channel.send(f'I was not able to find anything matching {clan_tag} on {clan_realm} [{status_code}]\n```{e}```', delete_after=30)
             return
 
         if clan_id:
@@ -315,13 +316,13 @@ class blitz_aftermath_contest(commands.Cog):
             if not clan:
                 new_clan = {
                     'clan_id': clan_id,
-                    'clan_name': clan_name,
+                    'clan_tag': clan_tag,
                     'clan_realm': clan_realm,
                 }
                 response = clans.insert_one(new_clan)
-                await channel.send(f'Enabled for {clan_name}\n```{response}```', delete_after=10)
+                await channel.send(f'Enabled for {clan_tag}\n```{response}```', delete_after=10)
             else:
-                await channel.send(f'Already enabled for {clan_name}', delete_after=10)
+                await channel.send(f'Already enabled for {clan_tag}', delete_after=10)
 
     # Commands
     @ commands.command()
@@ -333,26 +334,26 @@ class blitz_aftermath_contest(commands.Cog):
         guild_settings = guilds.find_one({'guild_id': guild_id})
 
         clan_list = (clan_str.upper()).split('@')
-        clan_name = clan_list[0]
+        clan_tag = clan_list[0]
         clan_realm = clan_list[1]
         api_domain = get_wg_api_domain(clan_realm)
         if not api_domain:
             raise Exception(f'{clan_realm} is not valid realm')
-        url = api_domain + wg_clan_api_url_base + clan_name
+        url = api_domain + wg_clan_api_url_base + clan_tag
         res = requests.get(url)
         if res.status_code != 200:
-            await message.channel.send(f'Unable to find a clan named {clan_name} on {clan_realm}')
+            await message.channel.send(f'Unable to find a clan named {clan_tag} on {clan_realm}')
             return
         else:
             res_json = rapidjson.loads(res.text)
             clan_id = res_json.get('data')[0].get('clan_id') or None
-            new_clan_name = res_json.get('data')[0].get('tag') or None
+            new_clan_tag = res_json.get('data')[0].get('tag') or None
             guilds.update_one(
                 guild_settings, {"$set": {"default_clan_id": clan_id}})
 
             new_default_clan_id = clan_id
 
-            await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_name}', delete_after=30)
+            await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_tag}', delete_after=30)
 
 
 def setup(client):
