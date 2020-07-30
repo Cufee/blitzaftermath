@@ -130,6 +130,10 @@ class blitz_aftermath_contest(commands.Cog):
     async def on_ready(self):
         print(f'[Beta] Aftermath Contest cog is ready.')
 
+    @tasks.loop(hours=1)
+    async def printer(self):
+        await update_clan_marks()
+
     # Commands
     @commands.command(aliases=['contest', 'm'])
     async def mastery(self, message):
