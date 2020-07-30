@@ -235,6 +235,8 @@ class blitz_aftermath_contest(commands.Cog):
                 last_marks = last_marks_dict.get('badges_total')
                 last_marks_time = last_marks_dict.get('timestamp')
 
+                print(last_marks_time, datetime.now())
+
                 time_delta = datetime.now() - last_marks_time
 
                 await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of mastery over the past {(time_delta.seconds // 3600)} hours')
