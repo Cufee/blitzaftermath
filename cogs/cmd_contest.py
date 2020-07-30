@@ -3,8 +3,10 @@ import discord
 import requests
 import rapidjson
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
+
+import traceback
 
 client = MongoClient(
     "mongodb+srv://vko:XwufAAtwZh2JxR3E@cluster0-ouwv6.mongodb.net/<dbname>?retryWrites=true&w=majority")
@@ -107,7 +109,7 @@ async def update_clan_marks(clan_id=None, channel=None):
             clan_entry = {
                 'clan_id': clan_id,
                 'badges_total': badges_total,
-                'timestamp': datetime.now(),
+                'timestamp': datetime.utcnow(),
             }
             clan_entries.append(clan_entry)
 
@@ -229,19 +231,20 @@ class blitz_aftermath_contest(commands.Cog):
         else:
             try:
                 current_marks = list(clan_marks.find(
-                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.now() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total')
+                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', -1).limit(1))[0].get('badges_total')
                 last_marks_dict = list(clan_marks.find(
-                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.now() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
+                    {'clan_id': clan_id, 'timestamp': {"$gt": datetime.utcnow() - timedelta(hours=24)}}).sort('timestamp', 1).limit(1))[0]
                 last_marks = last_marks_dict.get('badges_total')
                 last_marks_time = last_marks_dict.get('timestamp')
 
-                print(last_marks_time, datetime.now())
+                print(last_marks_time, datetime.utcnow())
 
-                time_delta = datetime.now() - last_marks_time
+                time_delta = datetime.utcnow() - last_marks_time
 
                 await message.channel.send(f'Players in {clan_name} earned {current_marks - last_marks} Marks of mastery over the past {(time_delta.seconds // 3600)} hours')
 
             except Exception as e:
+                print(e, str(traceback.format_exc()))
                 await message.channel.send(f'Oh no, something did not work!\n```{e}```', delete_after=15)
 
         return
