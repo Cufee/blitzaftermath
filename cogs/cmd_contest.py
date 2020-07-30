@@ -240,6 +240,9 @@ class blitz_aftermath_contest(commands.Cog):
                 clan_id = clan.get('clan_id', None)
             except:
                 api_domain = get_wg_api_domain(clan_realm)
+                if not api_domain:
+                    await message.channel.send(f'Unable to find {clan_name} on {clan_realm}')
+                    return
                 url = api_domain + wg_clan_api_url_base + clan_name
                 res = requests.get(url)
                 if res.status_code != 200:
@@ -260,6 +263,7 @@ class blitz_aftermath_contest(commands.Cog):
                     await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
                     newclan = False
                 except:
+                    newclan = True
                     new_clan = {
                         'clan_id': clan_id,
                         'clan_name': clan_name,
@@ -267,7 +271,6 @@ class blitz_aftermath_contest(commands.Cog):
                     }
                     response = clans.insert_one(new_clan)
                     await update_clan_marks(clan_id=clan_id, clan_realm=clan_realm)
-                    newclan = True
                     return
                 finally:
                     current_marks = list(clan_marks.find(
@@ -305,6 +308,8 @@ class blitz_aftermath_contest(commands.Cog):
         clan_name = clan_list[0]
         clan_realm = clan_list[1]
         api_domain = get_wg_api_domain(clan_realm)
+        if not api_domain:
+            raise Exception(f'{clan_realm} is not valid realm')
         url = api_domain + wg_clan_api_url_base + clan_name
         res = requests.get(url)
         if res.status_code != 200:
