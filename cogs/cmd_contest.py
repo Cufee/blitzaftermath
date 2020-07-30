@@ -175,6 +175,7 @@ async def update_clan_marks(clan_id=None, channel=None):
         return result_clans.bulk_api_result, result_players.bulk_api_result
     except BulkWriteError as bwe:
         print(bwe.with_traceback)
+        pass
 
 
 def get_clan_marks(clan_id):
@@ -249,8 +250,10 @@ class blitz_aftermath_contest(commands.Cog):
                 clan_data = clan_data = clans.find_one(
                     {'clan_id': clan_id})
                 clan_name = clan_data.get('clan_tag')
-
-            await update_clan_marks(clan_id=clan_id)
+            try:
+                await update_clan_marks(clan_id=clan_id)
+            except:
+                pass
             clan_aces = get_clan_marks(clan_id=clan_id)
             await message.channel.send(f'Players in [{clan_name}] earned {clan_aces} Ace Tankers so far.')
         except Exception as e:
