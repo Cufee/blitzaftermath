@@ -95,6 +95,7 @@ async def update_clan_marks(clan_id=None, clan_realm=None, channel=None):
                 print(f'Failed to update for {clan_id}')
                 continue
 
+            lastMembers = clans.find_one()
             members = res_data.get(
                 str(clan_id)).get('members_ids') or []
             members_str = ','.join(str(m) for m in members)
@@ -114,6 +115,7 @@ async def update_clan_marks(clan_id=None, clan_realm=None, channel=None):
             clan_entry = {
                 'clan_id': clan_id,
                 'badges_total': badges_total,
+                'lastMembers': members,
                 'timestamp': datetime.utcnow(),
             }
             clan_entries.append(clan_entry)
