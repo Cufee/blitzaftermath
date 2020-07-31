@@ -232,8 +232,9 @@ class blitz_aftermath_contest(commands.Cog):
 
     @tasks.loop(hours=1)
     async def printer(self):
-        update_clan_marks()
-        print('Updated clan data')
+        print('Started hourly data update')
+        await create_queue()
+        print('Finished hourly data update')
 
     # Commands
     @commands.command()
