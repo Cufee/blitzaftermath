@@ -51,7 +51,7 @@ def get_wg_api_domain(realm):
     return api_domain
 
 
-async def update_clan_marks(clan_id=None, channel=None, force=True):
+async def update_clan_marks(clan_id=None, channel=None, force=False):
 
     clan_ids = {
         'NA': [],
@@ -229,6 +229,7 @@ class blitz_aftermath_contest(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'[Beta] Aftermath Contest cog is ready.')
+        self.printer.start()
 
     @tasks.loop(hours=1)
     async def printer(self):
