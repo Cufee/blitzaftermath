@@ -408,7 +408,6 @@ class blitz_aftermath_contest(commands.Cog):
     async def top(self, message):
         if message.author == self.client.user:
             return
-        await create_queue()
         image = Render().render_image()
         await message.channel.send(file=image)
 
