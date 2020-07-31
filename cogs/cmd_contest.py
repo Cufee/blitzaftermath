@@ -223,16 +223,16 @@ class blitz_aftermath_contest(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.update_monkey.start()
 
     # Events
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'[Beta] Aftermath Contest cog is ready.')
-        self.printer.start()
 
     @tasks.loop(hours=1)
-    async def printer(self):
+    async def update_monkey(self):
         print('Started hourly data update')
         await create_queue()
         print('Finished hourly data update')
