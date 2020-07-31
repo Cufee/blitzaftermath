@@ -15,7 +15,7 @@ TOKEN = settings["TOKEN"]
 mode = settings["mode"]
 prefix = settings["prefix"]
 default_game = settings["default_game"]
-client = commands.Bot(command_prefix=prefix, case_insensitive=True)
+client = commands.Bot(command_prefix=prefix, case_insensitive=False)
 
 
 # Connect to db
