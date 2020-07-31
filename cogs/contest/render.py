@@ -24,9 +24,9 @@ players = db.players
 
 
 class Render:
-    def __init__(self, top_count=5):
+    def __init__(self, top_count=5, realm='NA'):
         self.top_count = top_count
-        self.top_clans_list = list(clans.find().sort(
+        self.top_clans_list = list(clans.find({'clan_realm': realm}).sort(
             'clan_aces', -1).limit(top_count))
 
         self.render_prep()
