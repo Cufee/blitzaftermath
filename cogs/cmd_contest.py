@@ -365,6 +365,7 @@ class blitz_aftermath_contest(commands.Cog):
                     'clan_realm': clan_realm,
                     'clan_name': clan_tag,
                     'clan_aces': 0,
+                    'timestamp': datetime.utcnow()
                 }
                 response = clans.insert_one(new_clan)
                 await channel.send(f'Enabled for {clan_tag}', delete_after=10)
