@@ -241,7 +241,11 @@ class blitz_aftermath_contest(commands.Cog):
                 clan_realm = clan_list[1]
                 clan_data = clans.find_one(
                     {'clan_tag': clan_tag, 'clan_realm': clan_realm})
-                clan_id = clan_data.get('clan_id')
+                if not clan_data:
+                    await self.addclan(message, clan_id_str)
+
+                clan_id = clans.find_one(
+                    {'clan_tag': clan_tag, 'clan_realm': clan_realm}).get('clan_id')
             else:
                 guild_settings = guilds.find_one({'guild_id': guild_id})
                 if not guild_settings:
@@ -287,7 +291,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @ commands.command(aliases=['c-add'])
-    async def addclan(self, message, clan_id):
+    async def addclan(self, message, clan_id_str):
         if message.author == self.client.user:
             return
 
@@ -295,7 +299,7 @@ class blitz_aftermath_contest(commands.Cog):
         clan_id = None
         status_code = None
         try:
-            clan_id_list = (clan_id.upper()).split('@')
+            clan_id_list = (clan_id_str.upper()).split('@')
             clan_tag = clan_id_list[0]
             clan_realm = clan_id_list[1] or None
 
@@ -320,7 +324,7 @@ class blitz_aftermath_contest(commands.Cog):
                     'clan_realm': clan_realm,
                 }
                 response = clans.insert_one(new_clan)
-                await channel.send(f'Enabled for {clan_tag}\n```{response}```', delete_after=10)
+                await channel.send(f'Enabled for {clan_tag}', delete_after=10)
             else:
                 await channel.send(f'Already enabled for {clan_tag}', delete_after=10)
 
