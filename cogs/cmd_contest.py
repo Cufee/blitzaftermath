@@ -264,7 +264,7 @@ class blitz_aftermath_contest(commands.Cog):
             await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
         except Exception as e:
             print(str(traceback.format_exc()))
-            await message.channel.send(f'Something did not work.\n```{e}```')
+            await message.channel.send(f'Something did not work.\n```{e}```', delete_after=30)
 
     # Commands
     @ commands.command(aliases=['c-init'])
@@ -312,8 +312,8 @@ class blitz_aftermath_contest(commands.Cog):
             res_json = rapidjson.loads(res.text)
             clan_id = res_json.get('data')[0].get('clan_id') or None
         except Exception as e:
-            await message.channel.send(f'I was not able to find anything matching {clan_tag} on {clan_realm} [{status_code}]\n```{e}```', delete_after=30)
-            return
+            await message.channel.send(f'I was not able to find anything matching {clan_tag} on {clan_realm} [{status_code}]', delete_after=30)
+            pass
 
         if clan_id:
             clan = clans.find_one({'clan_id': clan_id})
