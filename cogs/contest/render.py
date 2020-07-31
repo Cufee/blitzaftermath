@@ -16,8 +16,7 @@ from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
 
-client = MongoClient(
-    "mongodb+srv://vko:XwufAAtwZh2JxR3E@cluster0-ouwv6.mongodb.net/<dbname>?retryWrites=true&w=majority")
+client = MongoClient("mongodb://51.222.13.110:27017")
 db = client.summer2020contest
 
 clans = db.clans
@@ -104,7 +103,7 @@ class Render:
 
         tag_draw_h = round(
             (self.clan_card_h - tag_h - name_h) / 3)
-        tag_draw_w = tag_draw_h * 2
+        tag_draw_w = tag_draw_h * 4
         draw.text((tag_draw_w, tag_draw_h), clan_tag,
                   self.font_color_base, font=self.font)
 

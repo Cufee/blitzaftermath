@@ -1,19 +1,19 @@
 from discord.ext import commands, tasks
 import discord
+import asyncio
 import requests
 import rapidjson
+import traceback
 
 from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
 
-import traceback
 
 from cogs.contest.render import Render
 
-client = MongoClient(
-    "mongodb+srv://vko:XwufAAtwZh2JxR3E@cluster0-ouwv6.mongodb.net/<dbname>?retryWrites=true&w=majority")
+client = MongoClient("mongodb://51.222.13.110:27017")
 db = client.summer2020contest
 
 guilds = db.guilds
@@ -68,7 +68,7 @@ async def update_clan_marks(clan_id=None, channel=None, force=False):
             clan_realm = clan_data.get('clan_realm')
             clan_id = clan_data.get('clan_id')
             if not clan_id or not clan_realm:
-                print(f'Skipping {clan_id} on {clan_realm}')
+                print(f'Skipping clan {clan_id} on {clan_realm}')
                 continue
 
             current_list = clan_ids.get(clan_realm)
@@ -89,7 +89,6 @@ async def update_clan_marks(clan_id=None, channel=None, force=False):
 
         res_data = rapidjson.loads(res.text).get('data') or None
         if not res_data:
-            print(rapidjson.dumps(rapidjson.loads(res.text), indent=2))
             raise Exception('Incomplete data received from WG API')
             continue
 
@@ -126,7 +125,7 @@ async def update_clan_marks(clan_id=None, channel=None, force=False):
                 if not last_player_data:
                     insert_obj = InsertOne({
                         'player_id': player_id,
-                        'aces': None,
+                        'aces': 0,
                         'timestamp': datetime.utcnow()
                     })
                     player_update_obj_list.append(insert_obj)
@@ -172,11 +171,16 @@ async def update_clan_marks(clan_id=None, channel=None, force=False):
             clan_update_obj_list.append(clan_update_obj)
 
     try:
-        result_clans = clans.bulk_write(clan_update_obj_list)
-        result_players = players.bulk_write(player_update_obj_list)
-        return result_clans.bulk_api_result, result_players.bulk_api_result
+        if clan_update_obj_list:
+            result_clans = clans.bulk_write(
+                clan_update_obj_list, ordered=False)
+        if player_update_obj_list:
+            result_players = players.bulk_write(
+                player_update_obj_list, ordered=False)
+        print(
+            f'[{clan_id}] Updated {len(clan_update_obj_list)} clans and {len(player_update_obj_list)} players')
     except BulkWriteError as bwe:
-        print(bwe.with_traceback)
+        print(bwe.details)
         pass
 
 
@@ -186,6 +190,33 @@ def get_clan_marks(clan_id):
     clan_data = clans.find_one({'clan_id': clan_id})
     clan_aces = clan_data.get('clan_aces')
     return clan_aces
+
+
+async def start_update_queue(queue):
+    while True:
+        clan_id = await queue.get()
+        await update_clan_marks(clan_id=clan_id)
+        queue.task_done()
+
+
+async def create_queue(clan_id=None, force=False):
+    queue = asyncio.Queue()
+    if not clan_id:
+        clans_all = clans.find()
+        for clan in clans_all:
+            queue.put_nowait(clan.get('clan_id'))
+    else:
+        queue.put_nowait(clan_id)
+
+    # Create worker tasks to process the queue concurrently.
+    tasks = []
+    for i in range(10):
+        task = asyncio.create_task(start_update_queue(queue))
+        tasks.append(task)
+    await queue.join()
+    # Cancel our worker tasks.
+    for task in tasks:
+        task.cancel()
 
 
 class blitz_aftermath_contest(commands.Cog):
@@ -201,7 +232,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     @tasks.loop(hours=1)
     async def printer(self):
-        await update_clan_marks()
+        update_clan_marks()
         print('Updated clan data')
 
     # Commands
@@ -212,26 +243,32 @@ class blitz_aftermath_contest(commands.Cog):
         # await message.delete()
         guild_id = message.guild.id
 
+        print('Starting update')
+
         if clan_id_str and clan_id_str != 'force':
             clan_list = (clan_id_str.upper()).split('@')
             clan_tag = clan_list[0]
             clan_realm = clan_list[1]
-            lan_data = clans.find_one(
+            clan_data = clans.find_one(
                 {'clan_tag': clan_tag, 'clan_realm': clan_realm})
+            print(clan_tag, clan_realm)
             if not clan_data:
                 await message.channel.send('Not found')
+                print('Update Failed')
                 return
             clan_id = clan_data.get('clan_id', 0)
-            result_clans, result_players = await update_clan_marks(clan_id=clan_id)
+            await create_queue(clan_id=clan_id)
         elif clan_id_str == 'force':
-            result_clans, result_players = await update_clan_marks(force=True)
+            await create_queue(force=True)
         else:
-            result_clans, result_players = await update_clan_marks()
+            await create_queue()
 
-        await message.channel.send(f'Update complete\n```{result_clans}```\n```{result_players}```')
+        print('Update Complete')
+
+        # await message.channel.send(f'Update complete\n```{result_clans}```\n```{result_players}```')
 
     # Commands
-    @commands.command(aliases=['c'])
+    @ commands.command(aliases=['c'])
     async def check(self, message, clan_id_str=None):
         if message.author == self.client.user:
             return
@@ -259,7 +296,7 @@ class blitz_aftermath_contest(commands.Cog):
                     {'clan_id': clan_id})
                 clan_tag = clan_data.get('clan_tag')
             try:
-                await update_clan_marks(clan_id=clan_id)
+                await create_queue(clan_id=clan_id)
             except:
                 pass
             clan_aces = get_clan_marks(clan_id=clan_id)
@@ -324,6 +361,8 @@ class blitz_aftermath_contest(commands.Cog):
                     'clan_id': clan_id,
                     'clan_tag': clan_tag,
                     'clan_realm': clan_realm,
+                    'clan_name': clan_tag,
+                    'clan_aces': 0,
                 }
                 response = clans.insert_one(new_clan)
                 await channel.send(f'Enabled for {clan_tag}', delete_after=10)
