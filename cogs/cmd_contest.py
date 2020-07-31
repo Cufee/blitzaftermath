@@ -10,6 +10,8 @@ from pymongo.errors import BulkWriteError
 
 import traceback
 
+from cogs.contest.render import Render
+
 client = MongoClient(
     "mongodb+srv://vko:XwufAAtwZh2JxR3E@cluster0-ouwv6.mongodb.net/<dbname>?retryWrites=true&w=majority")
 db = client.summer2020contest
@@ -358,6 +360,14 @@ class blitz_aftermath_contest(commands.Cog):
             new_default_clan_id = clan_id
 
             await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_tag}', delete_after=30)
+
+    # Commands
+    @ commands.command()
+    async def top(self, message):
+        if message.author == self.client.user:
+            return
+        image = Render().render_image()
+        await message.channel.send(file=image)
 
 
 def setup(client):
