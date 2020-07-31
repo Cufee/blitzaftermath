@@ -51,7 +51,7 @@ def get_wg_api_domain(realm):
     return api_domain
 
 
-async def update_clan_marks(clan_id=None, channel=None, force=False):
+async def update_clan_marks(clan_id=None, channel=None, force=True):
 
     clan_ids = {
         'NA': [],

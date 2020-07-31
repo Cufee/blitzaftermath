@@ -74,7 +74,7 @@ class Render:
         self.font_color_base = (255, 255, 255)
 
         self.color_dict = {
-            0: (230, 180, 0, 100),
+            0: (255, 215, 0, 100),
             1: (192, 192, 192, 100),
             2: (205, 127, 50, 100),
         }
@@ -97,9 +97,9 @@ class Render:
 
         tag_w, tag_h = draw.textsize(clan_tag, font=self.font)
         name_w, name_h = draw.textsize(clan_name, font=self.font)
-        aces_w, aces_h = draw.textsize(str(clan_aces), font=self.font)
+        aces_w, aces_h = draw.textsize(str(clan_aces), font=self.font_fat)
         best_aces_w, best_aces_h = draw.textsize(
-            str(best_clan_aces), font=self.font)
+            str(best_clan_aces), font=self.font_fat)
 
         tag_draw_h = round(
             (self.clan_card_h - tag_h - name_h) / 3)
@@ -112,10 +112,10 @@ class Render:
         draw.text((name_draw_w, name_draw_h), clan_name,
                   self.font_color_base, font=self.font)
 
-        ace_draw_w = self.clan_card_w - (tag_draw_w) - aces_w
+        ace_draw_w = self.clan_card_w - best_aces_w - best_aces_w + self.text_margin_w
         ace_draw_h = round((self.clan_card_h - aces_h) / 2)
         draw.text((ace_draw_w, ace_draw_h), str(clan_aces),
-                  self.font_color_base, font=self.font)
+                  self.font_color_base, font=self.font_fat)
 
         ace_icon_draw_w = self.clan_card_w - \
             ace_icon_size - (best_aces_w*2)
