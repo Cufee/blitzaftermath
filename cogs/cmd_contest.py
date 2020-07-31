@@ -377,7 +377,7 @@ class blitz_aftermath_contest(commands.Cog):
     async def myclan(self, message, clan_str):
         if message.author == self.client.user:
             return
-        await message.delete()
+        # await message.delete()
         guild_id = message.guild.id
         guild_settings = guilds.find_one({'guild_id': guild_id})
 
@@ -410,6 +410,30 @@ class blitz_aftermath_contest(commands.Cog):
             return
         image = Render().render_image()
         await message.channel.send(file=image)
+
+    # Commands
+    @ commands.command()
+    async def set(self, message, clan_str, aces):
+        if message.author == self.client.user:
+            return
+        guild_id = message.guild.id
+
+        clan_list = (clan_str.upper()).split('@')
+        clan_tag = clan_list[0]
+        clan_realm = clan_list[1]
+
+        clan_data = clans.find_one(
+            {'clan_tag': clan_tag, 'clan_realm': clan_realm})
+        if not clan_data:
+            await message.channel.send(f'Did not find {clan_tag} on {clan_realm}')
+            return
+
+        clan_id = clan_data.get('clan_id')
+        aces = int(aces)
+        clans.update_one(clan_data, {"$set": {"clan_aces": aces}})
+        await create_queue(clan_id=clan_id)
+        clan_aces = get_clan_marks(clan_id=clan_id)
+        await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
 
 
 def setup(client):
