@@ -238,6 +238,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command()
+    @commands.is_owner()
     async def update(self, message, clan_id_str=None):
         if message.author == self.client.user:
             return
@@ -308,6 +309,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command(aliases=['c-init'])
+    @commands.is_owner()
     async def c_init(self, message):
         if message.author == self.client.user:
             return
@@ -331,6 +333,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command(aliases=['c-add'])
+    @commands.is_owner()
     async def addclan(self, message, clan_id_str):
         if message.author == self.client.user:
             return
@@ -373,7 +376,8 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command()
-    async def myclan(self, message, clan_str):
+    @commands.is_owner()
+    async def defclan(self, message, clan_str):
         if message.author == self.client.user:
             return
         # await message.delete()
@@ -412,6 +416,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command()
+    @commands.is_owner()
     async def set(self, message, clan_str, aces):
         if message.author == self.client.user:
             return
