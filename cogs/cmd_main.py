@@ -33,6 +33,7 @@ class maintenance(commands.Cog):
 
         help_str = (f"""
 Use `v-check TAG@Realm` to check the current Ace Tanker count of a clan.
+You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
 To analyze a WoT Blitz replay, just send a file and I will do the rest.
         """)
 
