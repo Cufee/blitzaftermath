@@ -325,7 +325,7 @@ class blitz_aftermath_contest(commands.Cog):
                 'guild_name': guild_name,
                 'enabled': True,
                 'channel': channel_id,
-                'default_clan_id': None,
+                'default_clan_id': 0,
             }
             response = guilds.insert_one(new_guild_settings)
             await channel.send(f'Enabled in {guild_name}\n```{response}```', delete_after=10)
