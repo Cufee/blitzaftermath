@@ -10,7 +10,6 @@ from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
 
-
 from cogs.contest.render import Render
 
 client = MongoClient("mongodb://51.222.13.110:27017")
@@ -270,7 +269,7 @@ class blitz_aftermath_contest(commands.Cog):
         # await message.channel.send(f'Update complete\n```{result_clans}```\n```{result_players}```')
 
     # Commands
-    @ commands.command(aliases=['c'])
+    @commands.command(aliases=['c'])
     async def check(self, message, clan_id_str=None):
         if message.author == self.client.user:
             return
@@ -308,7 +307,7 @@ class blitz_aftermath_contest(commands.Cog):
             await message.channel.send(f'Something did not work.\n```{e}```', delete_after=30)
 
     # Commands
-    @ commands.command(aliases=['c-init'])
+    @commands.command(aliases=['c-init'])
     async def c_init(self, message):
         if message.author == self.client.user:
             return
@@ -323,7 +322,7 @@ class blitz_aftermath_contest(commands.Cog):
                 'guild_name': guild_name,
                 'enabled': True,
                 'channel': channel_id,
-                'default_clan_id': None,
+                'default_clan_id': 0,
             }
             response = guilds.insert_one(new_guild_settings)
             await channel.send(f'Enabled in {guild_name}\n```{response}```', delete_after=10)
@@ -331,7 +330,7 @@ class blitz_aftermath_contest(commands.Cog):
             await channel.send(f'Already enabled in {guild_name}', delete_after=10)
 
     # Commands
-    @ commands.command(aliases=['c-add'])
+    @commands.command(aliases=['c-add'])
     async def addclan(self, message, clan_id_str):
         if message.author == self.client.user:
             return
@@ -373,7 +372,7 @@ class blitz_aftermath_contest(commands.Cog):
                 await channel.send(f'Already enabled for {clan_tag}', delete_after=10)
 
     # Commands
-    @ commands.command()
+    @commands.command()
     async def myclan(self, message, clan_str):
         if message.author == self.client.user:
             return
@@ -404,7 +403,7 @@ class blitz_aftermath_contest(commands.Cog):
             await message.channel.send(f'Updated the default clan for {message.guild.name} to {new_clan_tag}', delete_after=30)
 
     # Commands
-    @ commands.command()
+    @commands.command()
     async def top(self, message):
         if message.author == self.client.user:
             return
@@ -412,7 +411,7 @@ class blitz_aftermath_contest(commands.Cog):
         await message.channel.send(file=image)
 
     # Commands
-    @ commands.command()
+    @commands.command()
     async def set(self, message, clan_str, aces):
         if message.author == self.client.user:
             return

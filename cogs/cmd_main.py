@@ -27,6 +27,17 @@ class maintenance(commands.Cog):
     # Commands
     # @commands.command(aliases=[''])
 
+    @commands.command(aliases=['help'])
+    async def _help(self, ctx):
+        guild_id = ctx.guild.id
+
+        help_str = (f"""
+Use `v-check TAG@Realm` to check the current Ace Tanker count of a clan.
+To analyze a WoT Blitz replay, just send a file and I will do the rest.
+        """)
+
+        await ctx.send(help_str)
+
 
 def setup(client):
     client.add_cog(maintenance(client))

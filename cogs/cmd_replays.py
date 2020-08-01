@@ -234,6 +234,7 @@ class blitz_aftermath_replays(commands.Cog):
     # @commands.command(aliases=[''])
 
     @commands.command(aliases=['lh', 'lookhere'])
+    @commands.has_permissions(manage_messages=True)
     async def LookHere(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
@@ -283,6 +284,7 @@ class blitz_aftermath_replays(commands.Cog):
                 return
 
     @commands.command(aliases=['la', 'lookaway'])
+    @commands.has_permissions(manage_messages=True)
     async def LookAway(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
@@ -318,6 +320,7 @@ class blitz_aftermath_replays(commands.Cog):
             await ctx.send(f'I am not watching #{channel_name} right now. You can add this channel by typing `{self.client.command_prefix}WatchHere`', delete_after=30)
 
     @commands.command(aliases=['olh', 'LookOnlyHere', 'onlylookhere', 'lookonlyhere'])
+    @commands.has_permissions(manage_messages=True)
     async def OnlyLookHere(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
