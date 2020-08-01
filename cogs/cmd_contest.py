@@ -416,7 +416,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command()
-    @commands.is_owner()
+    # @commands.is_owner()
     async def set(self, message, clan_str, aces):
         if message.author == self.client.user:
             return
