@@ -222,7 +222,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        # self.update_monkey.start()
+        self.update_monkey.start()
 
     # Events
     # @commands.Cog.listener()
