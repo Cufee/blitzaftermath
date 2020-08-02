@@ -240,7 +240,7 @@ class UpdateCache():
                 res = requests.get(req_url)
                 for player_ in list_:
                     res_j = rapidjson.loads(res.text)
-                    if res_j.status_code != 200:
+                    if res.status_code != 200:
                         print(
                             f'WG API player info responded with [{res_j.status_code}]')
                         break
