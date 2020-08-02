@@ -12,6 +12,7 @@ import requests
 import rapidjson
 
 from datetime import datetime, timedelta, timezone
+from pytz import timezone
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
@@ -61,6 +62,24 @@ class Render:
                     i-1), player_data=self.top_players_list[i])
 
     def render_prep(self):
+        # Import fonts
+        self.font_size = 20
+        self.font = ImageFont.truetype(
+            "./cogs/replays/render/fonts/font.ttf", self.font_size)
+        self.font_fat = ImageFont.truetype(
+            "./cogs/replays/render/fonts/font_fat.ttf", (int(self.font_size * 1.25)))
+        self.font_slim = ImageFont.truetype(
+            "./cogs/replays/render/fonts/font_slim.ttf", self.font_size)
+
+        self.font_color_base = (255, 255, 255)
+        self.font_color_half = (200, 200, 200, 100)
+
+        self.color_dict = {
+            0: (255, 215, 0, 100),
+            1: (192, 192, 192, 100),
+            2: (205, 127, 50, 100),
+        }
+
         self.frame_margin_w = 50
         self.frame_margin_h = 50
         self.clan_card_w = 400
@@ -70,7 +89,8 @@ class Render:
         self.frame_w = (self.frame_margin_w*2) + self.clan_card_w
         self.frame_h = int((self.frame_margin_h*2) +
                            (self.clan_card_h * self.top_count) +
-                           ((self.clan_card_h / 2) * len(self.top_players_list))
+                           ((self.clan_card_h / 2) *
+                            (len(self.top_players_list)))
                            )
         self.frame = Image.new(
             'RGBA', (self.frame_w, self.frame_h), (0, 0, 0, 255))
@@ -91,22 +111,15 @@ class Render:
         self.frame.paste(self.bg)
         self.frame_draw = ImageDraw.Draw(self.frame)
 
-        # Import fonts
-        self.font_size = 20
-        self.font = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font.ttf", self.font_size)
-        self.font_fat = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font_fat.ttf", (int(self.font_size * 1.25)))
-        self.font_slim = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font_slim.ttf", self.font_size)
-
-        self.font_color_base = (255, 255, 255)
-
-        self.color_dict = {
-            0: (255, 215, 0, 100),
-            1: (192, 192, 192, 100),
-            2: (205, 127, 50, 100),
-        }
+        last_stamp_conv = (self.top_clans_list[0].get(
+            'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
+        last_stamp = last_stamp_conv.strftime("Updated at %H:%M PST")
+        stamp_w, stamp_h = self.frame_draw.textsize(
+            last_stamp, font=self.font_slim)
+        time_draw_w = int((self.frame_w - stamp_w) / 2)
+        time_draw_h = self.frame_h - stamp_h - (self.text_margin_h / 2)
+        self.frame_draw.text((time_draw_w, time_draw_h), last_stamp,
+                             self.font_color_half, font=self.font_slim)
 
     def render_clan_card(self, card_index):
         card_height = self.clan_card_h
