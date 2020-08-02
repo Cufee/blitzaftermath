@@ -233,7 +233,7 @@ class UpdateCache():
             clans_update_obj.append(clan_update)
 
             # Update players without nicknames
-            requst_list = list(divide_chunks(player_name_check, 99))
+            requst_list = list(self.divide_chunks(player_name_check, 99))
             for list_ in requst_list:
                 req_url = self.api_domain + wg_player_info_api_url_base + \
                     ','.join(str(p) for p in list_)
