@@ -96,7 +96,7 @@ class UpdateCache():
             print(f'Working on {clan_name}')
             last_aces = clan.get('clan_aces')
             last_query_aces = clan.get(
-                f'clan_aces_{self.nation}_{self.starting_tier}', 0)
+                f'clan_aces_{self.nation}_{self.starting_tier}')
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)
@@ -211,16 +211,19 @@ class UpdateCache():
                 players_update_obj.append(player_update)
 
                 clan_aces_gained += aces_gained
-                if current_player_query_aces < last_player_query_aces:
+                if not last_player_query_aces:
+                    last_query_aces = -clan_query_aces_gained
+                elif current_player_query_aces < last_player_query_aces:
                     last_query_aces = last_query_aces - \
                         last_player_query_aces + current_player_query_aces
-                    clan_query_aces_gained = 0
                 else:
                     clan_query_aces_gained += (current_player_query_aces -
                                                last_player_query_aces)
 
             # if clan_aces_gained == last_aces and last_members:
             #     continue
+            if last_aces == None:
+                last_aces = - clan_aces_gained
 
             clan_update = UpdateOne({'clan_id': clan_id}, {'$set': {
                 'clan_aces': (last_aces + clan_aces_gained),
