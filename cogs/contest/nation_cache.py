@@ -120,9 +120,9 @@ class UpdateCache():
             for player_id in current_members:
                 print(requests_cnt)
                 if requests_cnt % 20 == 0:
-                    sleep(10)
+                    sleep(5)
                     if requests_cnt % 200 == 0:
-                        sleep(20)
+                        sleep(25)
 
                 if last_members != [] and player_id not in last_members:
                     continue
@@ -235,12 +235,12 @@ class UpdateCache():
             clans_update_obj.append(clan_update)
 
         try:
-            # if clans_update_obj:
-            #     result_clans = clans.bulk_write(
-            #         clans_update_obj, ordered=False)
-            # if players_update_obj:
-            #     result_players = players.bulk_write(
-            #         players_update_obj, ordered=False)
+            if clans_update_obj:
+                result_clans = clans.bulk_write(
+                    clans_update_obj, ordered=False)
+            if players_update_obj:
+                result_players = players.bulk_write(
+                    players_update_obj, ordered=False)
             print(
                 f'Updated {len(clans_update_obj)} clans and {len(players_update_obj)} players')
 
