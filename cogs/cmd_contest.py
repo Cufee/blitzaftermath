@@ -415,7 +415,7 @@ class blitz_aftermath_contest(commands.Cog):
     async def top(self, message):
         if message.author == self.client.user:
             return
-        image = Render(top_players=3).render_image()
+        image = Render().render_image()
         await message.channel.send(file=image)
 
     # Commands
