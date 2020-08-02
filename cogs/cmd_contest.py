@@ -297,12 +297,16 @@ class blitz_aftermath_contest(commands.Cog):
                 clan_data = clan_data = clans.find_one(
                     {'clan_id': clan_id})
                 clan_tag = clan_data.get('clan_tag')
-            try:
-                await create_queue(clan_id=clan_id)
-            except:
-                pass
-            clan_aces = get_clan_marks(clan_id=clan_id)
-            await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
+            # try:
+            #     await create_queue(clan_id=clan_id)
+            # except:
+            #     pass
+            # clan_aces = get_clan_marks(clan_id=clan_id)
+            # await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
+
+            image = Render(top_players=3, clan_id=clan_id).render_image()
+            await message.channel.send(file=image)
+
         except Exception as e:
             print(str(traceback.format_exc()))
             await message.channel.send(f'Something did not work.\n```{e}```', delete_after=30)
@@ -411,10 +415,11 @@ class blitz_aftermath_contest(commands.Cog):
     async def top(self, message):
         if message.author == self.client.user:
             return
-        image = Render().render_image()
+        image = Render(top_players=3).render_image()
         await message.channel.send(file=image)
 
     # Commands
+
     @commands.command()
     # @commands.is_owner()
     async def set(self, message, clan_str, aces):

@@ -1,4 +1,5 @@
 import requests
+import rapidjson
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
@@ -13,10 +14,41 @@ players = db.players
 tanks = glossary.tanks
 clan_marks = db.marksOfMastery
 
-# all_players = players.find()
+all_players = players.find()
 
-# for player_ in all_players:
-#     players.update_one(player_, {"$set": {'aces_gained': 0}})
+
+def divide_chunks(l, n):
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+url = 'https://api.wotblitz.com/wotb/account/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
+
+
+player_ids = players.find().distinct('player_id')
+
+requst_list = list(divide_chunks(player_ids, 90))
+
+for list_ in requst_list:
+    req_url = url + ','.join(str(p) for p in list_)
+    res = requests.get(req_url)
+
+    for player_ in list_:
+
+        res_j = rapidjson.loads(res.text)
+        data = res_j.get(
+            'data', {})
+        player_data = data.get(str(player_), {})
+
+        if not player_data:
+            continue
+        player_name = player_data.get(
+            'nickname', 'Unknown')
+
+        players.update_one({'player_id': player_}, {
+                           "$set": {'player_name': player_name}})
+        print(player_name)
 
 # all_clans = clans.find()
 
