@@ -215,7 +215,7 @@ class UpdateCache():
 
                 clan_aces_gained += aces_gained
                 if current_player_query_aces < last_player_query_aces:
-                    continue
+                    last_query_aces - last_player_query_aces + current_player_query_aces
                 elif last_player_query_aces == 0:
                     clan_query_aces_gained = 0
                 else:
