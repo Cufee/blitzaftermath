@@ -25,13 +25,20 @@ players = db.players
 
 
 class Render:
-    def __init__(self, top_count=5, realm='NA', top_players=0, clan_id=None):
+    def __init__(self, top_count=5, realm='NA', nation=None, starting_tier=None, top_players=0, clan_id=None):
         if top_players > 0:
             top_count = 1
+
+        self.aces_search_string = 'clan_aces'
+        if nation and starting_tier:
+            self.aces_search_string = f'clan_aces_{nation}_{starting_tier}'
+
+        print(nation, starting_tier)
+
         self.top_players = top_players
         self.top_count = top_count
         self.top_clans_list = list(clans.find({'clan_realm': realm}).sort(
-            'clan_aces', -1).limit(top_count))
+            self.aces_search_string, -1).limit(top_count))
 
         self.top_players_list = []
         if top_players > 0:
@@ -137,8 +144,8 @@ class Render:
         clan_data = self.top_clans_list[card_index]
         clan_tag = f'[{clan_data.get("clan_tag")}]'
         clan_name = clan_data.get('clan_name')
-        clan_aces = clan_data.get('clan_aces')
-        best_clan_aces = self.top_clans_list[-1].get('clan_aces')
+        clan_aces = clan_data.get(self.aces_search_string)
+        best_clan_aces = self.top_clans_list[-1].get(self.aces_search_string)
 
         tag_w, tag_h = draw.textsize(clan_tag, font=self.font)
         name_w, name_h = draw.textsize(clan_name, font=self.font)
