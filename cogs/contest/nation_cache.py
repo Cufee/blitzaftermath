@@ -172,7 +172,7 @@ class UpdateCache():
                 aces_gained_adjusted = aces_gained
                 if last_player_query_aces < current_player_query_aces and last_player_query_aces != 0 and clan_id in self.top_clans:
                     aces_gained_adjusted = current_player_query_aces - last_player_query_aces
-                elif last_player_query_aces < current_player_query_aces and last_player_query_aces == 0 and clan_id in self.top_clans:
+                elif last_player_query_aces == 0 and clan_id in self.top_clans:
                     aces_gained_adjusted = 0
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
