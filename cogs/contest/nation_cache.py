@@ -21,6 +21,7 @@ tanks = glossary.tanks
 
 wg_api_url_base = '/wotb/clans/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&clan_id='
 wg_player_api_url_base = '/wotb/account/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
+wg_player_info_api_url_base = '/wotb/account/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 wg_clan_api_url_base = '/wotb/clans/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search='
 wg_clan_info_api_url_base = '/wotb/clans/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&clan_id='
 wg_player_medals_api_url_base = '/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
@@ -88,6 +89,7 @@ class UpdateCache():
                 f'Unable to access WG clan API usin {clan_id}. [{clan_res.status_code}]')
 
         requests_cnt = 0
+        player_name_check = []
         for clan in all_clans:
             clan_id = clan.get('clan_id')
             clan_name = clan.get('clan_name')
@@ -136,12 +138,16 @@ class UpdateCache():
                 if not last_player_data:
                     insert_obj = InsertOne({
                         'player_id': player_id,
+                        'player_name': player_id,
                         'aces': current_player_aces,
                         f'aces_{self.nation}_{self.starting_tier}': current_player_aces,
                         'timestamp': datetime.utcnow()
                     })
                     players_update_obj.append(insert_obj)
                     continue
+                player_name = last_player_data.get('player_name', None)
+                if not player_name:
+                    player_name_check.append(player_id)
 
                 last_player_aces: int = last_player_data.get(
                     'aces', current_player_aces)
@@ -225,6 +231,35 @@ class UpdateCache():
                 f'{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
             clans_update_obj.append(clan_update)
 
+            # Update players without nicknames
+            requst_list = list(divide_chunks(player_name_check, 99))
+            for list_ in requst_list:
+                req_url = self.api_domain + wg_player_info_api_url_base + \
+                    ','.join(str(p) for p in list_)
+                res = requests.get(req_url)
+                for player_ in list_:
+                    res_j = rapidjson.loads(res.text)
+                    if res_j.status_code != 200:
+                        print(
+                            f'WG API player info responded with [{res_j.status_code}]')
+                        break
+                    data = res_j.get(
+                        'data', {})
+
+                    player_data = data.get(str(player_), {})
+                    if not player_data:
+                        continue
+                    player_name = player_data.get(
+                        'nickname', None)
+                    if not player_name:
+                        print(f'Failed to fetch name for {player_}')
+                        continue
+
+                    player_update = UpdateOne({'player_id': player_}, {'$set': {
+                        'player_name': player_name
+                    }}, upsert=False)
+                    players_update_obj.append(player_update)
+
         try:
             if clans_update_obj:
                 result_clans = clans.bulk_write(
@@ -242,6 +277,11 @@ class UpdateCache():
             else:
                 print(e)
                 pass
+
+    def divide_chunks(self, l, n):
+        # looping till length l
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
 
 
 def run():
