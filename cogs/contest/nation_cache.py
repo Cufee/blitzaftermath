@@ -193,7 +193,8 @@ class UpdateCache():
                     current_player_query_aces = last_player_query_aces
 
                 aces_gained_adjusted = aces_gained
-                if clan_id in self.top_clans:
+                # if clan_id in self.top_clans:
+                if True:
                     if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0:
                         aces_gained_adjusted = current_player_query_aces - last_player_query_aces
                     elif last_player_query_aces == 0:
