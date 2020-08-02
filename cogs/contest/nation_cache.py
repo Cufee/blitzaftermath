@@ -187,7 +187,7 @@ class UpdateCache():
                     if current_player_query_aces == 0:
                         current_player_query_aces = last_player_query_aces
 
-                if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0:
+                if last_player_query_aces <= current_player_query_aces:
                     aces_gained_adjusted = current_player_query_aces - last_player_query_aces
                 elif last_player_query_aces > current_player_query_aces:
                     last_player_query_aces = current_player_query_aces
@@ -207,7 +207,6 @@ class UpdateCache():
                 if current_player_query_aces < last_player_query_aces:
                     last_query_aces = last_query_aces - \
                         last_player_query_aces + current_player_query_aces
-                elif last_player_query_aces == 0:
                     clan_query_aces_gained = 0
                 else:
                     clan_query_aces_gained += (current_player_query_aces -
