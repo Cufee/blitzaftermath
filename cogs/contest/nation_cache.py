@@ -138,10 +138,7 @@ class UpdateCache():
                     f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
 
-                if aces_gained == 0:
-                    continue
-
-                if aces_gained != 0 and clan_id in self.top_clans:
+                if clan_id in self.top_clans:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str
