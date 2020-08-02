@@ -1,3 +1,5 @@
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
 import rapidjson
 from pymongo import MongoClient
@@ -15,6 +17,27 @@ tanks = glossary.tanks
 clan_marks = db.marksOfMastery
 
 wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
+
+
+def test1():
+    print('test 1')
+
+
+def test2():
+    print('test 2')
+
+
+if __name__ == "__main__":
+    scheduler = BlockingScheduler()
+    scheduler.add_job(test1, 'interval', seconds=1)
+    scheduler.add_job(test2, 'interval', seconds=3)
+
+    print('Press Ctrl+{0} to exit'.format('C'))
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
 
 
 # all_players = players.find()

@@ -250,9 +250,30 @@ def run():
     print('Update complete')
 
 
+def reset_gained_aces():
+    print('Resetting player Aces')
+
+    players_all = list(players.find())
+    player_updates = []
+
+    for player_ in players_all:
+        player_update = UpdateOne(player_, {'$set': {
+            f'aces_gained': 0,
+            'timestamp': datetime.utcnow(),
+        }}, upsert=True)
+        player_updates.append(player_update)
+
+    result_clans = players.bulk_write(
+        player_updates, ordered=False)
+
+    print('Done resetting player Aces')
+
+
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
     scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
+    scheduler.add_job(reset_gained_aces,
+                      CronTrigger.from_crontab('0 10 * * *'))
     print('Press Ctrl+{0} to exit'.format('C'))
 
     try:
