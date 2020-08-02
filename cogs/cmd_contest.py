@@ -275,7 +275,8 @@ class blitz_aftermath_contest(commands.Cog):
         if message.author == self.client.user:
             return
         guild_id = message.guild.id
-        clan_id_str = clan_id_str.upper()
+        if clan_id_str:
+            clan_id_str = clan_id_str.upper()
         try:
             if clan_id_str:
                 if '@' in clan_id_str:
