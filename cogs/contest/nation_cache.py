@@ -98,7 +98,7 @@ class UpdateCache():
                 'data', None)
             current_members: list = clan_data.get(
                 str(clan_id), {}).get('members_ids')
-            last_members = clan.get('members', current_members)
+            last_members = clan.get('members', [])
 
             current_members_str = ','.join(str(m) for m in current_members)
             players_url = self.api_domain + wg_player_api_url_base + current_members_str
@@ -107,6 +107,7 @@ class UpdateCache():
                 print(
                     f'Unable to fetch player data for {clan_name}. [{players_res.status_code}]')
                 continue
+
             players_res_data: dict = rapidjson.loads(
                 players_res.text).get('data', None)
 
@@ -205,7 +206,7 @@ class UpdateCache():
                     clan_query_aces_gained += (current_player_query_aces -
                                                last_player_query_aces)
 
-            if clan_aces_gained == last_aces:
+            if clan_aces_gained == last_aces and last_members:
                 continue
 
             clan_update = UpdateOne({'clan_id': clan_id}, {'$set': {
