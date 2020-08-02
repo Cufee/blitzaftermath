@@ -161,19 +161,18 @@ class UpdateCache():
                             tank_aces = tank.get('achievements', {}).get(
                                 'markOfMastery', 0)
                             tank_id = tank.get('tank_id')
-
-                            tank_name = tanks.find(
-                                {'tank_id': tank_id}).distinct('name')
-
                             current_player_query_aces += tank_aces
                 else:
                     current_player_query_aces = last_player_query_aces
 
                 aces_gained_adjusted = aces_gained
-                if last_player_query_aces < current_player_query_aces and last_player_query_aces != 0 and clan_id in self.top_clans:
+                if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0 and clan_id in self.top_clans:
                     aces_gained_adjusted = current_player_query_aces - last_player_query_aces
                 elif last_player_query_aces == 0 and clan_id in self.top_clans:
                     aces_gained_adjusted = 0
+
+                print(
+                    f'R:{aces_gained} Q:{aces_gained_adjusted}({current_player_query_aces}/{last_player_query_aces})')
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
