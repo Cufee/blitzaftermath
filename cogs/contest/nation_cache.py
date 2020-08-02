@@ -135,6 +135,8 @@ class UpdateCache():
 
                 last_player_aces: int = last_player_data.get(
                     'aces', current_player_aces)
+                last_player_aces_gained: int = last_player_data.get(
+                    'aces_gained', 0)
                 last_player_query_aces: int = last_player_data.get(
                     f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
@@ -142,7 +144,6 @@ class UpdateCache():
                 if aces_gained == 0:
                     player_update = UpdateOne({'player_id': player_id}, {'$set': {
                         f'aces': current_player_aces,
-                        f'aces_gained': aces_gained,
                         'timestamp': datetime.utcnow(),
                     }}, upsert=True)
                     players_update_obj.append(player_update)
@@ -185,16 +186,16 @@ class UpdateCache():
                         aces_gained_adjusted = 0
 
                     print(
-                        f'R:{aces_gained} Q:{aces_gained_adjusted}({current_player_query_aces}/{last_player_query_aces})')
+                        f'R:{aces_gained} Q:{aces_gained_adjusted}({last_player_query_aces}/{current_player_query_aces})')
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
-                    f'aces_gained': aces_gained_adjusted,
+                    f'aces_gained': (last_player_aces_gained + aces_gained_adjusted),
                     f'aces_{self.nation}_{self.starting_tier}': current_player_query_aces,
                     'timestamp': datetime.utcnow(),
                 }}, upsert=True)
                 print(
-                    f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {aces_gained_adjusted}')
+                    f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {(last_player_aces_gained + aces_gained_adjusted)}')
                 players_update_obj.append(player_update)
 
                 clan_aces_gained += aces_gained
@@ -245,13 +246,13 @@ def run():
 
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
-    print('Press Ctrl+{0} to exit'.format('C'))
+    # scheduler = BlockingScheduler()
+    # scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
+    # print('Press Ctrl+{0} to exit'.format('C'))
 
-    try:
-        scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
-        pass
+    # try:
+    #     scheduler.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     pass
 
-    # run()
+    run()

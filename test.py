@@ -14,44 +14,47 @@ players = db.players
 tanks = glossary.tanks
 clan_marks = db.marksOfMastery
 
-all_players = players.find()
+# all_players = players.find()
 
 
-def divide_chunks(l, n):
-    # looping till length l
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+# def divide_chunks(l, n):
+#     # looping till length l
+#     for i in range(0, len(l), n):
+#         yield l[i:i + n]
 
 
-url = 'https://api.wotblitz.com/wotb/account/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
+# url = 'https://api.wotblitz.com/wotb/account/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 
 
-player_ids = players.find().distinct('player_id')
+# player_ids = players.find().distinct('player_id')
 
-requst_list = list(divide_chunks(player_ids, 90))
+# requst_list = list(divide_chunks(player_ids, 90))
 
-for list_ in requst_list:
-    req_url = url + ','.join(str(p) for p in list_)
-    res = requests.get(req_url)
+# for list_ in requst_list:
+#     req_url = url + ','.join(str(p) for p in list_)
+#     res = requests.get(req_url)
 
-    for player_ in list_:
+#     for player_ in list_:
 
-        res_j = rapidjson.loads(res.text)
-        data = res_j.get(
-            'data', {})
-        player_data = data.get(str(player_), {})
+#         res_j = rapidjson.loads(res.text)
+#         data = res_j.get(
+#             'data', {})
+#         player_data = data.get(str(player_), {})
 
-        if not player_data:
-            continue
-        player_name = player_data.get(
-            'nickname', 'Unknown')
+#         if not player_data:
+#             continue
+#         player_name = player_data.get(
+#             'nickname', 'Unknown')
 
-        players.update_one({'player_id': player_}, {
-                           "$set": {'player_name': player_name}})
-        print(player_name)
+#         players.update_one({'player_id': player_}, {
+#                            "$set": {'player_name': player_name}})
+#         print(player_name)
 
-# all_clans = clans.find()
+# for player_ in all_players:
+#     player_.update_one(player_, {'$set': {'aces': player_.get('aces_usa_5')}})
 
-# for clan_ in all_clans:
-#     clans.update_one(
-#         clan_, {"$set": {'clan_aces_usa_5': 0}})
+all_clans = clans.find()
+
+for clan_ in all_clans:
+    clans.update_one(
+        clan_, {"$set": {'clan_aces': clan_.get('clan_aces_usa_5')}})
