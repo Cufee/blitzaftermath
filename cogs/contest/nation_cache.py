@@ -1,6 +1,7 @@
 import requests
 import rapidjson
 from datetime import datetime
+from time import sleep
 
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
@@ -86,6 +87,7 @@ class UpdateCache():
             raise Exception(
                 f'Unable to access WG clan API usin {clan_id}. [{clan_res.status_code}]')
 
+        requests_cnt = 0
         for clan in all_clans:
             clan_id = clan.get('clan_id')
             clan_name = clan.get('clan_name')
@@ -102,6 +104,7 @@ class UpdateCache():
 
             current_members_str = ','.join(str(m) for m in current_members)
             players_url = self.api_domain + wg_player_api_url_base + current_members_str
+            requests_cnt += 1
             players_res = requests.get(players_url)
             if players_res.status_code != 200:
                 print(
@@ -113,8 +116,15 @@ class UpdateCache():
 
             clan_aces_gained = 0
             clan_query_aces_gained = 0
+
             for player_id in current_members:
-                if last_members and player_id not in last_members:
+                print(requests_cnt)
+                if requests_cnt % 20 == 0:
+                    sleep(10)
+                    if requests_cnt % 200 == 0:
+                        sleep(20)
+
+                if last_members != [] and player_id not in last_members:
                     continue
 
                 player_data: dict = players_res_data.get(str(player_id), None)
@@ -141,7 +151,7 @@ class UpdateCache():
                     f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
 
-                if aces_gained == 0:
+                if aces_gained == None:
                     player_update = UpdateOne({'player_id': player_id}, {'$set': {
                         f'aces': current_player_aces,
                         'timestamp': datetime.utcnow(),
@@ -149,10 +159,13 @@ class UpdateCache():
                     players_update_obj.append(player_update)
                     continue
 
-                if clan_id in self.top_clans:
+                # if clan_id in self.top_clans:
+                if True:
+                    print('Detailed check')
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str
+                    requests_cnt += 1
                     detailed_res = requests.get(detailed_url)
 
                     if detailed_res.status_code != 200:
@@ -164,6 +177,7 @@ class UpdateCache():
                         ace_query_data = rapidjson.loads(
                             detailed_res.text).get('data', {}).get(str(player_id), [])
                         if not ace_query_data:
+                            print('No data')
                             continue
 
                         current_player_query_aces = 0
@@ -207,8 +221,8 @@ class UpdateCache():
                     clan_query_aces_gained += (current_player_query_aces -
                                                last_player_query_aces)
 
-            if clan_aces_gained == last_aces and last_members:
-                continue
+            # if clan_aces_gained == last_aces and last_members:
+            #     continue
 
             clan_update = UpdateOne({'clan_id': clan_id}, {'$set': {
                 'clan_aces': (last_aces + clan_aces_gained),
@@ -221,12 +235,12 @@ class UpdateCache():
             clans_update_obj.append(clan_update)
 
         try:
-            if clans_update_obj:
-                result_clans = clans.bulk_write(
-                    clans_update_obj, ordered=False)
-            if players_update_obj:
-                result_players = players.bulk_write(
-                    players_update_obj, ordered=False)
+            # if clans_update_obj:
+            #     result_clans = clans.bulk_write(
+            #         clans_update_obj, ordered=False)
+            # if players_update_obj:
+            #     result_players = players.bulk_write(
+            #         players_update_obj, ordered=False)
             print(
                 f'Updated {len(clans_update_obj)} clans and {len(players_update_obj)} players')
 
@@ -246,13 +260,13 @@ def run():
 
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
-    print('Press Ctrl+{0} to exit'.format('C'))
+    # scheduler = BlockingScheduler()
+    # scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
+    # print('Press Ctrl+{0} to exit'.format('C'))
 
-    try:
-        scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
-        pass
+    # try:
+    #     scheduler.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     pass
 
-    # run()
+    run()

@@ -14,6 +14,9 @@ players = db.players
 tanks = glossary.tanks
 clan_marks = db.marksOfMastery
 
+wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
+
+
 # all_players = players.find()
 
 
@@ -53,8 +56,8 @@ clan_marks = db.marksOfMastery
 # for player_ in all_players:
 #     player_.update_one(player_, {'$set': {'aces': player_.get('aces_usa_5')}})
 
-all_clans = clans.find()
+# all_clans = clans.find()
 
-for clan_ in all_clans:
-    clans.update_one(
-        clan_, {"$set": {'clan_aces': clan_.get('clan_aces_usa_5')}})
+# for clan_ in all_clans:
+#     clans.update_one(
+#         clan_, {"$set": {'clan_aces': clan_.get('clan_aces_usa_5')}})
