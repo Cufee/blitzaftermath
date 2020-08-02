@@ -46,7 +46,7 @@ class Render:
 
             self.top_players_list = []
             for p in self.top_players_list_raw:
-                if type(p.get('aces_gained')) == int:
+                if type(p.get('aces_gained')) == int and p.get('aces_gained') != 0:
                     self.top_players_list.append(p)
 
             # self.top_players_list.reverse()
