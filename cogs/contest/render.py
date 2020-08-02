@@ -38,8 +38,8 @@ class Render:
         self.top_clans_list = list(clans.find({'clan_realm': realm}).sort(
             self.aces_search_string, -1).limit(top_count))
 
-        if clan_id not in self.top_clans_list:
-            self.aces_search_string = 'clan_aces'
+        # if clan_id not in self.top_clans_list:
+        #     self.aces_search_string = 'clan_aces'
 
         self.top_players_list = []
         if top_players > 0:
