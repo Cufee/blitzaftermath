@@ -421,7 +421,7 @@ class blitz_aftermath_contest(commands.Cog):
     # Commands
 
     @commands.command()
-    # @commands.is_owner()
+    @commands.is_owner()
     async def set(self, message, clan_str, aces):
         if message.author == self.client.user:
             return
@@ -439,7 +439,7 @@ class blitz_aftermath_contest(commands.Cog):
 
         clan_id = clan_data.get('clan_id')
         aces = int(aces)
-        clans.update_one(clan_data, {"$set": {"clan_aces": aces}})
+        clans.update_one(clan_data, {"$set": {"clan_aces_usa_5": aces}})
         await create_queue(clan_id=clan_id)
         clan_aces = get_clan_marks(clan_id=clan_id)
         await message.channel.send(f'Players in [{clan_tag}] earned {clan_aces} Ace Tankers.\n*This data is collected every hour and may be incomplete for some clans*.')
