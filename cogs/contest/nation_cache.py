@@ -118,10 +118,10 @@ class UpdateCache():
             clan_query_aces_gained = 0
 
             for player_id in current_members:
-                print(requests_cnt)
                 if requests_cnt % 20 == 0:
                     sleep(5)
                     if requests_cnt % 200 == 0:
+                        print(requests_cnt)
                         sleep(25)
 
                 if last_members != [] and player_id not in last_members:
@@ -161,7 +161,7 @@ class UpdateCache():
 
                 # if clan_id in self.top_clans:
                 if True:
-                    print('Detailed check')
+                    # print('Detailed check')
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str

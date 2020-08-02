@@ -56,8 +56,10 @@ wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements
 # for player_ in all_players:
 #     player_.update_one(player_, {'$set': {'aces': player_.get('aces_usa_5')}})
 
-# all_clans = clans.find()
+# all_clans = list(clans.find())
+
+# print(len(all_clans))
 
 # for clan_ in all_clans:
 #     clans.update_one(
-#         clan_, {"$set": {'clan_aces': clan_.get('clan_aces_usa_5')}})
+#         clan_, {"$set": {'clan_aces_usa_5': clan_.get('clan_aces')}})
