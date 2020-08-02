@@ -29,14 +29,17 @@ class Render:
         if top_players > 0:
             top_count = 1
 
+        self.aces_search_string = 'clan_aces'
+        if nation and starting_tier:
+            self.aces_search_string = f'clan_aces_{nation}_{starting_tier}'
+
         self.top_players = top_players
         self.top_count = top_count
         self.top_clans_list = list(clans.find({'clan_realm': realm}).sort(
             self.aces_search_string, -1).limit(top_count))
 
-        self.aces_search_string = 'clan_aces'
-        if nation and starting_tier and clan_id and clan_id in self.top_clans_list:
-            self.aces_search_string = f'clan_aces_{nation}_{starting_tier}'
+        if clan_id and clan_id not in self.top_clans_list:
+            self.aces_search_string = 'clan_aces'
 
         self.top_players_list = []
         if top_players > 0:
