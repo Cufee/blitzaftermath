@@ -6,6 +6,8 @@ from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
 
+from apscheduler.schedulers.blocking import BlockingScheduler
+
 client = MongoClient("mongodb://51.222.13.110:27017")
 db = client.summer2020contest
 glossary = client.summer2020contest
@@ -190,10 +192,10 @@ class UpdateCache():
             clans_update_obj.append(clan_update)
 
         try:
-            if clan_update_obj_list:
+            if clans_update_obj:
                 result_clans = clans.bulk_write(
                     clans_update_obj, ordered=False)
-            if player_update_obj_list:
+            if players_update_obj:
                 result_players = players.bulk_write(
                     players_update_obj, ordered=False)
             print(
@@ -208,5 +210,18 @@ class UpdateCache():
                 pass
 
 
-if __name__ == "__main__":
+def run():
+    print('Starting update')
     update = UpdateCache('NA', 'usa', 5)
+    print('Update complete')
+
+
+if __name__ == "__main__":
+    scheduler = BlockingScheduler()
+    scheduler.add_job(run, 'interval', hours=1)
+    print('Press Ctrl+{0} to exit'.format('C'))
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
