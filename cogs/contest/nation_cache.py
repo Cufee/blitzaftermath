@@ -192,7 +192,7 @@ class UpdateCache():
                 elif last_player_query_aces > current_player_query_aces:
                     last_player_query_aces = current_player_query_aces
                     aces_gained_adjusted = 0
-                elif last_player_query_aces == 0:
+                else:
                     aces_gained_adjusted = 0
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
@@ -201,13 +201,12 @@ class UpdateCache():
                     f'aces_{self.nation}_{self.starting_tier}': current_player_query_aces,
                     'timestamp': datetime.utcnow(),
                 }}, upsert=True)
-                # print(
-                #     f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {(last_player_aces_gained + aces_gained_adjusted)}')
                 players_update_obj.append(player_update)
 
                 clan_aces_gained += aces_gained
                 if current_player_query_aces < last_player_query_aces:
-                    last_query_aces - last_player_query_aces + current_player_query_aces
+                    last_query_aces = last_query_aces - \
+                        last_player_query_aces + current_player_query_aces
                 elif last_player_query_aces == 0:
                     clan_query_aces_gained = 0
                 else:
@@ -254,7 +253,7 @@ def run():
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('*/25 * * * *'))
+    scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
     print('Press Ctrl+{0} to exit'.format('C'))
 
     try:
