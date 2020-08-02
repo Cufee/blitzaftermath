@@ -7,6 +7,7 @@ from pymongo import InsertOne, UpdateOne
 from pymongo.errors import BulkWriteError
 
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 db = client.summer2020contest
