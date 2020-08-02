@@ -138,13 +138,14 @@ class UpdateCache():
                 if not last_player_data:
                     insert_obj = InsertOne({
                         'player_id': player_id,
-                        'player_name': player_id,
                         'aces': current_player_aces,
                         f'aces_{self.nation}_{self.starting_tier}': current_player_aces,
                         'timestamp': datetime.utcnow()
                     })
                     players_update_obj.append(insert_obj)
+                    player_name_check.append(player_id)
                     continue
+
                 player_name = last_player_data.get('player_name', None)
                 if not player_name:
                     player_name_check.append(player_id)
