@@ -119,10 +119,10 @@ class UpdateCache():
 
             for player_id in current_members:
                 if requests_cnt % 20 == 0:
-                    sleep(5)
+                    sleep(1)
                     if requests_cnt % 200 == 0:
                         print(requests_cnt)
-                        sleep(25)
+                        sleep(14)
 
                 if last_members != [] and player_id not in last_members:
                     continue
@@ -159,49 +159,41 @@ class UpdateCache():
                     players_update_obj.append(player_update)
                     continue
 
-                # if clan_id in self.top_clans:
-                if True:
-                    # print('Detailed check')
-                    detailed_url = self.api_domain + wg_player_medals_api_url_base + \
-                        str(player_id) + '&tank_id=' + \
-                        self.detailed_tanks_list_str
-                    requests_cnt += 1
-                    detailed_res = requests.get(detailed_url)
+                detailed_url = self.api_domain + wg_player_medals_api_url_base + \
+                    str(player_id) + '&tank_id=' + \
+                    self.detailed_tanks_list_str
+                requests_cnt += 1
+                detailed_res = requests.get(detailed_url)
 
-                    if detailed_res.status_code != 200:
-                        print(
-                            f'[{player_id}] WG Tanks API responded with {detailed_res.status_code}')
+                if detailed_res.status_code != 200:
+                    print(
+                        f'[{player_id}] WG Tanks API responded with {detailed_res.status_code}')
+                    continue
+
+                else:
+                    ace_query_data = rapidjson.loads(
+                        detailed_res.text).get('data', {}).get(str(player_id), [])
+                    if not ace_query_data:
+                        # print('No data')
                         continue
 
-                    else:
-                        ace_query_data = rapidjson.loads(
-                            detailed_res.text).get('data', {}).get(str(player_id), [])
-                        if not ace_query_data:
-                            # print('No data')
-                            continue
+                    current_player_query_aces = 0
+                    for tank in ace_query_data:
+                        tank_aces = tank.get('achievements', {}).get(
+                            'markOfMastery', 0)
+                        tank_id = tank.get('tank_id')
+                        current_player_query_aces += tank_aces
 
-                        current_player_query_aces = 0
-                        for tank in ace_query_data:
-                            tank_aces = tank.get('achievements', {}).get(
-                                'markOfMastery', 0)
-                            tank_id = tank.get('tank_id')
-                            current_player_query_aces += tank_aces
+                    if current_player_query_aces == 0:
+                        current_player_query_aces = last_player_query_aces
 
-                        if current_player_query_aces == 0:
-                            current_player_query_aces = last_player_query_aces
-                else:
-                    current_player_query_aces = last_player_query_aces
-
-                aces_gained_adjusted = aces_gained
-                # if clan_id in self.top_clans:
-                if True:
-                    if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0:
-                        aces_gained_adjusted = current_player_query_aces - last_player_query_aces
-                    elif last_player_query_aces == 0:
-                        aces_gained_adjusted = 0
-
-                    # print(
-                    #     f'R:{aces_gained} Q:{aces_gained_adjusted}({last_player_query_aces}/{current_player_query_aces})')
+                if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0:
+                    aces_gained_adjusted = current_player_query_aces - last_player_query_aces
+                elif last_player_query_aces > current_player_query_aces:
+                    last_player_query_aces = current_player_query_aces
+                    aces_gained_adjusted = 0
+                elif last_player_query_aces == 0:
+                    aces_gained_adjusted = 0
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
