@@ -138,6 +138,15 @@ class UpdateCache():
                     f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
 
+                if aces_gained == 0:
+                    player_update = UpdateOne({'player_id': player_id}, {'$set': {
+                        f'aces': current_player_aces,
+                        f'aces_gained': aces_gained,
+                        'timestamp': datetime.utcnow(),
+                    }}, upsert=True)
+                    players_update_obj.append(player_update)
+                    continue
+
                 if clan_id in self.top_clans:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
@@ -152,6 +161,8 @@ class UpdateCache():
                     else:
                         ace_query_data = rapidjson.loads(
                             detailed_res.text).get('data', {}).get(str(player_id), [])
+                        if not ace_query_data:
+                            continue
 
                         current_player_query_aces = 0
                         for tank in ace_query_data:
@@ -159,19 +170,21 @@ class UpdateCache():
                                 'markOfMastery', 0)
                             tank_id = tank.get('tank_id')
                             current_player_query_aces += tank_aces
+
+                        if current_player_query_aces == 0:
+                            current_player_query_aces = last_player_query_aces
                 else:
                     current_player_query_aces = last_player_query_aces
 
                 aces_gained_adjusted = aces_gained
-                if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0 and clan_id in self.top_clans:
-                    aces_gained_adjusted = current_player_query_aces - last_player_query_aces
-                elif last_player_query_aces == current_player_query_aces and clan_id in self.top_clans:
-                    aces_gained_adjusted = 0
-                elif last_player_query_aces == 0 and clan_id in self.top_clans:
-                    aces_gained_adjusted = 0
+                if clan_id in self.top_clans:
+                    if last_player_query_aces <= current_player_query_aces and last_player_query_aces != 0:
+                        aces_gained_adjusted = current_player_query_aces - last_player_query_aces
+                    elif last_player_query_aces == 0:
+                        aces_gained_adjusted = 0
 
-                print(
-                    f'R:{aces_gained} Q:{aces_gained_adjusted}({current_player_query_aces}/{last_player_query_aces})')
+                    print(
+                        f'R:{aces_gained} Q:{aces_gained_adjusted}({current_player_query_aces}/{last_player_query_aces})')
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
@@ -231,13 +244,13 @@ def run():
 
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
-    print('Press Ctrl+{0} to exit'.format('C'))
+    # scheduler = BlockingScheduler()
+    # scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
+    # print('Press Ctrl+{0} to exit'.format('C'))
 
-    try:
-        scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
-        pass
+    # try:
+    #     scheduler.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     pass
 
-    # run()
+    run()
