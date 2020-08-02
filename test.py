@@ -16,10 +16,10 @@ clan_marks = db.marksOfMastery
 # all_players = players.find()
 
 # for player_ in all_players:
-#     players.update_one(player_, {"$set": {'aces_usa_5': player_.get('aces')}})
+#     players.update_one(player_, {"$set": {'aces_gained': 0}})
 
-all_clans = clans.find()
+# all_clans = clans.find()
 
-for clan_ in all_clans:
-    clans.update_one(
-        clan_, {"$set": {'clan_aces_usa_5': 0}})
+# for clan_ in all_clans:
+#     clans.update_one(
+#         clan_, {"$set": {'clan_aces_usa_5': 0}})

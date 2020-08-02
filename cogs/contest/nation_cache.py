@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 db = client.summer2020contest
-glossary = client.summer2020contest
+glossary = client.glossary
 
 guilds = db.guilds
 clans = db.clans
@@ -32,16 +32,17 @@ class UpdateCache():
         self.starting_tier: int = starting_tier
 
         top_clans_cnt = 10
-        top_clans_list = clans.find({'clan_realm': realm}).sort(
-            'clan_aces', -1).distinct('clan_id')
+        top_clans_list = list(clans.find({'clan_realm': realm}).sort(
+            'clan_aces', -1))
         self.top_clans = []
         index = 0
         while index <= len(top_clans_list) and index < top_clans_cnt:
-            self.top_clans.append(top_clans_list[index])
+            self.top_clans.append(top_clans_list[index].get('clan_id'))
             index += 1
 
         detailed_tanks_list = tanks.find(
             {'nation': self.nation, 'tier': {'$gt': (self.starting_tier - 1)}}).distinct('tank_id')
+
         self.detailed_tanks_list_str = ','.join(
             str(t) for t in detailed_tanks_list)
 
@@ -89,7 +90,6 @@ class UpdateCache():
             clan_id = clan.get('clan_id')
             clan_name = clan.get('clan_name')
             print(f'Working on {clan_name}')
-
             last_aces = clan.get('clan_aces')
             last_query_aces = clan.get(
                 f'clan_aces_{self.nation}_{self.starting_tier}')
@@ -137,10 +137,11 @@ class UpdateCache():
                 last_player_query_aces: int = last_player_data.get(
                     f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
+
                 if aces_gained == 0:
                     continue
 
-                if aces_gained != 0 and clan in self.top_clans:
+                if aces_gained != 0 and clan_id in self.top_clans:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str
@@ -153,28 +154,42 @@ class UpdateCache():
 
                     else:
                         ace_query_data = rapidjson.loads(
-                            detailed_res.text).get(str(player_id), [])
+                            detailed_res.text).get('data', {}).get(str(player_id), [])
 
                         current_player_query_aces = 0
                         for tank in ace_query_data:
                             tank_aces = tank.get('achievements', {}).get(
                                 'markOfMastery', 0)
+                            tank_id = tank.get('tank_id')
+
+                            tank_name = tanks.find(
+                                {'tank_id': tank_id}).distinct('name')
+
                             current_player_query_aces += tank_aces
                 else:
                     current_player_query_aces = last_player_query_aces
 
+                aces_gained_adjusted = aces_gained
+                if last_player_query_aces < current_player_query_aces and last_player_query_aces != 0 and clan in self.top_clans:
+                    aces_gained_adjusted = current_player_query_aces - last_player_query_aces
+                elif last_player_query_aces < current_player_query_aces and last_player_query_aces == 0 and clan in self.top_clans:
+                    aces_gained_adjusted = 0
+
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
+                    f'aces_gained': aces_gained_adjusted,
                     f'aces_{self.nation}_{self.starting_tier}': current_player_query_aces,
                     'timestamp': datetime.utcnow(),
                 }}, upsert=True)
                 print(
-                    f'Player {player_id} now has {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: was {last_player_aces}, set to {current_player_aces}')
+                    f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {aces_gained_adjusted}')
                 players_update_obj.append(player_update)
 
                 clan_aces_gained += aces_gained
                 if current_player_query_aces < last_player_query_aces:
                     continue
+                elif last_player_query_aces == 0:
+                    clan_query_aces_gained = 0
                 else:
                     clan_query_aces_gained += (current_player_query_aces -
                                                last_player_query_aces)
@@ -189,7 +204,7 @@ class UpdateCache():
                 'timestamp': datetime.utcnow()
             }}, upsert=True)
             print(
-                f'{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
+                f'-----{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
             clans_update_obj.append(clan_update)
 
         try:
@@ -218,11 +233,13 @@ def run():
 
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('0 * * * *'))
-    print('Press Ctrl+{0} to exit'.format('C'))
+    # scheduler = BlockingScheduler()
+    # scheduler.add_job(run, CronTrigger.from_crontab('0 * * * *'))
+    # print('Press Ctrl+{0} to exit'.format('C'))
 
-    try:
-        scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
-        pass
+    # try:
+    #     scheduler.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     pass
+
+    run()
