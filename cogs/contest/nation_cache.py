@@ -177,7 +177,7 @@ class UpdateCache():
                         ace_query_data = rapidjson.loads(
                             detailed_res.text).get('data', {}).get(str(player_id), [])
                         if not ace_query_data:
-                            print('No data')
+                            # print('No data')
                             continue
 
                         current_player_query_aces = 0
@@ -232,7 +232,7 @@ class UpdateCache():
                 'timestamp': datetime.utcnow()
             }}, upsert=True)
             print(
-                f'-----{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
+                f'{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
             clans_update_obj.append(clan_update)
 
         try:
