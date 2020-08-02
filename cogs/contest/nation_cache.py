@@ -200,8 +200,8 @@ class UpdateCache():
                     elif last_player_query_aces == 0:
                         aces_gained_adjusted = 0
 
-                    print(
-                        f'R:{aces_gained} Q:{aces_gained_adjusted}({last_player_query_aces}/{current_player_query_aces})')
+                    # print(
+                    #     f'R:{aces_gained} Q:{aces_gained_adjusted}({last_player_query_aces}/{current_player_query_aces})')
 
                 player_update = UpdateOne({'player_id': player_id}, {'$set': {
                     f'aces': current_player_aces,
@@ -209,8 +209,8 @@ class UpdateCache():
                     f'aces_{self.nation}_{self.starting_tier}': current_player_query_aces,
                     'timestamp': datetime.utcnow(),
                 }}, upsert=True)
-                print(
-                    f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {(last_player_aces_gained + aces_gained_adjusted)}')
+                # print(
+                #     f'---\nPlayer {player_id}\nQuery Aces: {current_player_query_aces}, was {last_player_query_aces}\nRegular Aces: {current_player_aces}, was {last_player_aces}\nGained: {(last_player_aces_gained + aces_gained_adjusted)}')
                 players_update_obj.append(player_update)
 
                 clan_aces_gained += aces_gained
@@ -261,13 +261,13 @@ def run():
 
 
 if __name__ == "__main__":
-    # scheduler = BlockingScheduler()
-    # scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
-    # print('Press Ctrl+{0} to exit'.format('C'))
+    scheduler = BlockingScheduler()
+    scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
+    print('Press Ctrl+{0} to exit'.format('C'))
 
-    # try:
-    #     scheduler.start()
-    # except (KeyboardInterrupt, SystemExit):
-    #     pass
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
 
-    run()
+    # run()
