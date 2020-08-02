@@ -313,7 +313,7 @@ class blitz_aftermath_contest(commands.Cog):
 
     # Commands
     @commands.command(aliases=['c-init'])
-    @commands.is_owner()
+    # @commands.is_owner()
     async def c_init(self, message):
         if message.author == self.client.user:
             return
