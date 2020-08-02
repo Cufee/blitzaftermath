@@ -114,7 +114,7 @@ class UpdateCache():
             clan_aces_gained = 0
             clan_query_aces_gained = 0
             for player_id in current_members:
-                if player_id not in last_members:
+                if last_members and player_id not in last_members:
                     continue
 
                 player_data: dict = players_res_data.get(str(player_id), None)
