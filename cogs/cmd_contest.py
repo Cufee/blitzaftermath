@@ -275,18 +275,28 @@ class blitz_aftermath_contest(commands.Cog):
         if message.author == self.client.user:
             return
         guild_id = message.guild.id
+        clan_id_str = clan_id_str.upper()
         try:
             if clan_id_str:
-                clan_list = (clan_id_str.upper()).split('@')
-                clan_tag = clan_list[0]
-                clan_realm = clan_list[1]
-                clan_data = clans.find_one(
-                    {'clan_tag': clan_tag, 'clan_realm': clan_realm})
-                if not clan_data:
-                    await self.addclan(message, clan_id_str)
+                if '@' in clan_id_str:
+                    clan_list = (clan_id_str).split('@')
+                    clan_tag = clan_list[0]
+                    clan_realm = clan_list[1]
+                    clan_data = clans.find_one(
+                        {'clan_tag': clan_tag, 'clan_realm': clan_realm})
+                    if not clan_data:
+                        await self.addclan(message, clan_id_str)
 
-                clan_id = clans.find_one(
-                    {'clan_tag': clan_tag, 'clan_realm': clan_realm}).get('clan_id')
+                    clan_id = clans.find_one(
+                        {'clan_tag': clan_tag, 'clan_realm': clan_realm}).get('clan_id')
+                else:
+                    clan_ids = clans.find(
+                        {'clan_tag': clan_id_str}).distinct('clan_id')
+                    if len(clan_ids) == 1:
+                        clan_id = clan_ids[0]
+                    else:
+                        raise Exception(
+                            f'Please specify a realm for {clan_id_str.upper()}')
             else:
                 guild_settings = guilds.find_one({'guild_id': guild_id})
                 if not guild_settings:
