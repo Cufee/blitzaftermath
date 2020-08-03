@@ -223,7 +223,11 @@ class UpdateCache():
             # if clan_aces_gained == last_aces and last_members:
             #     continue
             if last_aces == None:
-                last_aces = - clan_aces_gained
+                last_aces = clan_aces_gained
+                clan_aces_gained = 0
+            if last_query_aces == None:
+                last_query_aces = clan_query_aces_gained
+                clan_query_aces_gained = 0
 
             clan_update = UpdateOne({'clan_id': clan_id}, {'$set': {
                 'clan_aces': (last_aces + clan_aces_gained),
