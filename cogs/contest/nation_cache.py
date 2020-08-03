@@ -144,7 +144,6 @@ class UpdateCache():
                     insert_obj = InsertOne({
                         'player_id': player_id,
                         'aces': current_player_aces,
-                        self.detailed_query_name: current_player_aces,
                         'timestamp': datetime.utcnow()
                     })
                     players_update_obj.append(insert_obj)
