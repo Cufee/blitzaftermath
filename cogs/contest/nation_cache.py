@@ -237,6 +237,10 @@ class UpdateCache():
                 clan_query_aces_gained += (current_player_query_aces -
                                            last_player_query_aces)
 
+            if clan_aces_gained == 0:
+                print('No change, skipping.')
+                continue
+
             if last_aces == None:
                 last_aces = clan_aces_gained
                 clan_aces_gained = 0
@@ -249,9 +253,22 @@ class UpdateCache():
                 'members': current_members,
                 'timestamp': datetime.utcnow()
             }
+
+            print(
+                f"""
+Clan Update:
+Last Aces:    {last_aces}
+Last Aces QR: {last_query_aces}
+Gained:       {clan_aces_gained}
+Gained QR:    {clan_query_aces_gained}
+New Aces:     {(last_aces + clan_aces_gained)}""")
+
             if self.nation or self.starting_tier:
                 clan_update.update({f'clan_{self.detailed_query_name}': (
                     last_query_aces + clan_query_aces_gained)})
+                print(
+                    f'New Aces QR: {(last_query_aces + clan_query_aces_gained)}')
+
             clans_update_obj.append(
                 UpdateOne({'clan_id': clan_id},  {'$set': clan_update}, upsert=True))
 
@@ -295,7 +312,7 @@ class UpdateCache():
                 result_players = players.bulk_write(
                     players_update_obj, ordered=False)
             print(
-                f'Clans:\n{result_clans.bulk_api_result}\n\nPlayers:\n{result_players.bulk_api_result}')
+                f'Requests sent: {requests_cnt}\nClans:\n{result_clans.bulk_api_result}\n\nPlayers:\n{result_players.bulk_api_result}')
 
         except Exception as e:
             if e == BulkWriteError:
