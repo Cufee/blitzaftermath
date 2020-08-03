@@ -101,7 +101,7 @@ class UpdateCache():
             print(f'Working on {clan_name}')
             last_aces = clan.get('clan_aces')
             last_query_aces = clan.get(
-                self.detailed_query_name)
+                f'clan_{self.detailed_query_name}')
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)
