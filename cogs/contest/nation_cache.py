@@ -200,7 +200,7 @@ class UpdateCache():
                         ace_query_data = rapidjson.loads(
                             detailed_res.text).get('data', {}).get(str(player_id), [])
                         if not ace_query_data:
-                            # print('No data')
+                            print('No ace query data')
                             continue
 
                         current_player_query_aces = 0
@@ -229,6 +229,8 @@ class UpdateCache():
 
                 else:
                     aces_gained_adjusted = aces_gained
+                    player_update.update(
+                        {f'aces_gained': (last_player_aces_gained + aces_gained_adjusted), self.detailed_query_name: current_player_query_aces})
 
                 player_update.update(
                     {f'aces': current_player_aces, 'timestamp': datetime.utcnow()})
@@ -244,7 +246,11 @@ class UpdateCache():
                                            last_player_query_aces)
 
             if clan_aces_gained == 0:
-                print('No change, skipping.')
+                clan_update = {
+                    'timestamp': datetime.utcnow()
+                }
+                clans_update_obj.append(
+                    UpdateOne({'clan_id': clan_id},  {'$set': clan_update}, upsert=True))
                 continue
 
             if last_aces == None:
