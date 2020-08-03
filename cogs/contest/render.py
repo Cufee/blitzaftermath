@@ -88,8 +88,6 @@ class Render:
             3: (205, 127, 50, 100),
         }
 
-        print(len(self.top_players_list))
-
         self.frame_margin_w = 50
         self.frame_margin_h = 50
         self.clan_card_w = 400
