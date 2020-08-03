@@ -288,12 +288,12 @@ class UpdateCache():
                 f'{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
 
         try:
-            # if clans_update_obj:
-            #     result_clans = clans.bulk_write(
-            #         clans_update_obj, ordered=False)
-            # if players_update_obj:
-            #     result_players = players.bulk_write(
-            #         players_update_obj, ordered=False)
+            if clans_update_obj:
+                result_clans = clans.bulk_write(
+                    clans_update_obj, ordered=False)
+            if players_update_obj:
+                result_players = players.bulk_write(
+                    players_update_obj, ordered=False)
             print(
                 f'Updated {len(clans_update_obj)} clans and {len(players_update_obj)} players')
 
