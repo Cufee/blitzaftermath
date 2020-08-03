@@ -168,6 +168,13 @@ class UpdateCache():
                     players_update_obj.append(
                         UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
                     continue
+                elif aces_gained == 0:
+                    player_update = {
+                        'timestamp': datetime.utcnow(),
+                    }
+                    players_update_obj.append(
+                        UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
+                    continue
                 else:
                     player_update = {}
 
