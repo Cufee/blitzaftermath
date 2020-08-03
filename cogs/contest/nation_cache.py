@@ -219,7 +219,7 @@ class UpdateCache():
                         aces_gained_adjusted = 0
 
                     player_update.update(
-                        {f'aces_gained': (last_player_aces_gained + aces_gained_adjusted)})
+                        {f'aces_gained': (last_player_aces_gained + aces_gained_adjusted), self.detailed_query_name: current_player_query_aces})
 
                 else:
                     aces_gained_adjusted = aces_gained
