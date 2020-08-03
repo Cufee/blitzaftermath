@@ -154,8 +154,6 @@ class UpdateCache():
                     'aces', current_player_aces)
                 last_player_aces_gained: int = last_player_data.get(
                     'aces_gained', 0)
-                last_player_query_aces: int = last_player_data.get(
-                    f'aces_{self.nation}_{self.starting_tier}', 0)
                 aces_gained: int = current_player_aces - last_player_aces
 
                 if aces_gained == None:
@@ -191,6 +189,9 @@ class UpdateCache():
                         tank_id = tank.get('tank_id')
                         current_player_query_aces += tank_aces
 
+                    last_player_query_aces: int = last_player_data.get(
+                        f'aces_{self.nation}_{self.starting_tier}', current_player_query_aces)
+
                     if current_player_query_aces == 0:
                         current_player_query_aces = last_player_query_aces
 
@@ -220,8 +221,6 @@ class UpdateCache():
                     clan_query_aces_gained += (current_player_query_aces -
                                                last_player_query_aces)
 
-            # if clan_aces_gained == last_aces and last_members:
-            #     continue
             if last_aces == None:
                 last_aces = clan_aces_gained
                 clan_aces_gained = 0
