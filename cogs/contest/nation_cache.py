@@ -100,8 +100,6 @@ class UpdateCache():
             clan_name = clan.get('clan_name')
             print(f'Working on {clan_name}')
             last_aces = clan.get('clan_aces')
-            last_query_aces = clan.get(
-                f'clan_{self.detailed_query_name}')
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)
@@ -179,6 +177,8 @@ class UpdateCache():
                     player_update = {}
 
                 if self.nation or self.starting_tier:
+                    last_query_aces = clan.get(
+                        f'clan_{self.detailed_query_name}')
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str
