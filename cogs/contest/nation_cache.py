@@ -295,7 +295,7 @@ class UpdateCache():
                 result_players = players.bulk_write(
                     players_update_obj, ordered=False)
             print(
-                f'Updated {len(clans_update_obj)} clans and {len(players_update_obj)} players')
+                f'Clans:\n{result_clans.bulk_api_result}\n\nPlayers:\n{result_players.bulk_api_result}')
 
         except Exception as e:
             if e == BulkWriteError:
