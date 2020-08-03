@@ -130,6 +130,12 @@ class UpdateCache():
                         sleep(14)
 
                 if last_members != [] and player_id not in last_members:
+                    player_update = {
+                        f'aces_gained': 0,
+                        'timestamp': datetime.utcnow(),
+                    }
+                    players_update_obj.append(
+                        UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
                     continue
 
                 player_data: dict = players_res_data.get(str(player_id), None)
