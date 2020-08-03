@@ -31,7 +31,7 @@ class Render:
 
         self.aces_search_string = 'clan_aces'
         if nation and starting_tier:
-            self.aces_search_string = f'clan_aces_{nation}_{starting_tier}'
+            self.aces_search_string = f'clan_aces_qr_{nation}_t{starting_tier}'
 
         self.top_players = top_players
         self.top_count = top_count
