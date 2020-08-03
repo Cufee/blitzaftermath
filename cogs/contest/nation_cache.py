@@ -222,7 +222,7 @@ class UpdateCache():
                         {f'aces_gained': (last_player_aces_gained + aces_gained_adjusted)})
 
                 else:
-                    aces_gained_adjusted
+                    aces_gained_adjusted = aces_gained
 
                 player_update.update(
                     {f'aces': current_player_aces, 'timestamp': datetime.utcnow()})
