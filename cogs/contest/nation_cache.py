@@ -343,7 +343,7 @@ New Aces:     {(last_aces + clan_aces_gained)}""")
 def run():
     print('Starting update')
     update = UpdateCache('NA', 'usa', 5)
-    print('Update complete')
+    print(f'Update complete {datetime.utcnow()}')
 
 
 def reset_gained_aces():
