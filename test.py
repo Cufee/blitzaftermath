@@ -25,7 +25,7 @@ all_guilds = requests.get('http://127.0.0.1:5000/guilds')
 data = rapidjson.loads(all_guilds.text)
 
 for i in data:
-    guilds_settings.insetr_one(i)
+    guilds_settings.insert_one(i)
 
     # wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 
