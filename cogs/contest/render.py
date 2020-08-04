@@ -29,6 +29,8 @@ class Render:
         if top_players > 0:
             top_count = 1
 
+        self.realm = realm
+
         self.aces_search_string = 'clan_aces'
         if nation and starting_tier:
             self.aces_search_string = f'clan_aces_qr_{nation}_t{starting_tier}'
@@ -121,7 +123,12 @@ class Render:
 
         last_stamp_conv = (self.top_clans_list[0].get(
             'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
-        last_stamp = last_stamp_conv.strftime("Updated at %H:%M PST")
+        if self.realm == 'NA':
+            last_stamp = last_stamp_conv.strftime("Updated at %I:%M %p PST")
+        else:
+            last_stamp = self.top_clans_list[0].get(
+                'timestamp').strftime("Updated at %H:%M UTC")
+
         stamp_w, stamp_h = self.frame_draw.textsize(
             last_stamp, font=self.font_slim)
         time_draw_w = int((self.frame_w - stamp_w) / 2)
