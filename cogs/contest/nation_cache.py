@@ -203,7 +203,7 @@ class UpdateCache():
                         ace_query_data = rapidjson.loads(
                             detailed_res.text).get('data', {}).get(str(player_id), [])
                         if not ace_query_data:
-                            print('No ace query data')
+                            print(f'No ace query data for {player_id}')
                             continue
 
                         current_player_query_aces = 0
