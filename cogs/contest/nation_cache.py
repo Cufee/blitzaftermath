@@ -29,6 +29,7 @@ wg_player_medals_api_url_base = '/wotb/tanks/achievements/?application_id=add73e
 
 class UpdateCache():
     def __init__(self, realm: str = 'NA', nation: str = None, starting_tier: int = 1, fake=False):
+        self.fake: str = fake
         self.nation: str = nation
         self.realm: str = realm
         self.starting_tier: int = starting_tier
@@ -302,7 +303,7 @@ New Aces:     {(last_aces + clan_aces_gained)}""")
                 f'{clan_name} gained {clan_aces_gained} Aces\n')
 
         try:
-            if not fake:
+            if not self.fake:
                 if clans_update_obj:
                     result_clans = clans.bulk_write(
                         clans_update_obj, ordered=False)
