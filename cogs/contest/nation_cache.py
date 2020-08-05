@@ -28,7 +28,7 @@ wg_player_medals_api_url_base = '/wotb/tanks/achievements/?application_id=add73e
 
 
 class UpdateCache():
-    def __init__(self, realm: str = 'NA', nation: str = None, starting_tier: int = 1):
+    def __init__(self, realm: str = 'NA', nation: str = None, starting_tier: int = 1, fake=False):
         self.nation: str = nation
         self.realm: str = realm
         self.starting_tier: int = starting_tier
@@ -100,7 +100,12 @@ class UpdateCache():
             clan_id = clan.get('clan_id')
             clan_name = clan.get('clan_name')
             print(f'Working on {clan_name}')
-            last_aces = clan.get('clan_aces')
+            if self.nation or self.starting_tier:
+                clan_aces_str = f'clan_{self.detailed_query_name}'
+                last_aces = clan.get(clan_aces_str)
+            else:
+                clan_aces_str = f'clan_aces'
+                last_aces = clan.get(clan_aces_str)
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)
@@ -121,14 +126,13 @@ class UpdateCache():
                 players_res.text).get('data', None)
 
             clan_aces_gained = 0
-            clan_query_aces_gained = 0
 
             for player_id in current_members:
                 if requests_cnt % 20 == 0:
-                    sleep(1)
+                    sleep(4)
                     if requests_cnt % 200 == 0:
                         print(requests_cnt)
-                        sleep(14)
+                        sleep(11)
 
                 if last_members != [] and player_id not in last_members:
                     print(
@@ -186,8 +190,6 @@ class UpdateCache():
                     player_update = {}
 
                 if self.nation or self.starting_tier:
-                    last_query_aces = clan.get(
-                        f'clan_{self.detailed_query_name}')
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
                         str(player_id) + '&tank_id=' + \
                         self.detailed_tanks_list_str
@@ -221,10 +223,8 @@ class UpdateCache():
 
                     if last_player_query_aces <= current_player_query_aces:
                         aces_gained_adjusted = current_player_query_aces - last_player_query_aces
-                    elif last_player_query_aces > current_player_query_aces:
-                        last_player_query_aces = current_player_query_aces
-                        aces_gained_adjusted = 0
                     else:
+                        last_player_query_aces = current_player_query_aces
                         aces_gained_adjusted = 0
 
                     player_update.update(
@@ -237,16 +237,10 @@ class UpdateCache():
 
                 player_update.update(
                     {f'aces': current_player_aces, 'timestamp': datetime.utcnow()})
-
                 players_update_obj.append(UpdateOne({'player_id': player_id},  {
                                           '$set': player_update}, upsert=True))
 
-                clan_aces_gained += aces_gained
-                if not last_player_query_aces or current_player_query_aces < last_player_query_aces:
-                    last_player_query_aces = current_player_query_aces
-
-                clan_query_aces_gained += (current_player_query_aces -
-                                           last_player_query_aces)
+                clan_aces_gained += aces_gained_adjusted
 
             if clan_aces_gained == 0:
                 clan_update = {
@@ -257,36 +251,20 @@ class UpdateCache():
                     UpdateOne({'clan_id': clan_id},  {'$set': clan_update}, upsert=True))
                 continue
 
-            if last_aces == None:
-                last_aces = clan_aces_gained
-                clan_aces_gained = 0
-            if last_query_aces == None:
-                last_query_aces = clan_query_aces_gained
-                clan_query_aces_gained = 0
-
             clan_update = {
-                'clan_aces': (last_aces + clan_aces_gained),
+                clan_aces_str: (last_aces + clan_aces_gained),
                 'members': current_members,
                 'timestamp': datetime.utcnow()
             }
+            clans_update_obj.append(
+                UpdateOne({'clan_id': clan_id},  {'$set': clan_update}, upsert=True))
 
             print(
                 f"""
 Clan Update:
 Last Aces:    {last_aces}
-Last Aces QR: {last_query_aces}
 Gained:       {clan_aces_gained}
-Gained QR:    {clan_query_aces_gained}
 New Aces:     {(last_aces + clan_aces_gained)}""")
-
-            if self.nation or self.starting_tier:
-                clan_update.update({f'clan_{self.detailed_query_name}': (
-                    last_query_aces + clan_query_aces_gained)})
-                print(
-                    f'New Aces QR: {(last_query_aces + clan_query_aces_gained)}')
-
-            clans_update_obj.append(
-                UpdateOne({'clan_id': clan_id},  {'$set': clan_update}, upsert=True))
 
             # Update players without nicknames
             requst_list = list(self.divide_chunks(player_name_check, 99))
@@ -318,17 +296,21 @@ New Aces:     {(last_aces + clan_aces_gained)}""")
                     players_update_obj.append(player_update)
 
             print(
-                f'{clan_name} gained {clan_query_aces_gained} Aces, {clan_aces_gained} regular Aces\n')
+                f'{clan_name} gained {clan_aces_gained} Aces\n')
 
         try:
-            if clans_update_obj:
-                result_clans = clans.bulk_write(
-                    clans_update_obj, ordered=False)
-            if players_update_obj:
-                result_players = players.bulk_write(
-                    players_update_obj, ordered=False)
-            print(
-                f'Requests sent: {requests_cnt}\nClans:\n{result_clans.bulk_api_result}\n\nPlayers:\n{result_players.bulk_api_result}')
+            if not fake:
+                if clans_update_obj:
+                    result_clans = clans.bulk_write(
+                        clans_update_obj, ordered=False)
+                if players_update_obj:
+                    result_players = players.bulk_write(
+                        players_update_obj, ordered=False)
+                print(
+                    f'Requests sent: {requests_cnt}\nClans:\n{result_clans.bulk_api_result}\n\nPlayers:\n{result_players.bulk_api_result}')
+            else:
+                print(
+                    f'THIS WAS A FAKE RUN\nRequests sent: {requests_cnt}\n')
 
         except Exception as e:
             if e == BulkWriteError:
@@ -347,6 +329,12 @@ New Aces:     {(last_aces + clan_aces_gained)}""")
 def run():
     print('Starting update')
     update = UpdateCache('NA', 'usa', 5)
+    print(f'Update complete {datetime.utcnow()}')
+
+
+def fakerun():
+    print('Starting update')
+    update = UpdateCache('NA', 'usa', 5, fake=True)
     print(f'Update complete {datetime.utcnow()}')
 
 
