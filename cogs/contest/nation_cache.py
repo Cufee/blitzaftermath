@@ -129,10 +129,11 @@ class UpdateCache():
 
             for player_id in current_members:
                 if requests_cnt % 20 == 0:
-                    sleep(4)
+                    print('Sleep')
+                    sleep(5)
                     if requests_cnt % 200 == 0:
                         print(requests_cnt)
-                        sleep(11)
+                        sleep(15)
 
                 if last_members != [] and player_id not in last_members:
                     print(
