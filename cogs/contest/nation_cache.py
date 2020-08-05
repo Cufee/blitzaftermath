@@ -131,6 +131,8 @@ class UpdateCache():
                         sleep(14)
 
                 if last_members != [] and player_id not in last_members:
+                    print(
+                        f'Skipping and resetting {player_id} due to clan change.')
                     player_update = {
                         f'aces_gained': 0,
                         'timestamp': datetime.utcnow(),
