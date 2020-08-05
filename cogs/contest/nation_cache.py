@@ -128,13 +128,6 @@ class UpdateCache():
             clan_aces_gained = 0
 
             for player_id in current_members:
-                if requests_cnt % 20 == 0:
-                    print('Sleep')
-                    sleep(5)
-                    if requests_cnt % 200 == 0:
-                        print(requests_cnt)
-                        sleep(15)
-
                 if last_members != [] and player_id not in last_members:
                     print(
                         f'Skipping and resetting {player_id} due to clan change.')
@@ -160,6 +153,7 @@ class UpdateCache():
                     })
                     players_update_obj.append(insert_obj)
                     player_name_check.append(player_id)
+                    print(f'Skipping {player_id}')
                     continue
 
                 player_name = last_player_data.get('player_name', None)
@@ -242,6 +236,14 @@ class UpdateCache():
                                           '$set': player_update}, upsert=True))
 
                 clan_aces_gained += aces_gained_adjusted
+
+                # Sleep to avoid request timeout
+                if requests_cnt % 20 == 0 and last_request != requests_cnt:
+                    print('Sleep')
+                    sleep(5)
+                    if requests_cnt % 200 == 0:
+                        print(requests_cnt)
+                        sleep(15)
 
             if clan_aces_gained == 0:
                 clan_update = {
