@@ -99,12 +99,12 @@ class blitz_aftermath_contest(commands.Cog):
                         clan_id = clan_ids[0]
                     else:
                         raise Exception(
-                            f'Please specify a realm for {clan_id_str.upper()}')
+                            f'Please specify a server for {clan_id_str.upper()}.\n*`v-check TAG@SERVER`*')
             else:
                 guild_settings = guilds.find_one({'guild_id': guild_id})
                 if not guild_settings:
                     raise Exception(
-                        'This server does not have a default clan set. Please specify the clan tag and realm you want to check.')
+                        'This server does not have a default clan set. Please specify the clan tag and server you want to check.')
 
                 clan_id = guild_settings.get('default_clan_id')
                 clan_data = clan_data = clans.find_one(
@@ -197,7 +197,7 @@ class blitz_aftermath_contest(commands.Cog):
         clan_realm = clan_list[1]
         api_domain = get_wg_api_domain(clan_realm)
         if not api_domain:
-            raise Exception(f'{clan_realm} is not valid realm')
+            raise Exception(f'{clan_realm} is not valid server')
         url = api_domain + wg_clan_api_url_base + clan_tag
         res = requests.get(url)
         if res.status_code != 200:

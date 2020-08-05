@@ -32,7 +32,7 @@ class maintenance(commands.Cog):
         guild_id = ctx.guild.id
 
         help_str = (f"""
-Use `v-check TAG@Realm` to check the current Ace Tanker count of a clan.
+Use `v-check TAG@SERVER` to check the current Ace Tanker count of a clan. Individual player contributions are reset every 24 hours.
 You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
 To analyze a WoT Blitz replay, just send a file and I will do the rest.
         """)
