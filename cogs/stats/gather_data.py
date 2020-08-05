@@ -1,6 +1,6 @@
 import requests
 import rapidjson
 
-from cogs.api.api import Api
+from cogs.api.mongoApi import StatsApi
 
-Api = Api()
+Api = StatsApi()

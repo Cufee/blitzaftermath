@@ -43,13 +43,14 @@ class UpdateCache():
                 {'tier': {'$gt': (self.starting_tier - 1)}})
             self.detailed_query_name += f'_t{self.starting_tier}'
 
-        print(self.detailed_query, self.detailed_query_name)
-
         detailed_tanks_list = tanks.find(
             self.detailed_query).distinct('tank_id')
         if len(detailed_tanks_list) > 99:
             raise Exception(
                 f'Tank list is {len(detailed_tanks_list)}, WG API limit is 100. There is no code to handle list splitting atm')
+
+        print(len(detailed_tanks_list))
+
         self.detailed_tanks_list_str = ','.join(
             str(t) for t in detailed_tanks_list)
 
@@ -247,6 +248,7 @@ class UpdateCache():
 
             if clan_aces_gained == 0:
                 clan_update = {
+                    'members': current_members,
                     'timestamp': datetime.utcnow()
                 }
                 clans_update_obj.append(
