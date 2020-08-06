@@ -236,7 +236,7 @@ class UpdateCache():
                 clan_aces_gained += aces_gained_adjusted
 
                 # Sleep to avoid request timeout
-                if requests_cnt % 20 == 0 and last_request != requests_cnt:
+                if requests_cnt % 20 == 0:
                     print('Sleep')
                     sleep(5)
                     if requests_cnt % 200 == 0:
