@@ -99,7 +99,7 @@ class blitz_aftermath_contest(commands.Cog):
                         clan_id = clan_ids[0]
                     else:
                         raise Exception(
-                            f'Please specify a server for {clan_id_str.upper()}.\n*`v-check TAG@SERVER`*')
+                            f'Please specify a server for {clan_id_str.upper()}.\nv-check TAG@SERVER')
             else:
                 guild_settings = guilds.find_one({'guild_id': guild_id})
                 if not guild_settings:

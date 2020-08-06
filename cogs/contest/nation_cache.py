@@ -180,14 +180,13 @@ class UpdateCache():
                 aces_gained: int = current_player_aces - last_player_aces
 
                 if aces_gained == 0:
-                    print('Gained 0 aces on account')
-                    # player_update = {
-                    #     f'aces': current_player_aces,
-                    #     'timestamp': datetime.utcnow(),
-                    # }
-                    # players_update_obj.append(
-                    #     UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
-                    # continue
+                    player_update = {
+                        f'aces': current_player_aces,
+                        'timestamp': datetime.utcnow(),
+                    }
+                    players_update_obj.append(
+                        UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
+                    continue
 
                 if self.nation or self.starting_tier:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
