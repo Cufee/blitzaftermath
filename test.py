@@ -51,36 +51,39 @@ clan_marks = db.marksOfMastery
 #     tanks_str = "\n".join(worst_list)
 #     print(f'Tier:{tier} Tanks:\n{tanks_str}\n')
 
-url = 'https://www.blitzstars.com/api/tankaverages.json'
-res = rapidjson.loads(requests.get(url).text)
-tanks_obj_list = []
-missing = 0
-for tank in res:
-    tank.pop('_id')
-    glossary_data = tankaverages.find_one({'tank_id': tank.get('tank_id')})
-    if glossary_data:
-        tank_name = glossary_data.get('name')
-        tank_tier = glossary_data.get('tier')
-        tank_nation = glossary_data.get('nation')
+# url = 'https://www.blitzstars.com/api/tankaverages.json'
+# res = rapidjson.loads(requests.get(url).text)
+# tanks_obj_list = []
+# missing = 0
+# for tank in res:
+#     tank.pop('_id')
+#     glossary_data = tankaverages.find_one({'tank_id': tank.get('tank_id')})
+#     if glossary_data:
+#         tank_name = glossary_data.get('name')
+#         tank_tier = glossary_data.get('tier')
+#         tank_nation = glossary_data.get('nation')
 
-        tank.update({
-            'name': tank_name,
-            'tier': tank_tier,
-            'nation': tank_nation
-        })
-        tanks_obj_list.append(
-            UpdateOne(glossary_data, {'$set': tank}, upsert=True))
-    else:
-        missing += 1
+#         tank.update({
+#             'name': tank_name,
+#             'tier': tank_tier,
+#             'nation': tank_nation
+#         })
+#         tanks_obj_list.append(
+#             UpdateOne(glossary_data, {'$set': tank}, upsert=True))
+#     else:
+#         missing += 1
 
 
-print(missing)
-result = tankaverages.bulk_write(
-    tanks_obj_list, ordered=False)
-print(result.bulk_api_result)
+# print(missing)
+# result = tankaverages.bulk_write(
+#     tanks_obj_list, ordered=False)
+# print(result.bulk_api_result)
 
-# all_clans = list(clans.find())
-# print(len(all_clans))
-# for clan_ in all_clans:
-#     clans.update_one(
-#         clan_, {"$set": {'clan_aces_qr_usa_t5': clan_.get('clan_aces_usa_5')}})
+# all_players = list(players.find())
+# print(len(all_players))
+# for player_ in all_players:
+#     players.update_one(
+#         player_, {"$unset": {'aces_usa_5': ""}})
+
+list(tanks.find(
+    self.detailed_query))

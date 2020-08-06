@@ -44,16 +44,16 @@ class UpdateCache():
                 {'tier': {'$gt': (self.starting_tier - 1)}})
             self.detailed_query_name += f'_t{self.starting_tier}'
 
-        detailed_tanks_list = tanks.find(
+        self.detailed_tanks_list = tanks.find(
             self.detailed_query).distinct('tank_id')
-        if len(detailed_tanks_list) > 99:
+        if len(self.detailed_tanks_list) > 99:
             raise Exception(
-                f'Tank list is {len(detailed_tanks_list)}, WG API limit is 100. There is no code to handle list splitting atm')
+                f'Tank list is {len(self.detailed_tanks_list)}, WG API limit is 100. There is no code to handle list splitting atm')
 
         print(len(detailed_tanks_list))
 
         self.detailed_tanks_list_str = ','.join(
-            str(t) for t in detailed_tanks_list)
+            str(t) for t in self.detailed_tanks_list)
 
         self.update()
 
@@ -162,12 +162,11 @@ class UpdateCache():
                     player_name_check.append(player_id)
 
                 last_player_aces: int = last_player_data.get(
-                    'aces', current_player_aces)
+                    'aces', None)
                 last_player_aces_gained: int = last_player_data.get(
                     'aces_gained', 0)
-                aces_gained: int = current_player_aces - last_player_aces
 
-                if aces_gained == None:
+                if last_player_aces == None:
                     player_update = {
                         f'aces': current_player_aces,
                         'timestamp': datetime.utcnow(),
@@ -175,15 +174,10 @@ class UpdateCache():
                     players_update_obj.append(
                         UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
                     continue
-                elif aces_gained == 0:
-                    player_update = {
-                        'timestamp': datetime.utcnow(),
-                    }
-                    players_update_obj.append(
-                        UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
-                    continue
                 else:
                     player_update = {}
+
+                aces_gained: int = current_player_aces - last_player_aces
 
                 if self.nation or self.starting_tier:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
@@ -209,7 +203,10 @@ class UpdateCache():
                             tank_aces = tank.get('achievements', {}).get(
                                 'markOfMastery', 0)
                             tank_id = tank.get('tank_id')
-                            current_player_query_aces += tank_aces
+                            if tank_id in self.detailed_tanks_list:
+                                current_player_query_aces += tank_aces
+                            else:
+                                print('Tank not in list')
 
                         last_player_query_aces: int = last_player_data.get(
                             self.detailed_query_name, current_player_query_aces)
