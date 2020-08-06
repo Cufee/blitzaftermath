@@ -50,7 +50,7 @@ class UpdateCache():
             raise Exception(
                 f'Tank list is {len(self.detailed_tanks_list)}, WG API limit is 100. There is no code to handle list splitting atm')
 
-        print(len(detailed_tanks_list))
+        print(len(self.detailed_tanks_list))
 
         self.detailed_tanks_list_str = ','.join(
             str(t) for t in self.detailed_tanks_list)
