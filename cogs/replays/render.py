@@ -147,6 +147,8 @@ class Render():
             self.all_players.append(player)
 
             full_name = f'{player.get("nickname")} [{player.get("clan_tag")}]'
+            if len(full_name) < 18:
+                full_name = '000000000 0000000'
             vehicle_name = f'{player.get("player_vehicle")}  '
 
             full_name_w, _ = text_check.textsize(
