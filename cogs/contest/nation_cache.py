@@ -178,14 +178,15 @@ class UpdateCache():
                     player_update = {}
 
                 aces_gained: int = current_player_aces - last_player_aces
-                if aces_gained == 0:
-                    player_update = {
-                        f'aces': current_player_aces,
-                        'timestamp': datetime.utcnow(),
-                    }
-                    players_update_obj.append(
-                        UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
-                    continue
+
+                # if aces_gained == 0:
+                #     player_update = {
+                #         f'aces': current_player_aces,
+                #         'timestamp': datetime.utcnow(),
+                #     }
+                #     players_update_obj.append(
+                #         UpdateOne({'player_id': player_id},  {'$set': player_update}, upsert=True))
+                #     continue
 
                 if self.nation or self.starting_tier:
                     detailed_url = self.api_domain + wg_player_medals_api_url_base + \
@@ -246,10 +247,10 @@ class UpdateCache():
                 # Sleep to avoid request timeout
                 if requests_cnt % 20 == 0:
                     print('Sleep')
-                    sleep(5)
+                    sleep(1)
                     if requests_cnt % 200 == 0:
                         print(requests_cnt)
-                        sleep(15)
+                        sleep(4)
 
             if clan_aces_gained == 0:
                 clan_update = {
