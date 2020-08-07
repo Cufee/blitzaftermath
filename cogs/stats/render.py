@@ -19,20 +19,18 @@ Stats = StatsApi()
 
 class Render:
     def __init__(self, player_id):
-        player_details, last_stats_all, session_all, session_detailed = Stats.get_session_stats(
+        player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
             player_id=player_id, session_duration=(datetime.utcnow() - timedelta(hours=24)))
 
         self.tank_count = len(session_detailed)
         self.render_prep()
         self.render_header(player_details=player_details)
         self.render_all_stats(stats_all=session_all,
-                              last_stats_all=last_stats_all)
+                              live_stats_all=live_stats_all)
         # Render a card for each tank in detailed stats
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
             self.render_detailed_stats(tank_stats=tank_stats, card_index=i)
-
-        self.frame.show()
 
     def render_prep(self):
         # Import fonts
@@ -70,7 +68,7 @@ class Render:
 
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
-            'RGB', (self.frame_w, self.frame_h), (0, 0, 0))
+            'RGBA', (self.frame_w, self.frame_h), (255, 255, 255, 255))
         bg_image = Image.open('./cogs/replays/render/bg_frame.png')
         bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
         bg_image_w, bg_image_h = bg_image.size
@@ -81,9 +79,10 @@ class Render:
             (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
         solid_bg.paste(bg_image, box=(
             0, 0))
-        self.bg = solid_bg
-        self.frame.paste(self.bg)
+        self.frame.paste(solid_bg)
         self.frame_draw = ImageDraw.Draw(self.frame)
+        self.frame_draw.text((10, 10), 'Preview Version',
+                             self.font_color_half, font=self.font_bold)
 
     def render_header(self, player_details: dict):
         header_w = self.base_card_w
@@ -92,11 +91,36 @@ class Render:
             'RGBA', (header_w, header_h), (0, 0, 0, 100))
         header_draw = ImageDraw.Draw(header_card)
 
+        nickanme = player_details.get('nickname')
+        clan_tag = player_details.get('clan_tag', None)
+        clan_tag_str = ''
+        if clan_tag:
+            clan_tag_str = f'[{clan_tag}]'
+        name_clan_str = f"{nickanme} {clan_tag_str}"
+        battles_type = 'Random Battles'
+
+        # Text size
+        name_clan_w, name_clan_h = header_draw.textsize(
+            name_clan_str, font=self.font_bold)
+        b_type_w, b_type_h = header_draw.textsize(
+            battles_type, font=self.font)
+
+        # Draw battle type
+        draw_b_type_w = int((header_w - b_type_w) / 2)
+        draw_b_type_h = int((self.text_margin_h * 2))
+        header_draw.text((draw_b_type_w, draw_b_type_h), battles_type,
+                         self.font_color_base, font=self.font)
+        # Draw player name and tag
+        draw_name_w = int((header_w - name_clan_w) / 2)
+        draw_name_h = int((self.text_margin_h * 2)) + draw_b_type_h
+        header_draw.text((draw_name_w, draw_name_h), name_clan_str,
+                         self.font_color_base, font=self.font_bold)
+
         # Render card on frame
         self.frame.paste(header_card, box=(
             self.frame_margin_w, int(self.frame_margin_h / 2)), mask=header_card.split()[3])
 
-    def render_all_stats(self, stats_all: dict, last_stats_all: dict):
+    def render_all_stats(self, stats_all: dict, live_stats_all: dict):
         stats_all_w = self.base_card_w
         stats_all_h = self.base_card_h
         stats_all_card = Image.new(
@@ -104,16 +128,16 @@ class Render:
         stats_draw = ImageDraw.Draw(stats_all_card)
 
         # Organize Data
-        live_stats_random = last_stats_all.get('live_stats_random')
-        live_stats_rating = last_stats_all.get('live_stats_rating')
-        last_stats_random = last_stats_all.get('last_stats_random')
-        last_stats_rating = last_stats_all.get('last_stats_rating')
+        live_stats_random = live_stats_all.get('live_stats_random')
+        live_stats_rating = live_stats_all.get('live_stats_rating')
+        session_stats_random = stats_all.get('stats_random')
+        session_stats_rating = stats_all.get('stats_rating')
         # Session Stats
-        session_battles = last_stats_random.get('battles')
-        session_dmg_all = last_stats_random.get('damage_dealt')
-        session_wins_all = last_stats_random.get('wins')
+        session_battles = session_stats_random.get('battles')
+        session_dmg_all = session_stats_random.get('damage_dealt')
+        session_wins_all = session_stats_random.get('wins')
         session_dmg_avg = f"{round(session_dmg_all / session_battles)}"
-        session_wr_avg = f"{round(((session_wins_all / session_battles) * 100), 2)}%"
+        session_wr_avg = f"{round(((session_wins_all / session_battles) * 100), 2)}% ({session_battles})"
         session_wn8 = f'WN8: 0000'
         # Live stats
         live_battles = live_stats_random.get('battles')
@@ -121,24 +145,96 @@ class Render:
         live_wins_all = live_stats_random.get('wins')
         live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
         live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
-        slive_wn8 = f'WN8: 0000'
-
-        print(session_wr_avg, live_wr_avg)
+        live_wn8 = f'WN8: 0000'
 
         # Get text size
-        damage_text_w, damage_text_w = stats_draw.textsize(
+        damage_text_w, damage_text_h = stats_draw.textsize(
             'Damage', font=self.font)
-        winrate_text_w, winrate_text_w = stats_draw.textsize(
+        winrate_text_w, winrate_text_h = stats_draw.textsize(
             'Winrate', font=self.font)
-        wn8_text_w, wn8_text_w = stats_draw.textsize(
+        wn8_text_w, wn8_text_h = stats_draw.textsize(
             'WN8', font=self.font_bold)
+        # Session Stats
+        session_dmg_w, session_dmg_h = stats_draw.textsize(
+            session_dmg_avg, font=self.font)
+        session_wn8_w, session_wn8_h = stats_draw.textsize(
+            session_wn8, font=self.font_bold)
+        session_wr_w, session_wr_h = stats_draw.textsize(
+            session_wr_avg, font=self.font)
+        # Live stats
+        live_dmg_w, live_dmg_h = stats_draw.textsize(
+            live_dmg_avg, font=self.font)
+        live_wn8_w, live_wn8_h = stats_draw.textsize(
+            live_wn8, font=self.font_bold)
+        live_wr_w, live_wr_h = stats_draw.textsize(
+            live_wr_avg, font=self.font)
+
+        # Margins
+        metric_names_row_h = self.text_margin_h
+        session_stats_row_h = int(wn8_text_h + (self.text_margin_h * 2))
+        all_stats_row = int(session_stats_row_h +
+                            session_wn8_h + (self.text_margin_h))
+        stats_margin_w = int((stats_all_w - (4 * self.text_margin_w)) / 3)
 
         # Top row
-        # Draw metric names
-        draw_name_w = text_w_margin
-        draw_name_h = text_h_margin
-        stats_draw.text((draw_name_w, draw_name_h), tank_name,
+        # Draw damage
+        draw_damage_w = int((2 * self.text_margin_w) +
+                            ((stats_margin_w - damage_text_w) / 2))
+        draw_damage_h = metric_names_row_h
+        stats_draw.text((draw_damage_w, draw_damage_h), 'Damage',
+                        self.font_color_base, font=self.font)
+        # Draw WN8
+        draw_wn8_name_w = int((2 * self.text_margin_w) + stats_margin_w +
+                              ((stats_margin_w - wn8_text_w) / 2))
+        draw_wn8_name_h = metric_names_row_h
+        stats_draw.text((draw_wn8_name_w, draw_wn8_name_h), 'WN8',
+                        self.font_color_base, font=self.font)
+        # Draw winrate
+        draw_winrate_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
+                             ((stats_margin_w - winrate_text_w) / 2))
+        draw_winrate_h = metric_names_row_h
+        stats_draw.text((draw_winrate_w, draw_winrate_h), 'Winrate',
+                        self.font_color_base, font=self.font)
+
+        # Middle row
+        # Draw damage
+        draw_dmg_w = int((2 * self.text_margin_w) +
+                         ((stats_margin_w - session_dmg_w) / 2))
+        draw_dmg_h = session_stats_row_h
+        stats_draw.text((draw_dmg_w, draw_dmg_h), session_dmg_avg,
+                        self.font_color_base, font=self.font)
+        # Draw WN8
+        draw_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
+                         ((stats_margin_w - session_wn8_w) / 2))
+        draw_wn8_h = session_stats_row_h
+        stats_draw.text((draw_wn8_w, draw_wn8_h), session_wn8,
                         self.font_color_base, font=self.font_bold)
+        # Draw winrate
+        draw_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
+                        ((stats_margin_w - session_wr_w) / 2))
+        draw_wr_h = session_stats_row_h
+        stats_draw.text((draw_wr_w, draw_wr_h), session_wr_avg,
+                        self.font_color_base, font=self.font)
+
+        # Bottom row
+        # Draw damage
+        draw_live_dmg_w = int((self.text_margin_w * 2) +
+                              ((stats_margin_w - live_dmg_w) / 2))
+        draw_live_dmg_h = all_stats_row
+        stats_draw.text((draw_live_dmg_w, draw_live_dmg_h), live_dmg_avg,
+                        self.font_color_base, font=self.font)
+        # Draw WN8
+        draw_live_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
+                              ((stats_margin_w - live_wn8_w) / 2))
+        draw_live_wn8_h = all_stats_row
+        stats_draw.text((draw_live_wn8_w, draw_live_wn8_h), live_wn8,
+                        self.font_color_base, font=self.font_bold)
+        # Draw winrate
+        draw_live_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
+                             ((stats_margin_w - live_wr_w) / 2))
+        draw_live_wr_h = all_stats_row
+        stats_draw.text((draw_live_wr_w, draw_live_wr_h), live_wr_avg,
+                        self.font_color_base, font=self.font)
 
         # Render card on frame
         stats_all_render_h = int(
@@ -178,7 +274,7 @@ class Render:
             tank_wn8, font=self.font_bold)
 
         # Margins
-        text_w_margin = self.text_margin_w
+        text_w_margin = self.text_margin_w * 2
         text_h_margin = int((stats_detailed_h - (name_text_h + wr_text_h)) / 3)
         bottom_metric_margin = int(stats_detailed_w / 3)
 

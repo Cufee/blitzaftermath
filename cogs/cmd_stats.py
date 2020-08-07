@@ -4,9 +4,7 @@ import discord
 import requests
 import rapidjson
 
-from cogs.replays.replay import Replay
-from cogs.replays.rating import Rating
-from cogs.replays.render import Render
+from cogs.stats.render import Render
 from cogs.api.mongoApi import StatsApi, MongoClient
 
 client = MongoClient("mongodb://51.222.13.110:27017")
@@ -45,9 +43,9 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception(
                         'Player not found. This feature is only enabled for a limited number of users during the testing period.')
                 player_id = player_details.get('_id')
-                player_details, last_stats, session_all, session_detailed = API.get_session_stats(
-                    player_id, session_duration=(datetime.utcnow() - timedelta(hours=24)))
-                await message.channel.send(f'```{rapidjson.dumps(session_all, indent=2)}```')
+
+                image = Render(player_id=player_id).render_image()
+                await message.channel.send(file=image)
 
         except Exception as e:
             await message.channel.send(f'```{e}```')
