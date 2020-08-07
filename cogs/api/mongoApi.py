@@ -26,6 +26,7 @@ def get_wg_api_domain(realm=None, player_id=None):
         player_realm = 'NA'
         api_domain = 'http://api.wotblitz.com'
     else:
+        print(player_id)
         raise Exception(
             'Unable to find this player on RU, EU or NA. ASIA server queries are not supported by WG.')
     return api_domain, player_realm
@@ -301,15 +302,16 @@ class StatsApi():
                 result = self.sessions.bulk_write(
                     sessions_list, ordered=False)
                 print(f'{datetime.utcnow()}\n{result.bulk_api_result}')
+                return 'Done'
             else:
                 print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-            return ('Done')
+                return None
         except Exception as e:
             if e == BulkWriteError:
                 print(e.details)
             else:
                 print(e)
-            return ('Something Failed.')
+            return None
 
     def add_premium_time(self, player_id: int, days_to_add=None):
         player_details = self.players.find_one({'_id': player_id})
@@ -456,6 +458,7 @@ class StatsApi():
             last_stats_rating = last_stats.get('stats_rating')
         else:
             result = self.update_stats(player_ids_long=[player_id])
+            print(result)
             if result:
                 raise Exception(
                     'I just refreshed your session, please try again.')

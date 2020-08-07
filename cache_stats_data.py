@@ -1,7 +1,7 @@
 import requests
 import rapidjson
 
-from api.mongoApi import StatsApi
+from cogs.api.mongoApi import StatsApi
 from pymongo import MongoClient
 
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -14,13 +14,13 @@ players_db = client.stats.players
 
 
 def run():
-    player_list = list(players_db.find())
+    player_list = list(players_db.find().distinct('_id'))
     print(len(player_list))
     if len(player_list) > 100:
         for i in range(0, len(player_list), 100):
-            statsApi.update_stats(player_list[i:i + n])
+            Api.update_stats(player_list[i:i + n])
     else:
-        statsApi.update_stats(player_list)
+        Api.update_stats(player_list)
 
 
 if __name__ == "__main__":

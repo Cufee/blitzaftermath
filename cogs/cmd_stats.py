@@ -42,7 +42,7 @@ class blitz_aftermath_stats(commands.Cog):
                     {'nickname': player_name, 'realm': player_realm})
                 if not player_details:
                     raise Exception(
-                        'Player not found. This feature is only enabled for a limited number of users during the testing period.')
+                        'Player not found. This feature is only enabled for a limited number of users during the testing period. Please reach out to Vovko#0851 if you would like to enable this feature.')
                 player_id = player_details.get('_id')
 
                 image = Render(player_id=player_id).render_image()
