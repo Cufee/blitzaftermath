@@ -35,8 +35,8 @@ print(len(player_list))
 #     datetime.utcnow() - timedelta(hours=24)))
 
 # print(rapidjson.dumps(session_all, indent=2))
-for player_id in player_list:
-    statsApi.add_premium_time(player_id, days_to_add=14)
+# for player_id in player_list:
+#     statsApi.add_premium_time(player_id, days_to_add=14)
 
 # all_guilds = requests.get('http://127.0.0.1:5000/guilds')
 

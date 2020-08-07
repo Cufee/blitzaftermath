@@ -156,7 +156,7 @@ class StatsApi():
 
             if update_premium:
                 new_player.update(
-                    {'am_premium_expiration': datetime.utcnow()})
+                    {'am_premium_expiration': (datetime.utcnow() + timedelta(days=7))})
 
             new_players_list.append(UpdateOne({'_id': player_id}, {
                                     '$set': new_player}, upsert=True))
