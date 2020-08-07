@@ -83,6 +83,9 @@ class blitz_aftermath_contest(commands.Cog):
                     clan_list = (clan_id_str).split('@')
                     clan_tag = clan_list[0]
                     clan_realm = clan_list[1]
+                    if len(clan_tag) < 2 or len(clan_realm) != 2:
+                        raise Exception(
+                            'It looks like your formatting was off, please use v-check ClanTag@SERVER.')
                     clan_data = clans.find_one(
                         {'clan_tag': clan_tag, 'clan_realm': clan_realm})
                     if not clan_data:

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+from cogs.api.mongoApi import StatsApi
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
@@ -17,6 +19,19 @@ players = db.players
 tanks = glossary.tanks
 tankaverages = glossary.tankaverages
 clan_marks = db.marksOfMastery
+
+
+statsApi = StatsApi()
+
+player_list = [1013072123]
+
+# statsApi.update_players(player_list)
+# statsApi.update_stats(player_list)
+player_details, session_all, session_detailed = statsApi.get_session_stats(1013072123, session_duration=(
+    datetime.utcnow() - timedelta(hours=24)))
+
+print(rapidjson.dumps(session_all, indent=2))
+# statsApi.add_premium_time(player_list[0], days_to_add=999)
 
 # all_guilds = requests.get('http://127.0.0.1:5000/guilds')
 
@@ -85,5 +100,5 @@ clan_marks = db.marksOfMastery
 #     players.update_one(
 #         player_, {"$unset": {'aces_usa_5': ""}})
 
-list(tanks.find(
-    self.detailed_query))
+# list(tanks.find(
+#     self.detailed_query))
