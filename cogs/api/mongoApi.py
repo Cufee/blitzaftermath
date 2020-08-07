@@ -165,15 +165,16 @@ class StatsApi():
                 result_players = self.players.bulk_write(
                     new_players_list, ordered=False)
                 print(f'{datetime.utcnow()}\n{result_players.bulk_api_result}')
+                return ('Done')
             else:
                 print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-            return ('Done')
+                return None
         except Exception as e:
             if e == BulkWriteError:
                 print(e.details)
             else:
                 print(e)
-            return ('Something Failed.')
+            return None
 
     def update_stats(self, player_ids_long: list, realm=None):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
@@ -415,6 +416,8 @@ class StatsApi():
                                 {'tank_id': int(tank)}).get('tier') or ''
                             diff.update({'tank_name': tank_name})
                             session_detailed.update({tank: diff})
+        else:
+            session_detailed = {}
 
         # Check Basic stats
         player_data = stata_all_res_raw.get('data').get(str(player_id))
@@ -425,7 +428,7 @@ class StatsApi():
             last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
                                    'stats_rating': {'$exists': True, '$ne': stats_rating}}], 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
             if not last_stats_list:
-                last_stats_list = None
+                last_stats = None
             else:
                 last_stats = last_stats_list[0]
         else:
@@ -452,12 +455,13 @@ class StatsApi():
             last_stats_random = last_stats.get('stats_random')
             last_stats_rating = last_stats.get('stats_rating')
         else:
-            session_all = {
-                'stats_random': None,
-                'stats_rating': None
-            }
-            last_stats_random = None
-            last_stats_rating = None
+            result = self.update_stats(player_ids_long=[player_id])
+            if result:
+                raise Exception(
+                    'I just refreshed your session, please try again.')
+            else:
+                raise Exception(
+                    'Not enough data. I tried to refresh your session, but you did not play a single battle yet.')
 
         live_stats_all = {
             'live_stats_random': stats_random,

@@ -130,8 +130,8 @@ class Render:
         # Organize Data
         live_stats_random = live_stats_all.get('live_stats_random')
         live_stats_rating = live_stats_all.get('live_stats_rating')
-        session_stats_random = stats_all.get('stats_random')
-        session_stats_rating = stats_all.get('stats_rating')
+        session_stats_random = stats_all.get('stats_random') or {}
+        session_stats_rating = stats_all.get('stats_rating') or {}
         # Session Stats
         session_battles = session_stats_random.get('battles')
         session_dmg_all = session_stats_random.get('damage_dealt')

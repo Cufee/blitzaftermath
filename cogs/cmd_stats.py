@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 import discord
 import requests
 import rapidjson
+import traceback
 
 from cogs.stats.render import Render
 from cogs.api.mongoApi import StatsApi, MongoClient
@@ -48,6 +49,7 @@ class blitz_aftermath_stats(commands.Cog):
                 await message.channel.send(file=image)
 
         except Exception as e:
+            print(traceback.format_exc())
             await message.channel.send(f'```{e}```')
 
     # Commands
