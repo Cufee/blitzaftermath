@@ -9,7 +9,7 @@ from io import BytesIO
 import requests
 import rapidjson
 
-from cogs.api.mongoApi import StatsApi
+from api.mongoApi import StatsApi
 
 from datetime import datetime, timedelta
 # from cogs.api.mongoApi import StatsApi

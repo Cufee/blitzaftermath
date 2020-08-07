@@ -1,7 +1,7 @@
 import requests
 import rapidjson
 
-from cogs.api.mongoApi import StatsApi
+from api.mongoApi import StatsApi
 from pymongo import MongoClient
 
 from apscheduler.schedulers.blocking import BlockingScheduler

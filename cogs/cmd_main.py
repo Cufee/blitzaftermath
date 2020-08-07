@@ -6,7 +6,7 @@ import rapidjson
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
-from cogs.api.api import Api
+from api.api import Api
 
 debug = False
 Api = Api()
