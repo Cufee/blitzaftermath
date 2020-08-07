@@ -45,7 +45,7 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception(
                         'Player not found. This feature is only enabled for a limited number of users during the testing period.')
                 player_id = player_details.get('_id')
-                player_details, session_all, session_detailed = API.get_session_stats(
+                player_details, last_stats, session_all, session_detailed = API.get_session_stats(
                     player_id, session_duration=(datetime.utcnow() - timedelta(hours=24)))
                 await message.channel.send(f'```{rapidjson.dumps(session_all, indent=2)}```')
 

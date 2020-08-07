@@ -411,6 +411,8 @@ class StatsApi():
                         if diff.get('battles') != 0:
                             tank_name = self.glossary.find_one(
                                 {'tank_id': int(tank)}).get('name') or 'Unknown'
+                            tank_tier = self.glossary.find_one(
+                                {'tank_id': int(tank)}).get('tier') or ''
                             diff.update({'tank_name': tank_name})
                             session_detailed.update({tank: diff})
 
@@ -447,13 +449,23 @@ class StatsApi():
                 'stats_random': random_diff,
                 'stats_rating': rating_diff
             }
+            last_stats_random = last_stats.get('stats_random')
+            last_stats_rating = last_stats.get('stats_rating')
         else:
             session_all = {
                 'stats_random': None,
                 'stats_rating': None
             }
+            last_stats_random = None
+            last_stats_rating = None
 
-        return player_details, session_all, session_detailed
+        last_stats_all = {
+            'live_stats_random': stats_random,
+            'live_stats_rating': stats_rating,
+            'last_stats_random': last_stats_random,
+            'last_stats_rating': last_stats_rating,
+        }
+        return player_details, last_stats_all, session_all, session_detailed
 
     def get_vehicle_stats(self, player_id: int, tank_id: int):
         api_domain, realm = get_wg_api_domain(player_id=player_id)

@@ -194,6 +194,8 @@ class Replay:
 
             player_wins = stats.get('wins')
             player_battles = stats.get('battles')
+            if player_battles == 0:
+                player_battles = 1
             player_vehicle = vehicle.get('name')
             player_vehicle_type = vehicle.get('type')
             player_vehicle_tier = vehicle.get('tier')
