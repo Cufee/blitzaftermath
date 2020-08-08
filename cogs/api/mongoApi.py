@@ -460,7 +460,7 @@ class StatsApi():
             session_all = {
                 'stats_random': random_diff,
                 'stats_rating': rating_diff,
-                'timestamp': last_stats.get()
+                'timestamp': last_stats.get('timestamp')
             }
             last_stats_random = last_stats.get('stats_random')
             last_stats_rating = last_stats.get('stats_rating')
