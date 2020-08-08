@@ -103,10 +103,10 @@ class UpdateCache():
             print(f'Working on {clan_name}')
             if self.nation or self.starting_tier:
                 clan_aces_str = f'clan_{self.detailed_query_name}'
-                last_aces = clan.get(clan_aces_str)
+                last_aces = clan.get(clan_aces_str, 0)
             else:
                 clan_aces_str = f'clan_aces'
-                last_aces = clan.get(clan_aces_str)
+                last_aces = clan.get(clan_aces_str, 0)
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)

@@ -28,7 +28,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Commands
     @commands.command(aliases=['wr', 'session'])
-    async def stats(self, message, player_name_str):
+    async def stats(self, message, player_name_str, hours=None):
         if message.author == self.client.user:
             return
         try:
@@ -45,7 +45,13 @@ class blitz_aftermath_stats(commands.Cog):
                         'Player not found. This feature is only enabled for a limited number of users during the testing period. Please reach out to Vovko#0851 if you would like to enable this feature.')
                 player_id = player_details.get('_id')
 
-                image = Render(player_id=player_id).render_image()
+                try:
+                    session_hours = int(hours)
+                except:
+                    session_hours = None
+
+                image = Render(player_id=player_id,
+                               hours=session_hours).render_image()
                 await message.channel.send(file=image)
 
         except Exception as e:

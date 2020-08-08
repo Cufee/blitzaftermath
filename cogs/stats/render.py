@@ -18,9 +18,17 @@ Stats = StatsApi()
 
 
 class Render:
-    def __init__(self, player_id):
+    def __init__(self, player_id, hours=None):
+        if hours:
+            session_duration = (datetime.utcnow() - timedelta(hours=hours))
+        else:
+            session_duration = None
+
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
-            player_id=player_id, session_duration=(datetime.utcnow() - timedelta(hours=24)))
+            player_id=player_id, session_duration=session_duration)
+
+        self.session_start = (self.top_clans_list[0].get(
+            'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
 
         self.tank_count = len(session_detailed)
         self.render_prep()

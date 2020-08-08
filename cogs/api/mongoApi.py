@@ -124,6 +124,10 @@ class StatsApi():
             player_data = res_player_data.get(str(player_id))
             player_clan_data = res_player_clans_data.get(str(player_id))
 
+            if not player_data or not player_clan_data:
+                print(f'No data, skipping {player_id}')
+                continue
+
             # Player info
             nickname = player_data.get('nickname')
             last_battle_time = datetime.utcfromtimestamp(
@@ -216,6 +220,9 @@ class StatsApi():
         for player_id in player_ids:
             # Get player details and premium status
             player_details = self.players.find_one({'_id': player_id})
+            if not player_details:
+                print(f'Player {player_id} not in DB, skipping')
+                continue
             am_premium_expiration = player_details.get(
                 'am_premium_expiration') or datetime.utcnow()
             player_is_premium = False
@@ -452,7 +459,8 @@ class StatsApi():
 
             session_all = {
                 'stats_random': random_diff,
-                'stats_rating': rating_diff
+                'stats_rating': rating_diff,
+                'timestamp': last_stats.get()
             }
             last_stats_random = last_stats.get('stats_random')
             last_stats_rating = last_stats.get('stats_rating')
