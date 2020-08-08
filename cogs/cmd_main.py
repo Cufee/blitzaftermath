@@ -37,6 +37,7 @@ To analyze a WoT Blitz replay, just send a file and I will do the rest.
 
 **AfterStats**:
 Use `v-stats Player@Server` to check the last session of a player.
+*All sessions are reset at 2AM PST daily.*
 You can also check a specific session with `v-stats Player@Server Hours`.
 *For example:* `v-stats Vovko@na 24`
 

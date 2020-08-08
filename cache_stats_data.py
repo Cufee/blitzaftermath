@@ -26,8 +26,8 @@ def run():
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('0 10 * * *'))
-    scheduler.add_job(run, CronTrigger.from_crontab('0 12 * * *'))
+    scheduler.add_job(run, CronTrigger.from_crontab('0 9 * * *'))
+    # scheduler.add_job(run, CronTrigger.from_crontab('0 12 * * *'))
     print('Press Ctrl+{0} to exit'.format('C'))
 
     try:

@@ -54,7 +54,8 @@ class blitz_aftermath_stats(commands.Cog):
                 image = Render(player_id=player_id,
                                hours=session_hours).render_image()
                 await message.channel.send(file=image)
-                API.update_stats([player_id])
+                # Doing a forced session reset every 24 hours
+                # API.update_stats([player_id])
 
         except Exception as e:
             print(traceback.format_exc())
