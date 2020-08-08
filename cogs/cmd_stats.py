@@ -4,6 +4,7 @@ import discord
 import requests
 import rapidjson
 import traceback
+import re
 
 from cogs.stats.render import Render
 from cogs.api.mongoApi import StatsApi, MongoClient
@@ -39,7 +40,7 @@ class blitz_aftermath_stats(commands.Cog):
                 player_name = player_name_str_list[0]
                 player_realm = player_name_str_list[1].upper()
                 player_details = players.find_one(
-                    {'nickname': player_name, 'realm': player_realm})
+                    {'nickname': re.compile(player_name, re.IGNORECASE), 'realm': player_realm})
                 if not player_details:
                     # Need a call to WG API to get id from nickname
                     raise Exception(
