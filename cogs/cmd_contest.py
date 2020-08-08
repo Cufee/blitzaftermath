@@ -157,6 +157,9 @@ class blitz_aftermath_contest(commands.Cog):
         try:
             clan_id_list = (clan_id_str.upper()).split('@')
             clan_tag = clan_id_list[0]
+            if '[' in clan_tag or ']' in clan_tag:
+                raise Exception(
+                    'Please do not include [ ] around the clan tag.')
             clan_realm = clan_id_list[1] or None
 
             api_domain = get_wg_api_domain(clan_realm)
