@@ -17,7 +17,8 @@ def run():
     player_list = list(players_db.find().distinct('_id'))
     print(len(player_list))
     if len(player_list) > 100:
-        for i in range(0, len(player_list), 100):
+        n = 100
+        for i in range(0, len(player_list), n):
             Api.update_stats(player_list[i:i + n])
     else:
         Api.update_stats(player_list)
