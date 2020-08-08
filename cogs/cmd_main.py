@@ -32,9 +32,17 @@ class maintenance(commands.Cog):
         guild_id = ctx.guild.id
 
         help_str = (f"""
+**AfterMath**:
+To analyze a WoT Blitz replay, just send a file and I will do the rest.
+
+**AfterStats**:
+Use `v-stats Player@Server` to check the last session of a player.
+You can also check a specific session with `v-stats Player@Server Hours`.
+*For example:* `v-stats Vovko@na 24`
+
+**AfterContest**:
 Use `v-check TAG@SERVER` to check the current Ace Tanker count of a clan. Individual player contributions are reset every 24 hours.
 You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
-To analyze a WoT Blitz replay, just send a file and I will do the rest.
         """)
 
         await ctx.send(help_str)
