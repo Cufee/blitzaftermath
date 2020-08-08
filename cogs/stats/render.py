@@ -27,8 +27,8 @@ class Render:
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
             player_id=player_id, session_duration=session_duration)
 
-        self.session_start = (self.top_clans_list[0].get(
-            'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
+        # self.session_start = (self.top_clans_list[0].get(
+        #     'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
 
         self.tank_count = len(session_detailed)
         self.render_prep()
