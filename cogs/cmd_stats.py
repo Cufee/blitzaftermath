@@ -41,7 +41,7 @@ class blitz_aftermath_stats(commands.Cog):
                 player_details = players.find_one(
                     {'nickname': player_name, 'realm': player_realm})
                 if not player_details:
-                    # Need a call to WG API to get id from nickname.
+                    # Need a call to WG API to get id from nickname
                     raise Exception(
                         'Player not found. This feature is only enabled for a limited number of users during the testing period. Please reach out to Vovko#0851 if you would like to enable this feature.')
                 player_id = player_details.get('_id')
@@ -54,6 +54,7 @@ class blitz_aftermath_stats(commands.Cog):
                 image = Render(player_id=player_id,
                                hours=session_hours).render_image()
                 await message.channel.send(file=image)
+                API.update_stats([player_id])
 
         except Exception as e:
             print(traceback.format_exc())

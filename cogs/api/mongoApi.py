@@ -69,6 +69,7 @@ class StatsApi():
         self.sessions = client.stats.sessions
         self.clans = client.stats.clans
         self.glossary = client.glossary.tanks
+        self.glossary_averages = client.glossary.tankaverages
 
         # WG Stats API URLs
         self.wg_api_personal_data = '/wotb/account/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
@@ -357,76 +358,85 @@ class StatsApi():
         if stats_all_res.status_code != 200 or not stata_all_res_raw:
             raise Exception(
                 f'Failed to get player stats, WG responded with {stats_all_res.status_code}')
-        if player_is_premium:
-            # Request and check detailed stats
-            stats_detailed_url = api_domain + \
-                self.wg_api_vehicle_statistics + str(player_id)
-            stats_detailed_res = requests.get(stats_detailed_url)
-            stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
 
-            if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
-                print(
-                    f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+        # Request and check detailed stats
+        stats_detailed_url = api_domain + \
+            self.wg_api_vehicle_statistics + str(player_id)
+        stats_detailed_res = requests.get(stats_detailed_url)
+        stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
+
+        if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
+            print(
+                f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+            session_detailed = {}
+        else:
+            # Get current detailed stats
+            stats_detailed_tanks = stats_detailed_res_raw.get(
+                'data').get(str(player_id))
+            stats_detailed_data = {}
+            for tank_stats in stats_detailed_tanks:
+                tank_id = tank_stats.get('tank_id')
+                tank_stats_all = tank_stats
+                stats_detailed_data.update({str(tank_id): tank_stats_all})
+
+            # Get last session object
+            if session_duration:
+                last_detailed_stats_list = list(self.sessions.find(
+                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}, 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
+                if last_detailed_stats_list:
+                    last_detailed_stats_data = last_detailed_stats_list[0].get(
+                        'vehicles') or {}
+                else:
+                    last_detailed_stats_data = None
+            else:
+                last_detailed_stats_list = list(self.sessions.find(
+                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}}).sort('timestamp', -1).limit(1))
+
+                if last_detailed_stats_list:
+                    last_detailed_stats_data = last_detailed_stats_list[0].get(
+                        'vehicles') or {}
+                else:
+                    last_detailed_stats_data = None
+
+            if not last_detailed_stats_data:
+                print('Last detailed session not available.')
                 session_detailed = {}
             else:
-                # Get current detailed stats
-                stats_detailed_tanks = stats_detailed_res_raw.get(
-                    'data').get(str(player_id))
-                stats_detailed_data = {}
-                for tank_stats in stats_detailed_tanks:
-                    tank_id = tank_stats.get('tank_id')
-                    tank_stats_all = tank_stats
-                    stats_detailed_data.update({str(tank_id): tank_stats_all})
+                # Compare two dicts using sets
+                set_last_detailed_stats_data = set(
+                    last_detailed_stats_data)
+                set_stats_detailed_data = set(stats_detailed_data)
+                session_detailed_diff = (
+                    set_stats_detailed_data - set_last_detailed_stats_data)
 
-                # Get last session object
-                if session_duration:
-                    last_detailed_stats_list = list(self.sessions.find(
-                        {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}, 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
-                    if last_detailed_stats_list:
-                        last_detailed_stats_data = last_detailed_stats_list[0].get(
-                            'vehicles') or {}
-                    else:
-                        last_detailed_stats_data = None
-                else:
-                    last_detailed_stats_list = list(self.sessions.find(
-                        {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}}).sort('timestamp', -1).limit(1))
+                session_detailed = {}
+                for tank in stats_detailed_data.keys():
+                    session_old = last_detailed_stats_data.get(
+                        tank).get('all') or {}
+                    session_current = stats_detailed_data.get(
+                        tank).get('all') or {}
 
-                    if last_detailed_stats_list:
-                        last_detailed_stats_data = last_detailed_stats_list[0].get(
-                            'vehicles') or {}
-                    else:
-                        last_detailed_stats_data = None
+                    diff = {key: (session_current.get(key) - session_old.get(
+                        key)) for key in session_current.keys()}
 
-                if not last_detailed_stats_data:
-                    print('Last detailed session not available.')
-                    session_detailed = {}
-                else:
-                    # Compare two dicts using sets
-                    set_last_detailed_stats_data = set(
-                        last_detailed_stats_data)
-                    set_stats_detailed_data = set(stats_detailed_data)
-                    session_detailed_diff = (
-                        set_stats_detailed_data - set_last_detailed_stats_data)
+                    if diff.get('battles') != 0:
+                        tank_glossary = self.glossary.find_one(
+                            {'tank_id': int(tank)}) or {}
+                        tank_name = tank_glossary.get('name') or 'Unknown'
+                        tank_tier = tank_glossary.get('tier') or 0
+                        tank_nation = tank_glossary.get(
+                            'nation') or 'other'
+                        tank_id = tank_glossary.get('tank_id') or 0
 
-                    session_detailed = {}
-                    for tank in stats_detailed_data.keys():
-                        session_old = last_detailed_stats_data.get(
-                            tank).get('all') or {}
-                        session_current = stats_detailed_data.get(
-                            tank).get('all') or {}
-
-                        diff = {key: (session_current.get(key) - session_old.get(
-                            key)) for key in session_current.keys()}
-
-                        if diff.get('battles') != 0:
-                            tank_name = self.glossary.find_one(
-                                {'tank_id': int(tank)}).get('name') or 'Unknown'
-                            tank_tier = self.glossary.find_one(
-                                {'tank_id': int(tank)}).get('tier') or ''
-                            diff.update({'tank_name': tank_name})
-                            session_detailed.update({tank: diff})
-        else:
-            session_detailed = {}
+                        tank_data = {
+                            'tank_name': tank_name,
+                            'tank_tier': tank_tier,
+                            'tank_nation': tank_nation,
+                            'tank_id': tank_id
+                        }
+                        diff.update(tank_data)
+                        diff = self.add_vehicle_wn8(diff)
+                        session_detailed.update({tank: diff})
 
         # Check Basic stats
         player_data = stata_all_res_raw.get('data').get(str(player_id))
@@ -462,6 +472,7 @@ class StatsApi():
                 'stats_rating': rating_diff,
                 'timestamp': last_stats.get('timestamp')
             }
+
             last_stats_random = last_stats.get('stats_random')
             last_stats_rating = last_stats.get('stats_rating')
         else:
@@ -482,4 +493,53 @@ class StatsApi():
 
     def get_vehicle_stats(self, player_id: int, tank_id: int):
         api_domain, realm = get_wg_api_domain(player_id=player_id)
+        pass
+
+    def add_vehicle_wn8(self, tank_data: dict):
+        tank_id = int(tank_data.get('tank_id', 0))
+        tank_averages = self.glossary_averages.find_one(
+            {'tank_id': tank_id}) or None
+        if not tank_averages:
+            print(f'No averages in glossary for {tank_id}')
+            tank_data.update({'tank_wn8': 0})
+            return tank_data
+        else:
+            # Expected values
+            exp_dmg = tank_averages.get('meanSd', {}).get('dpbMean')
+            exp_spott = tank_averages.get('meanSd', {}).get('spbMean')
+            exp_frag = tank_averages.get('meanSd', {}).get('kpbMean')
+            exp_def = (tank_averages.get('all').get(
+                'dropped_capture_points') / tank_averages.get('all').get('battles'))
+            exp_wr = tank_averages.get('meanSd', {}).get('winrateMean')
+            # Organize data
+            tank_battles = tank_data.get("battles")
+            if tank_battles == 0:
+                tank_battles = 1
+            tank_avg_wr = round(
+                ((tank_data.get("wins") / tank_battles) * 100), 2)
+            tank_avg_dmg = round(tank_data.get('damage_dealt') / tank_battles)
+            tank_avg_spott = round(tank_data.get('spotted') / tank_battles)
+            tank_avg_frag = round(tank_data.get('frags') / tank_battles)
+            tank_avg_def = round(tank_data.get(
+                'dropped_capture_points') / tank_battles)
+            # Calculate WN8 metrics
+            rDMG = tank_avg_dmg / exp_dmg
+            rSPOTT = tank_avg_spott / exp_spott
+            rFRAG = tank_avg_frag / exp_frag
+            rDEF = tank_avg_def / exp_def
+            rWR = tank_avg_wr / exp_wr
+
+            rDMGc = max(0, ((rDMG - 0.22) / (1 - 0.22)))
+            rSPOTTc = max(0, (min(rDMGc + 0.1, (rSPOTT - 0.38) / (1 - 0.38))))
+            rFRAGc = max(0, (min(rDMGc + 0.2, (rFRAG - 0.12) / (1 - 0.12))))
+            rDEFc = max(0, (min(rDMGc + 0.1, (rDEF - 0.10) / (1 - 0.10))))
+            rWRc = max(0, ((rWR - 0.71) / (1 - 0.71)))
+
+            wn8 = round((980*rDMGc) + (210*rDMGc*rFRAGc) + (155*rFRAGc *
+                                                            rSPOTTc) + (75*rDEFc*rFRAGc) + (145*min(1.8, rWRc)))
+
+            tank_data.update({'tank_wn8': wn8})
+            return tank_data
+
+    def add_session_wn8(self, session: dict):
         pass

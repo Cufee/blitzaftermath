@@ -11,7 +11,7 @@ import rapidjson
 
 from cogs.api.mongoApi import StatsApi
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 # from cogs.api.mongoApi import StatsApi
 
 Stats = StatsApi()
@@ -27,14 +27,16 @@ class Render:
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
             player_id=player_id, session_duration=session_duration)
 
-        # self.session_start = (self.top_clans_list[0].get(
+        # Get session start time / Broken
+        # self.session_start = (session_all.get(
         #     'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
+        # print(self.session_start)
 
         self.tank_count = len(session_detailed)
         self.render_prep()
         self.render_header(player_details=player_details)
         self.render_all_stats(stats_all=session_all,
-                              live_stats_all=live_stats_all)
+                              live_stats_all=live_stats_all, session_detailed=session_detailed)
         # Render a card for each tank in detailed stats
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
@@ -128,7 +130,7 @@ class Render:
         self.frame.paste(header_card, box=(
             self.frame_margin_w, int(self.frame_margin_h / 2)), mask=header_card.split()[3])
 
-    def render_all_stats(self, stats_all: dict, live_stats_all: dict):
+    def render_all_stats(self, stats_all: dict, live_stats_all: dict, session_detailed: dict):
         stats_all_w = self.base_card_w
         stats_all_h = self.base_card_h
         stats_all_card = Image.new(
@@ -144,16 +146,45 @@ class Render:
         session_battles = session_stats_random.get('battles')
         session_dmg_all = session_stats_random.get('damage_dealt')
         session_wins_all = session_stats_random.get('wins')
+        session_cap_avg = round((session_stats_random.get(
+            'dropped_capture_points') / session_battles))
+        session_spot_avg = round(
+            (session_stats_random.get('spotted') / session_battles))
+        session_frags_avg = round(
+            (session_stats_random.get('frags') / session_battles))
         session_dmg_avg = f"{round(session_dmg_all / session_battles)}"
         session_wr_avg = f"{round(((session_wins_all / session_battles) * 100), 2)}% ({session_battles})"
-        session_wn8 = f'WN8: 0000'
+        # Calculate WN8
+        session_total_wn8 = 0
+        session_detailed_battles = 0
+        for tank in session_detailed:
+            tank_data = session_detailed.get(tank)
+            tank_wn8 = tank_data.get('tank_wn8')
+            if not tank_wn8:
+                continue
+            tank_battles = tank_data.get('battles')
+            weighted_wn8 = tank_wn8 * tank_battles
+            session_detailed_battles += tank_battles
+            session_total_wn8 += weighted_wn8
+
+        if session_battles != 0:
+            session_wn8 = f'WN8: {round(session_total_wn8 / session_detailed_battles)}'
+        else:
+            session_wn8 = f'WN8: 0000'
+
         # Live stats
         live_battles = live_stats_random.get('battles')
         live_dmg_all = live_stats_random.get('damage_dealt')
         live_wins_all = live_stats_random.get('wins')
+        live_cap_avg = round((live_stats_random.get(
+            'dropped_capture_points') / live_battles))
+        live_spot_avg = round(
+            (live_stats_random.get('spotted') / live_battles))
+        live_frags_avg = round((live_stats_random.get('frags') / live_battles))
         live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
         live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
-        live_wn8 = f'WN8: 0000'
+        # Calculate WN8
+        live_wn8 = f'WN8: Coming Soon'
 
         # Get text size
         damage_text_w, damage_text_h = stats_draw.textsize(
@@ -259,6 +290,7 @@ class Render:
 
         # Organize tank data
         tank_name = tank_stats.get('tank_name')
+        tank_id = tank_stats.get('tank_id')
         tank_battles = tank_stats.get("battles")
         tank_survival = round(
             (tank_stats.get('survived_battles') / tank_battles))
@@ -266,8 +298,7 @@ class Render:
         tank_wr = f"WR: {round(((tank_stats.get('wins') / tank_battles) * 100))}% ({tank_battles})"
         tank_dmg = f"DMG: {round((tank_stats.get('damage_dealt') / tank_battles))}"
         tank_xp = f"XP: {round((tank_stats.get('xp') / tank_battles))}"
-        tank_wn8 = f"WN8: 0000"
-        tank_frags = round((tank_stats.get('frags') / tank_battles))
+        tank_wn8 = f"WN8: {Stats.add_vehicle_wn8(tank_stats).get('tank_wn8')}"
 
         # Get text size
         name_text_w, name_text_h = stats_draw.textsize(
