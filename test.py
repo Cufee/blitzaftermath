@@ -25,14 +25,11 @@ clan_marks = db.marksOfMastery
 statsApi = StatsApi()
 # Render(1013072123)
 
-bop = clans.find_one({'clan_tag': '[-SLG]'})
-clans.delete_one(bop)
+player_list = list(clans.find({'clan_tag': 'B-OP'}).distinct('members'))
+print(len(player_list))
 
-# player_list = list(clans.find({'clan_tag': 'PRAMO'}).distinct('members'))
-# print(len(player_list))
-
-# statsApi.update_players(player_list)
-# statsApi.update_stats(player_list)
+statsApi.update_players(player_list)
+statsApi.update_stats(player_list)
 
 # player_details, session_all, session_detailed = statsApi.get_session_stats(1013072123, session_duration=(
 #     datetime.utcnow() - timedelta(hours=24)))

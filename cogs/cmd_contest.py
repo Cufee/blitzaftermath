@@ -91,7 +91,7 @@ class blitz_aftermath_contest(commands.Cog):
                     if not clan_data:
                         await self.addclan(message, clan_id_str)
                         raise Exception(
-                            f'Nothing found matching {clan_tag} on {clan_realm}')
+                            f'Nothing found matching {clan_tag} on {clan_realm}. Please use the following format: v-check RGN@na')
 
                     clan_id = clans.find_one(
                         {'clan_tag': clan_tag, 'clan_realm': clan_realm}).get('clan_id')
