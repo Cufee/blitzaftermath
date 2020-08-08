@@ -371,7 +371,7 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler()
     scheduler.add_job(run, CronTrigger.from_crontab('*/30 * * * *'))
     scheduler.add_job(reset_gained_aces,
-                      CronTrigger.from_crontab('0 10 * * *'))
+                      CronTrigger.from_crontab('0 0 * * *'))
     print('Press Ctrl+{0} to exit'.format('C'))
 
     try:
