@@ -168,9 +168,9 @@ class Render:
             session_total_wn8 += weighted_wn8
 
         if session_detailed_battles != 0:
-            session_wn8 = f'WN8: {round(session_total_wn8 / session_detailed_battles)}'
+            session_wn8 = f'{round(session_total_wn8 / session_detailed_battles)}'
         else:
-            session_wn8 = f'WN8: 0000'
+            session_wn8 = f'No Data'
 
         # Live stats
         live_battles = live_stats_random.get('battles')
@@ -184,7 +184,7 @@ class Render:
         live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
         live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
         # Calculate WN8
-        live_wn8 = f'WN8: Coming Soon'
+        live_wn8 = f'Coming Soon'
 
         # Get text size
         damage_text_w, damage_text_h = stats_draw.textsize(
