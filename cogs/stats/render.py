@@ -167,7 +167,7 @@ class Render:
             session_detailed_battles += tank_battles
             session_total_wn8 += weighted_wn8
 
-        if session_battles != 0:
+        if session_detailed_battles != 0:
             session_wn8 = f'WN8: {round(session_total_wn8 / session_detailed_battles)}'
         else:
             session_wn8 = f'WN8: 0000'
