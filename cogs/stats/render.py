@@ -56,9 +56,16 @@ class Render:
         self.font_color_half = (200, 200, 200, 100)
 
         self.color_dict = {
-            1: (255, 215, 0, 100),
-            2: (192, 192, 192, 100),
-            3: (205, 127, 50, 100),
+            0: (130, 37, 173, 200),
+            300: (241, 25, 25, 200),
+            450: (255, 138, 0, 200),
+            650: (230, 223, 39, 200),
+            900: (119, 232, 18, 200),
+            1200: (69, 147, 0, 200),
+            1600: (42, 228, 255, 200),
+            2000: (0, 160, 184, 200),
+            2450: (198, 76, 255, 200),
+            2900: (130, 37, 173, 200)
         }
 
         self.frame_margin_w = 50
@@ -168,7 +175,9 @@ class Render:
             session_total_wn8 += weighted_wn8
 
         if session_detailed_battles != 0:
-            session_wn8 = f'{round(session_total_wn8 / session_detailed_battles)}'
+            session_wn8 = round(session_total_wn8 / session_detailed_battles)
+            session_wn8_color = self.color_dict.get(session_wn8, self.color_dict[min(
+                self.color_dict.keys(), key=lambda k: (k-session_wn8) < 0)])
         else:
             session_wn8 = f'No Data'
 
@@ -197,7 +206,7 @@ class Render:
         session_dmg_w, session_dmg_h = stats_draw.textsize(
             session_dmg_avg, font=self.font)
         session_wn8_w, session_wn8_h = stats_draw.textsize(
-            session_wn8, font=self.font_bold)
+            str(session_wn8), font=self.font_bold)
         session_wr_w, session_wr_h = stats_draw.textsize(
             session_wr_avg, font=self.font)
         # Live stats
@@ -246,8 +255,15 @@ class Render:
         draw_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
                          ((stats_margin_w - session_wn8_w) / 2))
         draw_wn8_h = session_stats_row_h
-        stats_draw.text((draw_wn8_w, draw_wn8_h), session_wn8,
+        stats_draw.text((draw_wn8_w, draw_wn8_h), str(session_wn8),
                         self.font_color_base, font=self.font_bold)
+        # Draw WN8 color bar
+        wn8_box_w1 = draw_wn8_w - 12
+        wn8_h1 = draw_wn8_h + 2
+        wn8_w2 = wn8_box_w1 + 6
+        wn8_h2 = wn8_h1 + self.font_size
+        stats_draw.rectangle([(wn8_box_w1, wn8_h1),
+                              (wn8_w2, wn8_h2)], fill=session_wn8_color)
         # Draw winrate
         draw_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                         ((stats_margin_w - session_wr_w) / 2))
@@ -298,7 +314,11 @@ class Render:
         tank_wr = f"WR: {round(((tank_stats.get('wins') / tank_battles) * 100))}% ({tank_battles})"
         tank_dmg = f"DMG: {round((tank_stats.get('damage_dealt') / tank_battles))}"
         tank_xp = f"XP: {round((tank_stats.get('xp') / tank_battles))}"
-        tank_wn8 = f"WN8: {Stats.add_vehicle_wn8(tank_stats).get('tank_wn8')}"
+        tank_wn8_value = tank_stats.get('tank_wn8')
+        # Extra spaces to fit the color bar
+        tank_wn8 = f"{tank_wn8_value}"
+        tank_wn8_color = self.color_dict.get(
+            tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k: (k-tank_wn8_value) <= 0)])
 
         # Get text size
         name_text_w, name_text_h = stats_draw.textsize(
@@ -328,6 +348,13 @@ class Render:
         draw_wn8_h = draw_name_h
         stats_draw.text((draw_wn8_w, draw_wn8_h), tank_wn8,
                         self.font_color_base, font=self.font_bold)
+        # Draw WN8 color bar
+        wn8_box_w1 = draw_wn8_w - 12
+        wn8_h1 = draw_wn8_h + 2
+        wn8_w2 = wn8_box_w1 + 6
+        wn8_h2 = wn8_h1 + self.font_size
+        stats_draw.rectangle([(wn8_box_w1, wn8_h1),
+                              (wn8_w2, wn8_h2)], fill=tank_wn8_color)
         # Bottom row
         # Draw tank damage
         draw_dmg_w = int((bottom_metric_margin - dmg_text_w) / 2)
