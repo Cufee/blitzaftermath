@@ -412,12 +412,15 @@ class StatsApi():
                 session_detailed = {}
                 for tank in stats_detailed_data.keys():
                     session_old = last_detailed_stats_data.get(
-                        tank).get('all') or {}
+                        tank, {}).get('all')
                     session_current = stats_detailed_data.get(
-                        tank).get('all') or {}
+                        tank, {}).get('all')
 
-                    diff = {key: (session_current.get(key) - session_old.get(
-                        key)) for key in session_current.keys()}
+                    if session_old:
+                        diff = {key: (session_current.get(key) - session_old.get(
+                            key)) for key in session_current.keys()}
+                    else:
+                        diff = session_current
 
                     if diff.get('battles') != 0:
                         tank_glossary = self.glossary.find_one(
