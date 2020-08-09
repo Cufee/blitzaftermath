@@ -53,6 +53,7 @@ class Render:
             "./cogs/replays/render/fonts/font_slim.ttf", int(self.font_size * 0.9))
 
         self.font_color_base = (255, 255, 255)
+        self.font_color_none = (255, 255, 255, 0)
         self.font_color_half = (200, 200, 200, 100)
 
         self.color_dict = {
@@ -180,7 +181,7 @@ class Render:
                 self.color_dict.keys(), key=lambda k: (k-session_wn8) < 0)])
         else:
             session_wn8 = f'No Data'
-            session_wn8_color = self.font_color_base
+            session_wn8_color = self.font_color_none
 
         # Live stats
         live_battles = live_stats_random.get('battles')
