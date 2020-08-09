@@ -25,8 +25,10 @@ clan_marks = db.marksOfMastery
 statsApi = StatsApi()
 # Render(1013072123)
 
-player_list = list(clans.find({'clan_tag': 'B-OP'}).distinct('members'))
-print(len(player_list))
+# player_list = list(clans.find({'clan_tag': 'B-OP'}).distinct('members'))
+# print(len(player_list))
+
+player_list = [1014656889]
 
 statsApi.update_players(player_list)
 statsApi.update_stats(player_list)
