@@ -54,6 +54,7 @@ class Render:
 
         self.font_color_base = (255, 255, 255)
         self.font_color_none = (255, 255, 255, 0)
+        self.font_color_none = (0, 0, 0, 0)
         self.font_color_half = (200, 200, 200, 100)
 
         self.color_dict = {
@@ -260,12 +261,13 @@ class Render:
         stats_draw.text((draw_wn8_w, draw_wn8_h), str(session_wn8),
                         self.font_color_base, font=self.font_bold)
         # Draw WN8 color bar
-        wn8_box_w1 = draw_wn8_w - 12
-        wn8_h1 = draw_wn8_h + 2
-        wn8_w2 = wn8_box_w1 + 6
-        wn8_h2 = wn8_h1 + self.font_size
-        stats_draw.rectangle([(wn8_box_w1, wn8_h1),
-                              (wn8_w2, wn8_h2)], fill=session_wn8_color)
+        if type(session_wn8) == int:
+            wn8_box_w1 = draw_wn8_w - 12
+            wn8_h1 = draw_wn8_h + 2
+            wn8_w2 = wn8_box_w1 + 6
+            wn8_h2 = wn8_h1 + self.font_size
+            stats_draw.rectangle([(wn8_box_w1, wn8_h1),
+                                  (wn8_w2, wn8_h2)], fill=session_wn8_color)
         # Draw winrate
         draw_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                         ((stats_margin_w - session_wr_w) / 2))
