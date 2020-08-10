@@ -85,13 +85,11 @@ class blitz_aftermath_contest(commands.Cog):
                     clan_realm = clan_list[1]
                     if len(clan_tag) < 2 or len(clan_realm) != 2:
                         raise Exception(
-                            'It looks like your formatting was off, please use v-check ClanTag@SERVER.')
+                            'It looks like your formatting was off, please use v-check TAG@SERVER.')
                     clan_data = clans.find_one(
                         {'clan_tag': clan_tag, 'clan_realm': clan_realm})
                     if not clan_data:
                         await self.addclan(message, clan_id_str)
-                        raise Exception(
-                            f'Nothing found matching {clan_tag} on {clan_realm}. Please use the following format: v-check RGN@na')
 
                     clan_id = clans.find_one(
                         {'clan_tag': clan_tag, 'clan_realm': clan_realm}).get('clan_id')
