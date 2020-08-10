@@ -235,18 +235,6 @@ class StatsApi():
                 {'player_id': player_id}).sort('timestamp', -1).limit(1))
             if last_session_list:
                 last_session = last_session_list[0]
-
-                # Past sessions long / Not sure how to implement best, safe to remove completely.
-                # past_sessions_list = []
-                # past_session_30_day = list(self.sessions.find(
-                #     {'player_id': player_id}, {'timestamp': {'$gt': delata_30_day}}).sort('timestamp', 1)).limit(1)[0]
-                # past_sessions_list.append(past_session_30_day)
-                # past_session_60_day = list(self.sessions.find(
-                #     {'player_id': player_id}, {'timestamp': {'$gt': delata_30_day}}).sort('timestamp', 1)).limit(1)[0]
-                # past_sessions_list.append(past_session_60_day)
-                # past_session_90_day = list(self.sessions.find(
-                #     {'player_id': player_id}, {'timestamp': {'$gt': delata_30_day}}).sort('timestamp', 1)).limit(1)[0]
-                # past_sessions_list.append(past_session_90_day)
             else:
                 last_session = {}
                 past_sessions_list = []
@@ -447,15 +435,21 @@ class StatsApi():
         stats_rating = player_data.get('statistics', {}).get('rating', {})
 
         if session_duration:
-            last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
-                                   'stats_rating': {'$exists': True, '$ne': stats_rating}}], 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
+            # No code to check Rating mode atm
+            # last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
+            #                        'stats_rating': {'$exists': True, '$ne': stats_rating}}], 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
+            last_stats_list = list(self.sessions.find({'player_id': player_id, 'stats_random': {
+                                   '$exists': True, '$ne': stats_random}, 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
             if not last_stats_list:
                 last_stats = None
             else:
                 last_stats = last_stats_list[0]
         else:
-            last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
-                                   'stats_rating': {'$exists': True, '$ne': stats_rating}}]}).sort('timestamp', -1).limit(1))
+            # No code to check Rating mode atm
+            # last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
+            #                        'stats_rating': {'$exists': True, '$ne': stats_rating}}]}).sort('timestamp', -1).limit(1))
+            last_stats_list = list(self.sessions.find({'player_id': player_id, 'stats_random': {
+                                   '$exists': True, '$ne': stats_random}}).sort('timestamp', -1).limit(1))
             if not last_stats_list:
                 last_stats = None
             else:

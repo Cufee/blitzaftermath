@@ -25,13 +25,23 @@ clan_marks = db.marksOfMastery
 statsApi = StatsApi()
 # Render(1013072123)
 
-# player_list = list(clans.find({'clan_tag': 'B-OP'}).distinct('members'))
-# print(len(player_list))
+clan_data = list(clans.find())
+for clan in clan_data:
+    player_list = clan.get('members')
+    clan_tag = clan.get('clan_tag')
+    # print(len(player_list))
+    total_gained = 0
+    for player in player_list:
+        player_data = players.find_one({'player_id': player})
+        total_gained += player_data.get('aces_gained')
 
-player_list = [1014656889]
+    print(clan_tag, total_gained)
 
-statsApi.update_players(player_list)
-statsApi.update_stats(player_list)
+
+# player_list = [1014656889]
+
+# statsApi.update_players(player_list)
+# statsApi.update_stats(player_list)
 
 # player_details, session_all, session_detailed = statsApi.get_session_stats(1013072123, session_duration=(
 #     datetime.utcnow() - timedelta(hours=24)))
