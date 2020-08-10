@@ -58,16 +58,16 @@ class Render:
         self.font_color_half = (200, 200, 200, 100)
 
         self.color_dict = {
-            0: (130, 37, 173, 200),
-            300: (241, 25, 25, 200),
-            450: (255, 138, 0, 200),
-            650: (230, 223, 39, 200),
-            900: (119, 232, 18, 200),
-            1200: (69, 147, 0, 200),
-            1600: (42, 228, 255, 200),
-            2000: (0, 160, 184, 200),
-            2450: (198, 76, 255, 200),
-            2900: (130, 37, 173, 200)
+            0: (130, 37, 173, 255),
+            300: (251, 83, 83, 255),
+            450: (255, 160, 49, 255),
+            650: (255, 244, 65, 255),
+            900: (149, 245, 62, 255),
+            1200: (103, 190, 51, 255),
+            1600: (106, 236, 255, 255),
+            2000: (46, 174, 193, 255),
+            2450: (208, 108, 255, 255),
+            2900: (142, 65, 177, 255)
         }
 
         self.frame_margin_w = 50
@@ -262,9 +262,9 @@ class Render:
                         self.font_color_base, font=self.font_bold)
         # Draw WN8 color bar
         if type(session_wn8) == int:
-            wn8_box_w1 = draw_wn8_w - 12
+            wn8_box_w1 = draw_wn8_w - 16
             wn8_h1 = draw_wn8_h + 2
-            wn8_w2 = wn8_box_w1 + 6
+            wn8_w2 = wn8_box_w1 + 10
             wn8_h2 = wn8_h1 + self.font_size
             stats_draw.rectangle([(wn8_box_w1, wn8_h1),
                                   (wn8_w2, wn8_h2)], fill=session_wn8_color)
@@ -353,9 +353,9 @@ class Render:
         stats_draw.text((draw_wn8_w, draw_wn8_h), tank_wn8,
                         self.font_color_base, font=self.font_bold)
         # Draw WN8 color bar
-        wn8_box_w1 = draw_wn8_w - 12
+        wn8_box_w1 = draw_wn8_w - 16
         wn8_h1 = draw_wn8_h + 2
-        wn8_w2 = wn8_box_w1 + 6
+        wn8_w2 = wn8_box_w1 + 10
         wn8_h2 = wn8_h1 + self.font_size
         stats_draw.rectangle([(wn8_box_w1, wn8_h1),
                               (wn8_w2, wn8_h2)], fill=tank_wn8_color)
