@@ -359,13 +359,14 @@ class StatsApi():
             session_detailed = {}
         else:
             # Get current detailed stats
-            stats_detailed_tanks = stats_detailed_res_raw.get(
-                'data').get(str(player_id))
+            stats_detailed_tanks = sorted(stats_detailed_res_raw.get(
+                'data').get(str(player_id)), key=lambda x: x['last_battle_time'], reverse=True)
             stats_detailed_data = {}
             for tank_stats in stats_detailed_tanks:
                 tank_id = tank_stats.get('tank_id')
                 tank_stats_all = tank_stats
                 stats_detailed_data.update({str(tank_id): tank_stats_all})
+            # Sort dict by last played battle
 
             # Get last session object
             if session_duration:
@@ -398,6 +399,8 @@ class StatsApi():
                     set_stats_detailed_data - set_last_detailed_stats_data)
 
                 session_detailed = {}
+                # Limiting detailed stats to 10 tanks to avoid running out of memory
+                tank_count = 0
                 for tank in stats_detailed_data.keys():
                     session_old = last_detailed_stats_data.get(
                         tank, {}).get('all')
@@ -410,7 +413,7 @@ class StatsApi():
                     else:
                         diff = session_current
 
-                    if diff.get('battles') != 0:
+                    if diff.get('battles') != 0 and tank_count < 10:
                         tank_glossary = self.glossary.find_one(
                             {'tank_id': int(tank)}) or {}
                         tank_name = tank_glossary.get('name') or 'Unknown'
@@ -428,6 +431,7 @@ class StatsApi():
                         diff.update(tank_data)
                         diff = self.add_vehicle_wn8(diff)
                         session_detailed.update({tank: diff})
+                        tank_count += 1
 
         # Check Basic stats
         player_data = stata_all_res_raw.get('data').get(str(player_id))
