@@ -115,7 +115,7 @@ class UpdateCache():
                 print(clan_res.text)
 
             current_members: list = clan_data.get(
-                str(clan_id), {}).get('members_ids')
+                str(clan_id), {}).get('members_ids', [])
             last_members = clan.get('members', [])
 
             current_members_str = ','.join(str(m) for m in current_members)
