@@ -85,9 +85,9 @@ class UpdateCache():
         clans_update_obj = []
         players_update_obj = []
 
-        all_clans = clans.find({'clan_realm': self.realm})
+        all_clans = clans.find({'clan_realm': self.realm})[:99]
         all_clans_ids = clans.find(
-            {'clan_realm': self.realm}).distinct('clan_id')
+            {'clan_realm': self.realm}).distinct('clan_id')[:99]
         all_clans_str = ','.join(str(c) for c in all_clans_ids)
         clans_url = self.api_domain + wg_clan_info_api_url_base + all_clans_str
         clan_res = requests.get(clans_url)
@@ -110,6 +110,10 @@ class UpdateCache():
 
             clan_data: dict = rapidjson.loads(clan_res.text).get(
                 'data', None)
+            if not clan_data:
+                print('No clan data')
+                print(clan_res.text)
+
             current_members: list = clan_data.get(
                 str(clan_id), {}).get('members_ids')
             last_members = clan.get('members', [])
