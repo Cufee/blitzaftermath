@@ -38,14 +38,38 @@ class blitz_aftermath_stats(commands.Cog):
                 player_name_str = player_name_str
                 player_name_str_list = player_name_str.split('@')
                 player_name = player_name_str_list[0]
+                if len(player_name) < 3:
+                    raise Exception(
+                        'Player name needs to be at least 3 characters long')
                 player_realm = player_name_str_list[1].upper()
                 player_details = players.find_one(
                     {'nickname': re.compile(player_name, re.IGNORECASE), 'realm': player_realm})
                 if not player_details:
-                    # Need a call to WG API to get id from nickname
-                    raise Exception(
-                        'Player not found. This feature is only enabled for a limited number of users during the testing period. Please reach out to Vovko#0851 if you would like to enable this feature.')
-                player_id = player_details.get('_id')
+                    # Check if username is valid
+                    api_url = 'https://api.wotblitz.com/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
+                    res = requests.get(api_url)
+                    res_data_raw = rapidjson.loads(res.text)
+                    if res.status_code != 200 or not res_data_raw:
+                        raise Exception(
+                            f'WG API responded with {res.status_code}')
+
+                    res_data = res_data_raw.get('data')
+                    player_data_1 = res_data[0]
+                    if not res_data or not player_data_1:
+                        raise Exception(
+                            f'Player not found [{res.status_code}]. Are the username and server spelled correctly?')
+
+                    player_id = player_data_1.get('account_id')
+                    player_name_fixed = player_data_1.get('nickname')
+
+                    API.update_players([player_id])
+                    API.update_stats([player_id])
+
+                    await message.channel.send(f'Enabled for {player_name_fixed} on {player_realm}. You will need to play at least one battle to start tracking.')
+                    return
+
+                else:
+                    player_id = player_details.get('_id')
 
                 try:
                     session_hours = int(hours)

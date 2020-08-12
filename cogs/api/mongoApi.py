@@ -144,9 +144,14 @@ class StatsApi():
 
             # Detailed clan info
             clan_data = player_clan_data.get('clan')
-            clan_name = clan_data.get('name')
-            clan_tag = clan_data.get('tag')
-            clan_emblem_id = clan_data.get('emblem_set_id')
+            if clan_data:
+                clan_name = clan_data.get('name')
+                clan_tag = clan_data.get('tag')
+                clan_emblem_id = clan_data.get('emblem_set_id')
+            else:
+                clan_name = None
+                clan_tag = None
+                clan_emblem_id = None
 
             new_player = {
                 'nickname': nickname,
