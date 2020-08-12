@@ -18,17 +18,6 @@ default_game = settings["default_game"]
 client = commands.Bot(command_prefix=prefix, case_insensitive=False)
 
 
-# Connect to db
-# client = pymongo.MongoClient(ATLAS_URI)
-# db = client.bots
-
-
-# async def settings_parser():
-#     with open(f'{os.path.dirname(os.path.realpath(__file__))}/cogs/core_multi_guild/cache/feature_list.json') as settings_json:
-#         settings = rapidjson.load(settings_json)
-#     return settings
-
-
 # Startup
 @client.event
 async def on_ready():
@@ -49,13 +38,6 @@ async def on_ready():
                 logger.log(f'{filename} was loaded')
             else:
                 logger.log(f'{filename} is disabled')
-
-# Tasks
-# Root tasks go here
-
-
-# Root Commands
-# Commands go here
 
 
 # Cog managment
