@@ -123,9 +123,10 @@ class StatsApi():
                 update_premium = False
 
             player_data = res_player_data.get(str(player_id))
-            player_clan_data = res_player_clans_data.get(str(player_id))
+            player_clan_data = res_player_clans_data.get(str(player_id)) or {}
 
-            if not player_data or not player_clan_data:
+            if not player_data:
+                print(player_data)
                 print(f'No data, skipping {player_id}')
                 continue
 
@@ -136,11 +137,7 @@ class StatsApi():
             updated_at = datetime.utcfromtimestamp(
                 player_data.get('updated_at'))
 
-            # Basic clan info
-            clan_id = player_clan_data.get('clan_id')
-            clan_role = player_clan_data.get('role')
-            clan_joined_at = datetime.utcfromtimestamp(
-                player_clan_data.get('joined_at'))
+            new_player = {}
 
             # Detailed clan info
             clan_data = player_clan_data.get('clan')
@@ -148,21 +145,24 @@ class StatsApi():
                 clan_name = clan_data.get('name')
                 clan_tag = clan_data.get('tag')
                 clan_emblem_id = clan_data.get('emblem_set_id')
-            else:
-                clan_name = None
-                clan_tag = None
-                clan_emblem_id = None
+                clan_id = player_clan_data.get('clan_id')
+                clan_role = player_clan_data.get('role')
+                clan_joined_at = datetime.utcfromtimestamp(
+                    player_clan_data.get('joined_at'))
 
-            new_player = {
+                new_player.update({
+                    'clan_id': clan_id,
+                    'clan_name': clan_name,
+                    'clan_tag': clan_tag,
+                    'clan_role': clan_role,
+                    'clan_joined_at': clan_joined_at
+                })
+
+            new_player.update({
                 'nickname': nickname,
                 'realm': realm,
                 'last_battle_time': last_battle_time,
-                'clan_id': clan_id,
-                'clan_name': clan_name,
-                'clan_tag': clan_tag,
-                'clan_role': clan_role,
-                'clan_joined_at': clan_joined_at,
-            }
+            })
 
             if update_premium:
                 new_player.update(
