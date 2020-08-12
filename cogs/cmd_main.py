@@ -42,6 +42,7 @@ You can also check a specific session with `v-stats Player@Server Hours`.
 *For example:* `v-stats Vovko@na 24`
 
 **AfterContest**:
+**DISABLED**
 Use `v-check TAG@SERVER` to check the current Ace Tanker count of a clan. Individual player contributions are reset every 24 hours.
 You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
         """)
