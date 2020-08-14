@@ -258,6 +258,27 @@ class Render:
         draw_dmg_h = session_stats_row_h
         stats_draw.text((draw_dmg_w, draw_dmg_h), session_dmg_avg,
                         self.font_color_base, font=self.font)
+        # Draw progress indicator
+        if session_dmg_avg > live_dmg_avg:
+            poly_base_1_w = draw_dmg_w - 6
+            poly_base_1_h = draw_dmg_h + damage_text_h - (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_dmg_h + (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(0, 255, 0, 100))
+        elif session_dmg_avg < live_dmg_avg:
+            poly_base_1_w = draw_dmg_w - 6
+            poly_base_1_h = draw_dmg_h + (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_dmg_h + damage_text_h - (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(255, 0, 0, 100))
         # Draw WN8
         draw_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
                          ((stats_margin_w - session_wn8_w) / 2))
@@ -272,12 +293,56 @@ class Render:
             wn8_h2 = wn8_h1 + self.font_size
             stats_draw.rectangle([(wn8_box_w1, wn8_h1),
                                   (wn8_w2, wn8_h2)], fill=session_wn8_color)
+        # Draw progress indicator
+        if session_wn8 > player_wn8:
+            # -6 for standart margin, -16 from colored WN8 bar
+            poly_base_1_w = draw_wn8_w - 16 - 6
+            poly_base_1_h = draw_wn8_h + session_wn8_h - (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_wn8_h + (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(0, 255, 0, 100))
+        elif session_wn8 < player_wn8:
+            # -6 for standart margin, -16 from colored WN8 bar
+            poly_base_1_w = draw_wn8_w - 6 - 16
+            poly_base_1_h = draw_wn8_h + (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_wn8_h + damage_text_h - (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(255, 0, 0, 100))
         # Draw winrate
         draw_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                         ((stats_margin_w - session_wr_w) / 2))
         draw_wr_h = session_stats_row_h
         stats_draw.text((draw_wr_w, draw_wr_h), session_wr_avg,
                         self.font_color_base, font=self.font)
+        # Draw progress indicator
+        if session_wr_avg > live_wr_avg:
+            poly_base_1_w = draw_wr_w - 6
+            poly_base_1_h = draw_wr_h + damage_text_h - (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_wr_h + (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(0, 255, 0, 100))
+        elif session_wr_avg < live_wr_avg:
+            poly_base_1_w = draw_wr_w - 6
+            poly_base_1_h = draw_wr_h + (self.font_size / 3)
+            poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
+            poly_base_2_h = poly_base_1_h
+            poly_peak_w = (poly_base_2_w +
+                           int((poly_base_1_w - poly_base_2_w) / 2))
+            poly_peak_h = draw_wr_h + damage_text_h - (self.font_size / 3)
+            stats_draw.polygon([(poly_base_1_w, poly_base_1_h), (poly_base_2_w,
+                                                                 poly_base_2_h), (poly_peak_w, poly_peak_h)], fill=(255, 0, 0, 100))
 
         # Bottom row
         # Draw damage
