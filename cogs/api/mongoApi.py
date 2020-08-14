@@ -531,16 +531,17 @@ class StatsApi():
                 'dropped_capture_points') / tank_averages.get('all').get('battles'))
             exp_wr = tank_averages.get('meanSd', {}).get('winrateMean')
             # Organize data
-            tank_battles = tank_data.get("battles")
-            if tank_battles == 0:
+            tank_battles = tank_data.get("battles", 0)
+            if tank_battles == 0 or not tank_battles:
                 tank_battles = 1
             tank_avg_wr = round(
                 ((tank_data.get("wins") / tank_battles) * 100), 2)
-            tank_avg_dmg = round(tank_data.get('damage_dealt') / tank_battles)
-            tank_avg_spott = round(tank_data.get('spotted') / tank_battles)
-            tank_avg_frag = round(tank_data.get('frags') / tank_battles)
+            tank_avg_dmg = round(tank_data.get(
+                'damage_dealt', 0) / tank_battles)
+            tank_avg_spott = round(tank_data.get('spotted', 0) / tank_battles)
+            tank_avg_frag = round(tank_data.get('frags', 0) / tank_battles)
             tank_avg_def = round(tank_data.get(
-                'dropped_capture_points') / tank_battles)
+                'dropped_capture_points', 0) / tank_battles)
             # Calculate WN8 metrics
             rDMG = tank_avg_dmg / exp_dmg
             rSPOTT = tank_avg_spott / exp_spott
