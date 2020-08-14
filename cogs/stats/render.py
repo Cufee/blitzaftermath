@@ -146,6 +146,9 @@ class Render:
             'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
         stats_draw = ImageDraw.Draw(stats_all_card)
         player_wn8 = player_details.get('career_wn8', 'No Data')
+        if player_wn8 != 'No Data':
+            player_wn8_color = self.color_dict.get(player_wn8, self.color_dict[min(
+                self.color_dict.keys(), key=lambda k: (k-player_wn8) < 0)])
 
         # Organize Data
         live_stats_random = live_stats_all.get('live_stats_random')
@@ -289,6 +292,14 @@ class Render:
         draw_live_wn8_h = all_stats_row
         stats_draw.text((draw_live_wn8_w, draw_live_wn8_h), live_wn8,
                         self.font_color_base, font=self.font_bold)
+        # Draw WN8 color bar
+        if type(player_wn8) == int:
+            cwn8_box_w1 = draw_live_wn8_w - 16
+            cwn8_h1 = draw_live_wn8_h + 2
+            cwn8_w2 = cwn8_box_w1 + 10
+            cwn8_h2 = cwn8_h1 + self.font_size
+            stats_draw.rectangle([(cwn8_box_w1, cwn8_h1),
+                                  (cwn8_w2, cwn8_h2)], fill=player_wn8_color)
         # Draw winrate
         draw_live_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                              ((stats_margin_w - live_wr_w) / 2))
