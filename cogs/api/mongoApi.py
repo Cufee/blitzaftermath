@@ -257,6 +257,9 @@ class StatsApi():
                 last_battles_total = last_battles_random + last_battles_rating
 
                 player_data = res_stats_all_data.get(str(player_id))
+                if not player_data:
+                    print(f'No data for {player_id}')
+                    continue
                 stats_random = player_data.get('statistics', {}).get('all', {})
                 battles_random = player_data.get(
                     'statistics', {}).get('all', {}).get('battles', 0)
