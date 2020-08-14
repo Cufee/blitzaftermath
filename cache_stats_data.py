@@ -26,11 +26,28 @@ def run(realm):
         Api.update_stats(player_list)
 
 
+def refresh_wn8(realm):
+    player_list = players_db.find({'realm': realm}).distinct('_id')
+    Api.add_career_wn8(player_list)
+
+
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
-    scheduler.add_job(run, CronTrigger.from_crontab('0 9 * * *'), args=['NA'])
-    scheduler.add_job(run, CronTrigger.from_crontab('0 1 * * *'), args=['EU'])
-    scheduler.add_job(run, CronTrigger.from_crontab('0 23 * * *'), args=['RU'])
+    # Refresh sessions
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '0 9 * * *'), args=['NA'])
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '0 1 * * *'), args=['EU'])
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '0 23 * * *'), args=['RU'])
+    # Refresh WN8
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '10 9 * * *'), args=['NA'])
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '10 1 * * *'), args=['EU'])
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '10 23 * * *'), args=['RU'])
+
     print('Press Ctrl+{0} to exit'.format('C'))
 
     try:

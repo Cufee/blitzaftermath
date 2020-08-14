@@ -13,10 +13,12 @@ guilds_settings = client.guilds.guilds_settings
 
 db = client.summer2020contest
 glossary = client.glossary
+stats = client.stats
 
 guilds = db.guilds
 clans = db.clans
 players = db.players
+players_stats = stats.players
 tanks = glossary.tanks
 tankaverages = glossary.tankaverages
 clan_marks = db.marksOfMastery
@@ -37,12 +39,13 @@ statsApi = StatsApi()
 
 #     print(clan_tag, total_gained)
 
+player_list = players_stats.find().distinct('_id')
+statsApi.add_career_wn8(player_list)
 
-# player_list = [1014656889]
-clan_members = clans.find_one({'clan_tag': 'CALI'}).get('members')
-print(len(clan_members))
-statsApi.update_players(clan_members)
-statsApi.update_stats(clan_members)
+# clan_members = clans.find_one({'clan_tag': 'CALI'}).get('members')
+# print(len(clan_members))
+# statsApi.update_players(clan_members)
+# statsApi.update_stats(clan_members)
 
 # player_details, session_all, session_detailed = statsApi.get_session_stats(1013072123, session_duration=(
 #     datetime.utcnow() - timedelta(hours=24)))

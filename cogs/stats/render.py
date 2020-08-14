@@ -36,7 +36,7 @@ class Render:
         self.render_prep()
         self.render_header(player_details=player_details)
         self.render_all_stats(stats_all=session_all,
-                              live_stats_all=live_stats_all, session_detailed=session_detailed)
+                              live_stats_all=live_stats_all, session_detailed=session_detailed, player_details=player_details)
         # Render a card for each tank in detailed stats
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
@@ -139,12 +139,13 @@ class Render:
         self.frame.paste(header_card, box=(
             self.frame_margin_w, int(self.frame_margin_h / 2)), mask=header_card.split()[3])
 
-    def render_all_stats(self, stats_all: dict, live_stats_all: dict, session_detailed: dict):
+    def render_all_stats(self, stats_all: dict, live_stats_all: dict, session_detailed: dict, player_details: dict):
         stats_all_w = self.base_card_w
         stats_all_h = self.base_card_h
         stats_all_card = Image.new(
             'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
         stats_draw = ImageDraw.Draw(stats_all_card)
+        player_wn8 = player_details.get('career_wn8', 'No Data')
 
         # Organize Data
         live_stats_random = live_stats_all.get('live_stats_random')
@@ -196,7 +197,7 @@ class Render:
         live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
         live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
         # Calculate WN8
-        live_wn8 = f'Coming Soon'
+        live_wn8 = str(player_wn8)
 
         # Get text size
         damage_text_w, damage_text_h = stats_draw.textsize(
