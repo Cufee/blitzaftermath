@@ -119,9 +119,9 @@ class Render:
         battles_type = 'Random Battles'
 
         # Text size
-        name_clan_w, name_clan_h = header_draw.textsize(
+        name_clan_w, _ = header_draw.textsize(
             name_clan_str, font=self.font_bold)
-        b_type_w, b_type_h = header_draw.textsize(
+        b_type_w, _ = header_draw.textsize(
             battles_type, font=self.font)
 
         # Draw battle type
@@ -152,19 +152,13 @@ class Render:
 
         # Organize Data
         live_stats_random = live_stats_all.get('live_stats_random')
-        live_stats_rating = live_stats_all.get('live_stats_rating')
+        # live_stats_rating = live_stats_all.get('live_stats_rating')
         session_stats_random = stats_all.get('stats_random') or {}
-        session_stats_rating = stats_all.get('stats_rating') or {}
+        # session_stats_rating = stats_all.get('stats_rating') or {}
         # Session Stats
         session_battles = session_stats_random.get('battles')
         session_dmg_all = session_stats_random.get('damage_dealt')
         session_wins_all = session_stats_random.get('wins')
-        session_cap_avg = round((session_stats_random.get(
-            'dropped_capture_points') / session_battles))
-        session_spot_avg = round(
-            (session_stats_random.get('spotted') / session_battles))
-        session_frags_avg = round(
-            (session_stats_random.get('frags') / session_battles))
         session_dmg_avg = f"{round(session_dmg_all / session_battles)}"
         session_wr_avg = f"{round(((session_wins_all / session_battles) * 100), 2)}% ({session_battles})"
         # Calculate WN8
@@ -192,36 +186,31 @@ class Render:
         live_battles = live_stats_random.get('battles')
         live_dmg_all = live_stats_random.get('damage_dealt')
         live_wins_all = live_stats_random.get('wins')
-        live_cap_avg = round((live_stats_random.get(
-            'dropped_capture_points') / live_battles))
-        live_spot_avg = round(
-            (live_stats_random.get('spotted') / live_battles))
-        live_frags_avg = round((live_stats_random.get('frags') / live_battles))
         live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
         live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
         # Calculate WN8
         live_wn8 = str(player_wn8)
 
         # Get text size
-        damage_text_w, damage_text_h = stats_draw.textsize(
+        damage_text_w, _ = stats_draw.textsize(
             'Damage', font=self.font)
-        winrate_text_w, winrate_text_h = stats_draw.textsize(
+        winrate_text_w, _ = stats_draw.textsize(
             'Winrate', font=self.font)
         wn8_text_w, wn8_text_h = stats_draw.textsize(
             'WN8', font=self.font_bold)
         # Session Stats
-        session_dmg_w, session_dmg_h = stats_draw.textsize(
+        session_dmg_w, _ = stats_draw.textsize(
             session_dmg_avg, font=self.font)
         session_wn8_w, session_wn8_h = stats_draw.textsize(
             str(session_wn8), font=self.font_bold)
-        session_wr_w, session_wr_h = stats_draw.textsize(
+        session_wr_w, _ = stats_draw.textsize(
             session_wr_avg, font=self.font)
         # Live stats
-        live_dmg_w, live_dmg_h = stats_draw.textsize(
+        live_dmg_w, _ = stats_draw.textsize(
             live_dmg_avg, font=self.font)
-        live_wn8_w, live_wn8_h = stats_draw.textsize(
+        live_wn8_w, _ = stats_draw.textsize(
             live_wn8, font=self.font_bold)
-        live_wr_w, live_wr_h = stats_draw.textsize(
+        live_wr_w, _ = stats_draw.textsize(
             live_wr_avg, font=self.font)
 
         # Margins
@@ -387,10 +376,7 @@ class Render:
 
         # Organize tank data
         tank_name = tank_stats.get('tank_name')
-        tank_id = tank_stats.get('tank_id')
         tank_battles = tank_stats.get("battles")
-        tank_survival = round(
-            (tank_stats.get('survived_battles') / tank_battles))
         # Performance
         tank_wr = f"WR: {round(((tank_stats.get('wins') / tank_battles) * 100))}% ({tank_battles})"
         tank_dmg = f"DMG: {round((tank_stats.get('damage_dealt') / tank_battles))}"
@@ -402,15 +388,15 @@ class Render:
             tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k: (k-tank_wn8_value) <= 0)])
 
         # Get text size
-        name_text_w, name_text_h = stats_draw.textsize(
+        _, name_text_h = stats_draw.textsize(
             tank_name, font=self.font_bold)
         wr_text_w, wr_text_h = stats_draw.textsize(
             tank_wr, font=self.font)
-        xp_text_w, xp_text_h = stats_draw.textsize(
+        xp_text_w, _ = stats_draw.textsize(
             tank_xp, font=self.font)
         dmg_text_w, dmg_text_h = stats_draw.textsize(
             tank_dmg, font=self.font)
-        wn8_text_w, wn8_text_h = stats_draw.textsize(
+        wn8_text_w, _ = stats_draw.textsize(
             tank_wn8, font=self.font_bold)
 
         # Margins

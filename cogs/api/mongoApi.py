@@ -46,7 +46,7 @@ class GuildApi():
         self.guilds_settings = client.guilds.guilds_settings
 
     def get_guild(self, guild_id: int):
-        guild_id = long(guild_id)
+        pass
 
     def add_guild(self, guild_dict: dict):
         pass
@@ -141,8 +141,6 @@ class StatsApi():
                 nickname = player_data.get('nickname')
                 last_battle_time = datetime.utcfromtimestamp(
                     player_data.get('last_battle_time'))
-                updated_at = datetime.utcfromtimestamp(
-                    player_data.get('updated_at'))
 
                 new_player = {}
 
@@ -151,7 +149,6 @@ class StatsApi():
                 if clan_data:
                     clan_name = clan_data.get('name')
                     clan_tag = clan_data.get('tag')
-                    clan_emblem_id = clan_data.get('emblem_set_id')
                     clan_id = player_clan_data.get('clan_id')
                     clan_role = player_clan_data.get('role')
                     clan_joined_at = datetime.utcfromtimestamp(
@@ -225,11 +222,6 @@ class StatsApi():
                 raise Exception(f'WG API did not return any data')
             res_stats_all_data = res_stats_all_raw.get('data')
 
-            # Time calculation for long sessions
-            delata_30_day = (datetime.utcnow() - timedelta(days=30, minutes=1))
-            delata_60_day = (datetime.utcnow() - timedelta(days=60, minutes=1))
-            delata_90_day = (datetime.utcnow() - timedelta(days=90, minutes=1))
-
             sessions_list = []
             for player_id in player_ids:
                 # Get player details and premium status
@@ -250,7 +242,6 @@ class StatsApi():
                     last_session = last_session_list[0]
                 else:
                     last_session = {}
-                    past_sessions_list = []
 
                 last_battles_random = last_session.get('battles_random', 0)
                 last_battles_rating = last_session.get('battles_rating', 0)
@@ -347,13 +338,6 @@ class StatsApi():
         if not player_details:
             raise Exception(f'Player with ID {player_id} not found')
 
-        # Check if a player has premium status
-        am_premium_expiration = player_details.get(
-            'am_premium_expiration') or datetime.utcnow()
-        player_is_premium = False
-        if datetime.utcnow() < am_premium_expiration:
-            player_is_premium = True
-
         # Request and check basic stats
         api_domain, _ = get_wg_api_domain(player_id=player_id)
         stats_all_url = api_domain + \
@@ -409,13 +393,6 @@ class StatsApi():
                 print('Last detailed session not available.')
                 session_detailed = {}
             else:
-                # Compare two dicts using sets
-                set_last_detailed_stats_data = set(
-                    last_detailed_stats_data)
-                set_stats_detailed_data = set(stats_detailed_data)
-                session_detailed_diff = (
-                    set_stats_detailed_data - set_last_detailed_stats_data)
-
                 session_detailed = {}
                 # Limiting detailed stats to 10 tanks to avoid running out of memory
                 tank_count = 0
@@ -479,8 +456,6 @@ class StatsApi():
 
         # Compare stats
         if last_stats:
-            session_all_random = {}
-            session_all_rating = {}
             random_diff = {key: (stats_random.get(key, 0) - last_stats.get('stats_random').get(
                 key, 0)) for key in stats_random.keys()}
             rating_diff = {key: (stats_rating.get(key, 0) - last_stats.get('stats_rating').get(
@@ -491,9 +466,6 @@ class StatsApi():
                 'stats_rating': rating_diff,
                 'timestamp': last_stats.get('timestamp')
             }
-
-            last_stats_random = last_stats.get('stats_random')
-            last_stats_rating = last_stats.get('stats_rating')
         else:
             result = self.update_stats(player_ids_long=[player_id])
             print(result)
@@ -509,10 +481,6 @@ class StatsApi():
             'live_stats_rating': stats_rating,
         }
         return player_details, live_stats_all, session_all, session_detailed
-
-    def get_vehicle_stats(self, player_id: int, tank_id: int):
-        api_domain, realm = get_wg_api_domain(player_id=player_id)
-        pass
 
     def add_vehicle_wn8(self, tank_data: dict):
         tank_id = int(tank_data.get('tank_id', 0))
@@ -576,7 +544,6 @@ class StatsApi():
             if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
                 print(
                     f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
-                session_detailed = {}
             else:
                 # Get current detailed stats
                 # Sort dict by last played battle
@@ -591,8 +558,8 @@ class StatsApi():
                     tank_stats.update({'tank_id': tank_id})
                     tank_stats_final = self.add_vehicle_wn8(
                         tank_data=tank_stats)
-                    tank_wn8 = tank_stats.get('tank_wn8', 0)
-                    tank_battles = tank_stats.get("battles", 0)
+                    tank_wn8 = tank_stats_final.get('tank_wn8', 0)
+                    tank_battles = tank_stats_final.get("battles", 0)
                     career_wn8_raw += (tank_wn8 * tank_battles)
                     career_battles += tank_battles
 
