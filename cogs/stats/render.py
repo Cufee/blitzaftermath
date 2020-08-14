@@ -192,7 +192,7 @@ class Render:
         live_wn8 = str(player_wn8)
 
         # Get text size
-        damage_text_w, _ = stats_draw.textsize(
+        damage_text_w, damage_text_h = stats_draw.textsize(
             'Damage', font=self.font)
         winrate_text_w, _ = stats_draw.textsize(
             'Winrate', font=self.font)
@@ -286,7 +286,7 @@ class Render:
         if session_wn8 > player_wn8:
             # -6 for standart margin, -16 from colored WN8 bar
             poly_base_1_w = draw_wn8_w - 16 - 6
-            poly_base_1_h = draw_wn8_h + session_wn8_h - (self.font_size / 3)
+            poly_base_1_h = draw_wn8_h + damage_text_h - (self.font_size / 3)
             poly_base_2_w = poly_base_1_w - int(self.font_size / 2)
             poly_base_2_h = poly_base_1_h
             poly_peak_w = (poly_base_2_w +
