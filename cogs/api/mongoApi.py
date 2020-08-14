@@ -542,6 +542,8 @@ class StatsApi():
             tank_avg_frag = round(tank_data.get('frags', 0) / tank_battles)
             tank_avg_def = round(tank_data.get(
                 'dropped_capture_points', 0) / tank_battles)
+
+            print(tank_avg_dmg, exp_dmg)
             # Calculate WN8 metrics
             rDMG = tank_avg_dmg / exp_dmg
             rSPOTT = tank_avg_spott / exp_spott
