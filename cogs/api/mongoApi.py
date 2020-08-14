@@ -518,7 +518,7 @@ class StatsApi():
         tank_id = int(tank_data.get('tank_id', 0))
         tank_averages = self.glossary_averages.find_one(
             {'tank_id': tank_id}) or None
-        if not tank_averages.get('meanSd'):
+        if not tank_averages or not tank_averages.get('meanSd'):
             print(f'No averages in glossary for {tank_id}')
             tank_data.update({'tank_wn8': 0})
             return tank_data
