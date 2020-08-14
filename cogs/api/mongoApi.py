@@ -518,7 +518,7 @@ class StatsApi():
         tank_id = int(tank_data.get('tank_id', 0))
         tank_averages = self.glossary_averages.find_one(
             {'tank_id': tank_id}) or None
-        if not tank_averages:
+        if not tank_averages.get('meanSd'):
             print(f'No averages in glossary for {tank_id}')
             tank_data.update({'tank_wn8': 0})
             return tank_data
@@ -543,7 +543,6 @@ class StatsApi():
             tank_avg_def = round(tank_data.get(
                 'dropped_capture_points', 0) / tank_battles)
 
-            print(tank_avg_dmg, exp_dmg)
             # Calculate WN8 metrics
             rDMG = tank_avg_dmg / exp_dmg
             rSPOTT = tank_avg_spott / exp_spott
