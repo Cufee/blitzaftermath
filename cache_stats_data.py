@@ -66,7 +66,7 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler()
     # Refresh tank averages
     scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
-        '0 9 * * *'))
+        '0 9 * * *'), args=[])
     # Refresh sessions
     scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
         '0 9 * * *'), args=['NA'])
