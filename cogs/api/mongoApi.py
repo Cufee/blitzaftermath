@@ -518,11 +518,7 @@ class StatsApi():
         tank_id = int(tank_data.get('tank_id', 0))
         tank_averages = self.glossary_averages.find_one(
             {'tank_id': tank_id}) or None
-        missing_tanks = []
         if not tank_averages or not tank_averages.get('meanSd'):
-            if tank_id not in missing_tanks:
-                print(f'No averages in glossary for {tank_id}')
-            missing_tanks.append(tank_id)
             return tank_data
         else:
             # Expected values
