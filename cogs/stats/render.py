@@ -61,6 +61,7 @@ class Render:
         self.font_color_none = (255, 255, 255, 0)
         self.font_color_none = (0, 0, 0, 0)
         self.font_color_half = (200, 200, 200, 100)
+        self.font_color_session_time = (200, 200, 200, 255)
 
         self.color_dict = {
             0: (130, 37, 173, 255),
@@ -112,7 +113,7 @@ class Render:
         time_draw_w = int((self.frame_w - time_text_w) / 2)
         time_draw_h = int(((self.frame_margin_h / 2) - time_text_h) / 2)
         frame_draw.text((time_draw_w, time_draw_h), self.last_stamp_conv,
-                        self.font_color_half, font=self.font_slim)
+                        self.font_color_session_time, font=self.font_slim)
 
     def render_header(self, player_details: dict):
         header_w = self.base_card_w
