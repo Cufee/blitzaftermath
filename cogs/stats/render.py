@@ -385,24 +385,65 @@ class Render:
         draw_dmg_h = int(stats_detailed_h - dmg_text_h - text_h_margin)
         stats_draw.text((draw_dmg_w, draw_dmg_h), tank_dmg,
                         self.font_color_base, font=self.font)
+        # Draw progress arrow
+        arrow_size = int(dmg_text_h / 2)
+        pos_w = draw_dmg_w - int(arrow_size * 1.5)
+        pos_h = draw_dmg_h + int((dmg_text_h - arrow_size) / 1.5)
+        self.draw_progress_arrow(
+            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_dmg_value > last_dmg_value))
+
         # Draw tank xp
         draw_xp_w = int((bottom_metric_margin * 1) +
                         ((bottom_metric_margin - xp_text_w) / 2))
         draw_xp_h = draw_dmg_h
         stats_draw.text((draw_xp_w, draw_xp_h), tank_xp,
                         self.font_color_base, font=self.font)
+        # Draw progress arrow
+        arrow_size = int(dmg_text_h / 2)
+        pos_w = draw_xp_w - int(arrow_size * 1.5)
+        pos_h = draw_xp_h + int((dmg_text_h - arrow_size) / 1.5)
+        self.draw_progress_arrow(
+            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_xp_value > last_xp_value))
+
         # Draw tank winrate
         draw_wr_w = int((bottom_metric_margin * 2) +
                         ((bottom_metric_margin - wr_text_w) / 2))
         draw_wr_h = draw_dmg_h
         stats_draw.text((draw_wr_w, draw_wr_h), tank_wr,
                         self.font_color_base, font=self.font)
+        # Draw progress arrow
+        arrow_size = int(dmg_text_h / 2)
+        pos_w = draw_wr_w - int(arrow_size * 1.5)
+        pos_h = draw_wr_h + int((dmg_text_h - arrow_size) / 1.5)
+        self.draw_progress_arrow(
+            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_wr_value > last_wr_value))
 
         # Render card on frame
         stats_detailed_render_h = int(
             (self.frame_margin_h / 2) + ((2 * self.card_margin_h) + (self.base_card_h + self.header_h)) + (card_index * (stats_detailed_h + self.card_margin_h)))
         self.frame.paste(stats_detailed_card, box=(
             self.frame_margin_w, stats_detailed_render_h), mask=stats_detailed_card.split()[3])
+
+    def draw_progress_arrow(self, draw, pos_w: int, pos_h: int, size: int, isup: bool):
+        if isup:
+            base_1_w = pos_w
+            base_1_h = pos_h + size
+            base_2_w = base_1_w + size
+            base_2_h = base_1_h
+            peak_w = pos_w + int(size / 2)
+            peak_h = pos_h
+            draw.polygon([(base_1_w, base_1_h), (base_2_w, base_2_h),
+                          (peak_w, peak_h)], fill=(0, 255, 0, 100))
+            return
+        else:
+            base_1_w = pos_w
+            base_1_h = pos_h
+            base_2_w = base_1_w + size
+            base_2_h = base_1_h
+            peak_w = pos_w + int(size / 2)
+            peak_h = pos_h + size
+            draw.polygon([(base_1_w, base_1_h), (base_2_w, base_2_h),
+                          (peak_w, peak_h)], fill=(255, 0, 0, 100))
 
     def render_image(self):
         final_buffer = BytesIO()
