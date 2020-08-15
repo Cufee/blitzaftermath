@@ -80,15 +80,17 @@ class StatsApi():
         self.wg_api_vehicle_achievements = '/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 
     def list_to_chunks(self, lst: list, chunk_size: int):
-        """Yield successive chunk_size-sized chunks from lst."""
+        """Return list broken up into chunk_size-sized lists from lst."""
+        fixed_list = []
         for i in range(0, len(lst), chunk_size):
-            yield lst[i:i + chunk_size]
+            fixed_list.append(lst[i:i + chunk_size])
+        return fixed_list
 
     def update_players(self, player_ids_long: list, realm=None):
         """Takes in a list of player ids and realm (optional). Adds/Updates all players to the database with default settings.\nDoes not cache any stats."""
         if len(player_ids_long) > 100:
-            player_ids_list = list(self.list_to_chunks(
-                lst=player_ids_long, chunk_size=99))
+            player_ids_list = self.list_to_chunks(
+                lst=player_ids_long, chunk_size=99)
         else:
             player_ids_list = [player_ids_long]
 
@@ -196,8 +198,8 @@ class StatsApi():
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
         self.hard = hard
         if len(player_ids_long) > 100:
-            player_ids_list = list(self.list_to_chunks(
-                lst=player_ids_long, chunk_size=99))
+            player_ids_list = self.list_to_chunks(
+                lst=player_ids_long, chunk_size=99)
         else:
             player_ids_list = [player_ids_long]
 
