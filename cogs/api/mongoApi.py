@@ -192,8 +192,9 @@ class StatsApi():
                     print(e)
                 return None
 
-    def update_stats(self, player_ids_long: list, realm=None):
+    def update_stats(self, player_ids_long: list, realm=None, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
+        self.hard = hard
         if len(player_ids_long) > 100:
             player_ids_list = self.list_to_chunks(
                 lst=player_ids_long, chunk_size=99)
@@ -263,10 +264,10 @@ class StatsApi():
                     player_data.get('last_battle_time'))
                 battles_total = battles_random + battles_rating
 
-                # Disabling this check since stats are rest every 24 hours
-                # if last_battles_total == battles_total and battles_total != 0:
-                #     print(f'Player {player_id} played 0 battles')
-                #     continue
+                # Checking self.hard to allow force resets
+                if last_battles_total == battles_total and battles_total != 0 and not self.hard:
+                    print(f'Player {player_id} played 0 battles')
+                    continue
 
                 if player_is_premium:
                     # Gather per vehicle stats

@@ -21,12 +21,8 @@ def run(realm):
     if len(player_list) == 0:
         print(f'No players on {realm}')
         return
-    elif len(player_list) > 100:
-        n = 100
-        for i in range(0, len(player_list), n):
-            Api.update_stats(player_list[i:i + n])
     else:
-        Api.update_stats(player_list)
+        Api.update_stats(player_ids_long=player_list, hard=True)
 
 
 def refresh_wn8(realm):
