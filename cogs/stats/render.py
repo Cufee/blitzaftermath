@@ -323,7 +323,7 @@ class Render:
             tank_wn8_color = self.color_dict.get(
                 tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k:(k - tank_wn8_value) <= 0)])
         else:
-            tank_wn8_color = self.font_color_base
+            tank_wn8_color = (0, 0, 0, 100)
 
         # Get text size
         _, name_text_h = stats_draw.textsize(
