@@ -16,6 +16,7 @@ tankaverages = client.glossary.tankaverages
 
 
 def run(realm):
+    print(f'Working on {realm}')
     player_list = list(players_db.find({'realm': realm}).distinct('_id'))
     if len(player_list) == 0:
         print(f'No players on {realm}')
@@ -66,13 +67,13 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler()
     # Refresh tank averages
     scheduler.add_job(refresh_tank_avg_cache, CronTrigger.from_crontab(
-        '0 9 * * *'))
+        '15 9 * * *'))
     # Refresh sessions
-    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+    scheduler.add_job(run, CronTrigger.from_crontab(
         '0 9 * * *'), args=['NA'])
-    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+    scheduler.add_job(run, CronTrigger.from_crontab(
         '0 1 * * *'), args=['EU'])
-    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+    scheduler.add_job(run, CronTrigger.from_crontab(
         '0 23 * * *'), args=['RU'])
     # Refresh WN8
     scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
