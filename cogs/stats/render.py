@@ -27,6 +27,8 @@ class Render:
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
             player_id=player_id, session_duration=session_duration)
 
+        self.session_timestamp = session_all.get('timestamp')
+
         # Get session start time / Broken
         # self.session_start = (session_all.get(
         #     'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
@@ -41,6 +43,8 @@ class Render:
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
             self.render_detailed_stats(tank_stats=tank_stats, card_index=i)
+
+        print(self.tank_count, self.session_timestamp)
 
     def render_prep(self):
         # Import fonts
@@ -324,6 +328,11 @@ class Render:
                 tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k:(k - tank_wn8_value) <= 0)])
         else:
             tank_wn8_color = (0, 0, 0, 100)
+        # Previous session stats
+        tank_id = tank_stats.get('tank_id')
+        last_session = Stats.get_vehicle_stats(
+            player_id=player_id, tank_id=tank_id, timestamp=self.session_timestamp)
+        print(last_session)
 
         # Get text size
         _, name_text_h = stats_draw.textsize(

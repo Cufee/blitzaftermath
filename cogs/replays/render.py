@@ -2,6 +2,7 @@ from operator import itemgetter
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
+from PIL import ImageEnhance
 
 from discord import File
 from io import BytesIO
@@ -106,7 +107,8 @@ class Render():
         self.font_color_win = (95, 227, 66)
         self.font_color_loss = (242, 94, 61)
 
-        self.player_card_color = (80, 80, 80, 200)
+        self.player_card_color = (80, 80, 80, 225)
+        self.player_card_color_dead = (95, 80, 80, 225)
         self.result_back_color = (80, 80, 80, 0)
         self.map_font_color = (110, 110, 110, 255)
 
@@ -214,12 +216,15 @@ class Render():
         self.enemy_team_offset_w = self.player_card_w + self.image_min_w
 
         if bg == 1:
-            solid_bg = Image.new('RGB', (frame_w, frame_h), (0, 0, 0))
+            solid_bg = Image.new('RGB', (frame_w, frame_h), (255, 255, 255))
             try:
                 bg_image = Image.open(
                     f'./cogs/replays/render/bg_frames_named/{self.protagonist_id}.jpg')
             except:
                 bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+
+            enhancer = ImageEnhance.Brightness(bg_image)
+            bg_image = enhancer.enhance(0.75)
 
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = frame_h / bg_image_h
@@ -574,8 +579,11 @@ class Render():
             clan_tag = f'[{clan}]'
 
         # Draw name bg plates
+        player_card_color = self.player_card_color
+        if not survived:
+            player_card_color = self.player_card_color_dead
         player_card = Image.new(
-            'RGBA', (self.player_card_w, (self.image_step - 10)), self.player_card_color)
+            'RGBA', (self.player_card_w, (self.image_step - 10)), player_card_color)
         player_card_w, player_card_h = player_card.size
 
         draw = ImageDraw.Draw(player_card)
@@ -583,11 +591,11 @@ class Render():
         # Draw HP Bars
         hp_bar_w = 3 * self.hpbars
         if self.hpbars == 1:
-            hp_bar_base_color = (100, 100, 100, 200)
+            hp_bar_base_color = (100, 100, 100, 220)
             if team == 1:
-                hp_bar_color = (123, 219, 101, 200)
+                hp_bar_color = (123, 219, 101, 220)
             else:
-                hp_bar_color = (219, 109, 101, 200)
+                hp_bar_color = (219, 109, 101, 220)
 
             hp_bar_base_h = int((self.font_size * 2))
             hp_bar_h = int(hp_percent * hp_bar_base_h)
@@ -634,9 +642,6 @@ class Render():
         font_color = self.font_color_base
         font_color_info = self.font_color_base
         font_color_name = self.font_color_base
-        if not survived:
-            font_color_info = self.font_color_nickname_dead
-            font_color_name = self.font_color_nickname_dead
         if nickname == self.protagonist_name:
             font_color_name = self.font_color_pr
             if not survived:

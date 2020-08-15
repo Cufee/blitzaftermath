@@ -269,25 +269,22 @@ class StatsApi():
                     print(f'Player {player_id} played 0 battles')
                     continue
 
-                if player_is_premium:
-                    # Gather per vehicle stats
-                    vehicle_stats_url = api_domain + \
-                        self.wg_api_vehicle_statistics + str(player_id)
-                    vehicles_stats_res = requests.get(vehicle_stats_url)
-                    requests_ctn += 1
-                    vehicles_stats_raw = rapidjson.loads(
-                        vehicles_stats_res.text)
-                    if vehicles_stats_res.status_code != 200 or not vehicles_stats_raw:
-                        raise Exception(
-                            f'Failed to get data from WG API, status code {vehicles_stats_res.status_code}')
-                    vehicles_stats_data = vehicles_stats_raw.get(
-                        'data').get(str(player_id))
-                    vehicles_stats = {}
-                    for tank_stats in vehicles_stats_data:
-                        tank_id = tank_stats.get('tank_id')
-                        vehicles_stats.update({str(tank_id): tank_stats})
-                else:
-                    vehicles_stats = None
+                # Gather per vehicle stats
+                vehicle_stats_url = api_domain + \
+                    self.wg_api_vehicle_statistics + str(player_id)
+                vehicles_stats_res = requests.get(vehicle_stats_url)
+                requests_ctn += 1
+                vehicles_stats_raw = rapidjson.loads(
+                    vehicles_stats_res.text)
+                if vehicles_stats_res.status_code != 200 or not vehicles_stats_raw:
+                    raise Exception(
+                        f'Failed to get data from WG API, status code {vehicles_stats_res.status_code}')
+                vehicles_stats_data = vehicles_stats_raw.get(
+                    'data').get(str(player_id))
+                vehicles_stats = {}
+                for tank_stats in vehicles_stats_data:
+                    tank_id = tank_stats.get('tank_id')
+                    vehicles_stats.update({str(tank_id): tank_stats})
 
                 player_stats = {
                     'player_id': player_id,
@@ -484,6 +481,18 @@ class StatsApi():
             'live_stats_rating': stats_rating,
         }
         return player_details, live_stats_all, session_all, session_detailed
+
+    def get_vehicle_stats(self, player_id: int, tank_id: int, timestamp: datetime = None):
+        query_params = {'player_id': player_id}
+        if timestamp:
+            query_params.update({'timestamp': {'$lt': timestamp}})
+        session_stats = self.sessions.find(query_params).sort(
+            'timestamp', -1).limit(1).distinct(f'vehicles.{tank_id}.all')
+        if not session_stats:
+            return None
+        else:
+            session_stats = session_stats[0]
+            return(session_stats)
 
     def add_vehicle_wn8(self, tank_data: dict):
         tank_id = int(tank_data.get('tank_id', 0))

@@ -27,6 +27,8 @@ clan_marks = db.marksOfMastery
 statsApi = StatsApi()
 # Render(1013072123)
 
+statsApi.get_vehicle_stats(player_id=1013072123, tank_id=18209)
+
 # clan_data = list(clans.find())
 # for clan in clan_data:
 #     player_list = clan.get('members')
@@ -39,8 +41,8 @@ statsApi = StatsApi()
 
 #     print(clan_tag, total_gained)
 
-player_list = players_stats.find().distinct('_id')
-statsApi.add_career_wn8(player_list)
+# player_list = players_stats.find().distinct('_id')
+# statsApi.add_career_wn8(player_list)
 
 # clan_members = clans.find_one({'clan_tag': 'CALI'}).get('members')
 # print(len(clan_members))

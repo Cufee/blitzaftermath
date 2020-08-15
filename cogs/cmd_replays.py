@@ -216,7 +216,7 @@ class blitz_aftermath_replays(commands.Cog):
             elif payload.emoji == self.emoji_10:
                 embed = discord.Embed()
                 embed.add_field(
-                    name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_02} to the original message.", inline=False)
+                    name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_01} to the original message.", inline=False)
 
                 dm_channel = await member.create_dm()
                 try:
