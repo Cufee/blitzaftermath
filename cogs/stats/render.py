@@ -30,10 +30,10 @@ class Render:
         self.session_timestamp = session_all.get('timestamp')
         if player_details.get('realm') == 'NA':
             self.last_stamp_conv = (self.session_timestamp.replace(
-                tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific')).strftime("Session from %I:%M %p PST")
+                tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific')).strftime("Session from %I:%M %p PST %m/%d")
         else:
             self.last_stamp_conv = self.session_timestamp.strftime(
-                "Session from %H:%M UTC")
+                "Session from %H:%M UTC %d/%m")
 
         self.player_id = player_details.get('_id')
 
