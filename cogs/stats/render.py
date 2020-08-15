@@ -28,6 +28,7 @@ class Render:
             player_id=player_id, session_duration=session_duration)
 
         self.session_timestamp = session_all.get('timestamp')
+        self.player_id = player_details.get('_id')
 
         # Get session start time / Broken
         # self.session_start = (session_all.get(
@@ -317,9 +318,12 @@ class Render:
         tank_name = tank_stats.get('tank_name')
         tank_battles = tank_stats.get("battles")
         # Performance
-        tank_wr = f"WR: {round(((tank_stats.get('wins') / tank_battles) * 100))}% ({tank_battles})"
-        tank_dmg = f"DMG: {round((tank_stats.get('damage_dealt') / tank_battles))}"
-        tank_xp = f"XP: {round((tank_stats.get('xp') / tank_battles))}"
+        tank_wr_value = round(((tank_stats.get('wins') / tank_battles) * 100))
+        tank_wr = f"WR: {tank_wr_value}% ({tank_battles})"
+        tank_dmg_value = round((tank_stats.get('damage_dealt') / tank_battles))
+        tank_dmg = f"DMG: {tank_dmg_value}"
+        tank_xp_value = round((tank_stats.get('xp') / tank_battles))
+        tank_xp = f"XP: {tank_xp_value}"
         tank_wn8_value = tank_stats.get('tank_wn8', 'No Data')
         # Extra spaces to fit the color bar
         tank_wn8 = f"{tank_wn8_value}"
@@ -331,8 +335,14 @@ class Render:
         # Previous session stats
         tank_id = tank_stats.get('tank_id')
         last_session = Stats.get_vehicle_stats(
-            player_id=player_id, tank_id=tank_id, timestamp=self.session_timestamp)
-        print(last_session)
+            player_id=self.player_id, tank_id=tank_id, timestamp=self.session_timestamp)
+        last_battles = last_session.get('battles')
+        last_wr_value = round(
+            ((last_session.get('wins') / last_battles) * 100), 2)
+        last_dmg_value = round(
+            (last_session.get('damage_dealt') / last_battles))
+        last_xp_value = round(
+            (last_session.get('xp') / last_battles))
 
         # Get text size
         _, name_text_h = stats_draw.textsize(
