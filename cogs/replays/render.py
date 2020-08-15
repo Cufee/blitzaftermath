@@ -3,6 +3,7 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 from PIL import ImageEnhance
+from PIL import ImageFilter
 
 from discord import File
 from io import BytesIO
@@ -225,6 +226,7 @@ class Render():
 
             enhancer = ImageEnhance.Brightness(bg_image)
             bg_image = enhancer.enhance(0.75)
+            bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
 
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = frame_h / bg_image_h

@@ -104,9 +104,6 @@ class Render:
         solid_bg.paste(bg_image, box=(
             0, 0))
         self.frame.paste(solid_bg)
-        self.frame_draw = ImageDraw.Draw(self.frame)
-        self.frame_draw.text((10, 10), 'Preview Version',
-                             self.font_color_half, font=self.font_bold)
 
     def render_header(self, player_details: dict):
         header_w = self.base_card_w
