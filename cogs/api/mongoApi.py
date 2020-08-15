@@ -96,7 +96,8 @@ class StatsApi():
         if realm:
             api_domain, _ = get_wg_api_domain(realm=realm)
         else:
-            api_domain, realm = get_wg_api_domain(player_id=player_ids_list[0][0])
+            api_domain, realm = get_wg_api_domain(
+                player_id=player_ids_list[0][0])
 
         for player_ids in player_ids_list:
             # Count requests send to avoid spam / Not implemented
@@ -262,9 +263,10 @@ class StatsApi():
                     player_data.get('last_battle_time'))
                 battles_total = battles_random + battles_rating
 
-                if last_battles_total == battles_total and battles_total != 0:
-                    print(f'Player {player_id} played 0 battles')
-                    continue
+                # Disabling this check since stats are rest every 24 hours
+                # if last_battles_total == battles_total and battles_total != 0:
+                #     print(f'Player {player_id} played 0 battles')
+                #     continue
 
                 if player_is_premium:
                     # Gather per vehicle stats
