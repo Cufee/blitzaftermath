@@ -87,8 +87,8 @@ class StatsApi():
     def update_players(self, player_ids_long: list, realm=None):
         """Takes in a list of player ids and realm (optional). Adds/Updates all players to the database with default settings.\nDoes not cache any stats."""
         if len(player_ids_long) > 100:
-            player_ids_list = self.list_to_chunks(
-                lst=player_ids_long, chunk_size=99)
+            player_ids_list = list(self.list_to_chunks(
+                lst=player_ids_long, chunk_size=99))
         else:
             player_ids_list = [player_ids_long]
 
@@ -196,8 +196,8 @@ class StatsApi():
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
         self.hard = hard
         if len(player_ids_long) > 100:
-            player_ids_list = self.list_to_chunks(
-                lst=player_ids_long, chunk_size=99)
+            player_ids_list = list(self.list_to_chunks(
+                lst=player_ids_long, chunk_size=99))
         else:
             player_ids_list = [player_ids_long]
 
