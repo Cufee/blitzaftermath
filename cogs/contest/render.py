@@ -11,7 +11,7 @@ from io import BytesIO
 import requests
 import rapidjson
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pytz import timezone
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne

@@ -11,8 +11,8 @@ import rapidjson
 
 from cogs.api.mongoApi import StatsApi
 
-from datetime import datetime, timedelta, timezone
-# from cogs.api.mongoApi import StatsApi
+from datetime import datetime, timedelta
+from pytz import timezone
 
 Stats = StatsApi()
 
@@ -28,12 +28,14 @@ class Render:
             player_id=player_id, session_duration=session_duration)
 
         self.session_timestamp = session_all.get('timestamp')
-        self.player_id = player_details.get('_id')
+        if player_details.get('realm') == 'NA':
+            self.last_stamp_conv = (self.session_timestamp.replace(
+                tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific')).strftime("Session from %I:%M %p PST")
+        else:
+            self.last_stamp_conv = self.session_timestamp.strftime(
+                "Session from %H:%M UTC")
 
-        # Get session start time / Broken
-        # self.session_start = (session_all.get(
-        #     'timestamp').replace(tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific'))
-        # print(self.session_start)
+        self.player_id = player_details.get('_id')
 
         self.tank_count = len(session_detailed)
         self.render_prep()
@@ -44,8 +46,6 @@ class Render:
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
             self.render_detailed_stats(tank_stats=tank_stats, card_index=i)
-
-        print(self.tank_count, self.session_timestamp)
 
     def render_prep(self):
         # Import fonts
@@ -104,6 +104,15 @@ class Render:
         solid_bg.paste(bg_image, box=(
             0, 0))
         self.frame.paste(solid_bg)
+
+        # Draw session start time
+        frame_draw = ImageDraw.Draw(self.frame)
+        time_text_w, time_text_h = frame_draw.textsize(
+            self.last_stamp_conv, font=self.font_slim)
+        time_draw_w = int((self.frame_w - time_text_w) / 2)
+        time_draw_h = int(((self.frame_margin_h / 2) - time_text_h) / 2)
+        frame_draw.text((time_draw_w, time_draw_h), self.last_stamp_conv,
+                        self.font_color_half, font=self.font_slim)
 
     def render_header(self, player_details: dict):
         header_w = self.base_card_w
