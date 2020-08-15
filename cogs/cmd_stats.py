@@ -71,6 +71,7 @@ class blitz_aftermath_stats(commands.Cog):
                     API.update_players([player_id])
                     await message.channel.send(f'Enabling for {player_name_fixed} on {player_realm}. You will need to play at least one battle to start tracking.')
                     API.update_stats([player_id])
+                    API.add_career_wn8([player_id])
                     return
 
                 else:
