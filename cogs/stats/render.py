@@ -336,13 +336,14 @@ class Render:
         tank_id = tank_stats.get('tank_id')
         last_session = Stats.get_vehicle_stats(
             player_id=self.player_id, tank_id=tank_id, timestamp=self.session_timestamp)
-        last_battles = last_session.get('battles')
-        last_wr_value = round(
-            ((last_session.get('wins') / last_battles) * 100), 2)
-        last_dmg_value = round(
-            (last_session.get('damage_dealt') / last_battles))
-        last_xp_value = round(
-            (last_session.get('xp') / last_battles))
+        if last_session:
+            last_battles = last_session.get('battles')
+            last_wr_value = round(
+                ((last_session.get('wins') / last_battles) * 100), 2)
+            last_dmg_value = round(
+                (last_session.get('damage_dealt') / last_battles))
+            last_xp_value = round(
+                (last_session.get('xp') / last_battles))
 
         # Get text size
         _, name_text_h = stats_draw.textsize(
@@ -385,12 +386,13 @@ class Render:
         draw_dmg_h = int(stats_detailed_h - dmg_text_h - text_h_margin)
         stats_draw.text((draw_dmg_w, draw_dmg_h), tank_dmg,
                         self.font_color_base, font=self.font)
-        # Draw progress arrow
-        arrow_size = int(dmg_text_h / 2)
-        pos_w = draw_dmg_w - int(arrow_size * 1.5)
-        pos_h = draw_dmg_h + int((dmg_text_h - arrow_size) / 1.5)
-        self.draw_progress_arrow(
-            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_dmg_value > last_dmg_value))
+        if last_session:
+            # Draw progress arrow
+            arrow_size = int(dmg_text_h / 2)
+            pos_w = draw_dmg_w - int(arrow_size * 1.5)
+            pos_h = draw_dmg_h + int((dmg_text_h - arrow_size) / 1.5)
+            self.draw_progress_arrow(
+                draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_dmg_value > last_dmg_value))
 
         # Draw tank xp
         draw_xp_w = int((bottom_metric_margin * 1) +
@@ -398,12 +400,13 @@ class Render:
         draw_xp_h = draw_dmg_h
         stats_draw.text((draw_xp_w, draw_xp_h), tank_xp,
                         self.font_color_base, font=self.font)
-        # Draw progress arrow
-        arrow_size = int(dmg_text_h / 2)
-        pos_w = draw_xp_w - int(arrow_size * 1.5)
-        pos_h = draw_xp_h + int((dmg_text_h - arrow_size) / 1.5)
-        self.draw_progress_arrow(
-            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_xp_value > last_xp_value))
+        if last_session:
+            # Draw progress arrow
+            arrow_size = int(dmg_text_h / 2)
+            pos_w = draw_xp_w - int(arrow_size * 1.5)
+            pos_h = draw_xp_h + int((dmg_text_h - arrow_size) / 1.5)
+            self.draw_progress_arrow(
+                draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_xp_value > last_xp_value))
 
         # Draw tank winrate
         draw_wr_w = int((bottom_metric_margin * 2) +
@@ -411,12 +414,13 @@ class Render:
         draw_wr_h = draw_dmg_h
         stats_draw.text((draw_wr_w, draw_wr_h), tank_wr,
                         self.font_color_base, font=self.font)
-        # Draw progress arrow
-        arrow_size = int(dmg_text_h / 2)
-        pos_w = draw_wr_w - int(arrow_size * 1.5)
-        pos_h = draw_wr_h + int((dmg_text_h - arrow_size) / 1.5)
-        self.draw_progress_arrow(
-            draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_wr_value > last_wr_value))
+        if last_session:
+            # Draw progress arrow
+            arrow_size = int(dmg_text_h / 2)
+            pos_w = draw_wr_w - int(arrow_size * 1.5)
+            pos_h = draw_wr_h + int((dmg_text_h - arrow_size) / 1.5)
+            self.draw_progress_arrow(
+                draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_wr_value > last_wr_value))
 
         # Render card on frame
         stats_detailed_render_h = int(
