@@ -378,22 +378,11 @@ class StatsApi():
 
             # Get last session object
             if session_duration:
-                last_detailed_stats_list = list(self.sessions.find(
-                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}, 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
-                if last_detailed_stats_list:
-                    last_detailed_stats_data = last_detailed_stats_list[0].get(
-                        'vehicles') or {}
-                else:
-                    last_detailed_stats_data = None
+                last_detailed_stats_data = self.sessions.find_one(
+                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}, 'timestamp': {'$gt': session_duration}}, sort=[('timestamp', 1)])
             else:
-                last_detailed_stats_list = list(self.sessions.find(
-                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}}).sort('timestamp', -1).limit(1))
-
-                if last_detailed_stats_list:
-                    last_detailed_stats_data = last_detailed_stats_list[0].get(
-                        'vehicles') or {}
-                else:
-                    last_detailed_stats_data = None
+                last_detailed_stats_data = self.sessions.find_one(
+                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}}, sort=[('timestamp', -1)])
 
             if not last_detailed_stats_data:
                 print('Last detailed session not available.')

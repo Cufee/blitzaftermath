@@ -93,7 +93,7 @@ class Render:
 
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
-            'RGBA', (self.frame_w, self.frame_h), (255, 255, 255, 255))
+            'RGB', (self.frame_w, self.frame_h), (255, 255, 255))
         bg_image = Image.open('./cogs/replays/render/bg_frame.png')
         bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
         bg_image_w, bg_image_h = bg_image.size
