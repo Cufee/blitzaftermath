@@ -352,8 +352,6 @@ class Render:
             last_xp_value = round(
                 (last_session.get('xp') / last_battles))
 
-            print()
-
         # Get text size
         _, name_text_h = stats_draw.textsize(
             tank_name, font=self.font_bold)
