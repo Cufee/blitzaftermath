@@ -84,6 +84,7 @@ class StatsApi():
         fixed_list = []
         for i in range(0, len(lst), chunk_size):
             fixed_list.append(lst[i:i + chunk_size])
+        print(len(fixed_list), len(fixed_list[-1]))
         return fixed_list
 
     def update_players(self, player_ids_long: list, realm=None):
@@ -101,6 +102,7 @@ class StatsApi():
             api_domain, realm = get_wg_api_domain(
                 player_id=player_ids_list[0][0])
 
+        players_updated = 0
         for player_ids in player_ids_list:
             # Count requests send to avoid spam / Not implemented
             requests_ctn = 0
@@ -178,21 +180,23 @@ class StatsApi():
                 new_players_list.append(UpdateOne({'_id': player_id}, {
                                         '$set': new_player}, upsert=True))
 
-            try:
-                if new_players_list:
-                    result_players = self.players.bulk_write(
-                        new_players_list, ordered=False)
-                    print(f'{datetime.utcnow()}\n{result_players.bulk_api_result}')
-                    return ('Done')
-                else:
-                    print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-                    return None
-            except Exception as e:
-                if e == BulkWriteError:
-                    print(e.details)
-                else:
-                    print(e)
+                players_updated += 1
+
+        try:
+            if new_players_list:
+                result_players = self.players.bulk_write(
+                    new_players_list, ordered=False)
+                print(f'{datetime.utcnow()}\n{result_players.bulk_api_result}')
+                return (f'Done, updated {players_updated} players')
+            else:
+                print(f'{datetime.utcnow()}\nNo valid objects to insert.')
                 return None
+        except Exception as e:
+            if e == BulkWriteError:
+                print(e.details)
+            else:
+                print(e)
+            return None
 
     def update_stats(self, player_ids_long: list, realm=None, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
