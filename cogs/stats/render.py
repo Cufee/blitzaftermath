@@ -157,8 +157,8 @@ class Render:
         stats_all_card = Image.new(
             'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
         stats_draw = ImageDraw.Draw(stats_all_card)
-        player_wn8 = player_details.get('career_wn8', 'No Data')
-        if player_wn8 != 'No Data':
+        player_wn8 = player_details.get('career_wn8', '-')
+        if player_wn8 != '-':
             player_wn8_color = self.color_dict.get(player_wn8, self.color_dict[min(
                 self.color_dict.keys(), key=lambda k: (k-player_wn8) < 0)])
 
@@ -191,7 +191,7 @@ class Render:
             session_wn8_color = self.color_dict.get(session_wn8, self.color_dict[min(
                 self.color_dict.keys(), key=lambda k: (k-session_wn8) < 0)])
         else:
-            session_wn8 = f'No Data'
+            session_wn8 = '-'
             session_wn8_color = self.font_color_none
 
         # Live stats
@@ -331,10 +331,10 @@ class Render:
         tank_dmg = f"DMG: {tank_dmg_value}"
         tank_xp_value = round((tank_stats.get('xp') / tank_battles))
         tank_xp = f"XP: {tank_xp_value}"
-        tank_wn8_value = tank_stats.get('tank_wn8', 'No Data')
+        tank_wn8_value = tank_stats.get('tank_wn8', '')
         # Extra spaces to fit the color bar
         tank_wn8 = f"{tank_wn8_value}"
-        if tank_wn8_value != 'No Data':
+        if tank_wn8_value != '':
             tank_wn8_color = self.color_dict.get(
                 tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k:(k - tank_wn8_value) <= 0)])
         else:
