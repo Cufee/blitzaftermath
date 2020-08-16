@@ -12,6 +12,8 @@ python-rapidjson = "*"
 pillow = "*"
 pymongo = "*"
 dnspython = "*"
+requests = "*"
+apscheduler = "*"
 
 [requires]
 python_version = "3.8"

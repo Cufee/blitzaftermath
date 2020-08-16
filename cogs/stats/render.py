@@ -204,7 +204,7 @@ class Render:
         live_wn8 = str(player_wn8)
 
         # Get text size
-        damage_text_w, damage_text_h = stats_draw.textsize(
+        damage_text_w, _ = stats_draw.textsize(
             'Damage', font=self.font)
         winrate_text_w, _ = stats_draw.textsize(
             'Winrate', font=self.font)
@@ -346,11 +346,13 @@ class Render:
         if last_session:
             last_battles = last_session.get('battles')
             last_wr_value = round(
-                ((last_session.get('wins') / last_battles) * 100), 2)
+                ((last_session.get('wins') / last_battles) * 100))
             last_dmg_value = round(
                 (last_session.get('damage_dealt') / last_battles))
             last_xp_value = round(
                 (last_session.get('xp') / last_battles))
+
+            print()
 
         # Get text size
         _, name_text_h = stats_draw.textsize(
@@ -393,7 +395,7 @@ class Render:
         draw_dmg_h = int(stats_detailed_h - dmg_text_h - text_h_margin)
         stats_draw.text((draw_dmg_w, draw_dmg_h), tank_dmg,
                         self.font_color_base, font=self.font)
-        if last_session:
+        if last_session and tank_dmg_value != last_dmg_value:
             # Draw progress arrow
             arrow_size = int(dmg_text_h / 2)
             pos_w = draw_dmg_w - int(arrow_size * 1.5)
@@ -407,7 +409,7 @@ class Render:
         draw_xp_h = draw_dmg_h
         stats_draw.text((draw_xp_w, draw_xp_h), tank_xp,
                         self.font_color_base, font=self.font)
-        if last_session:
+        if last_session and tank_xp_value != last_xp_value:
             # Draw progress arrow
             arrow_size = int(dmg_text_h / 2)
             pos_w = draw_xp_w - int(arrow_size * 1.5)
@@ -421,7 +423,7 @@ class Render:
         draw_wr_h = draw_dmg_h
         stats_draw.text((draw_wr_w, draw_wr_h), tank_wr,
                         self.font_color_base, font=self.font)
-        if last_session:
+        if last_session and tank_wr_value != last_wr_value:
             # Draw progress arrow
             arrow_size = int(dmg_text_h / 2)
             pos_w = draw_wr_w - int(arrow_size * 1.5)
