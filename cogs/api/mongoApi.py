@@ -103,6 +103,7 @@ class StatsApi():
                 player_id=player_ids_list[0][0])
 
         players_updated = 0
+        new_players_list = []
         for player_ids in player_ids_list:
             # Count requests send to avoid spam / Not implemented
             requests_ctn = 0
@@ -125,7 +126,6 @@ class StatsApi():
             res_player_data = res_player_data_raw.get('data')
             res_player_clans_data = res_player_clans_raw.get('data')
 
-            new_players_list = []
             for player_id in player_ids:
                 # Get player details and premium status
                 player_details = self.players.find_one({'_id': player_id})
@@ -213,6 +213,7 @@ class StatsApi():
         else:
             api_domain, _ = get_wg_api_domain(player_id=player_ids_list[0][0])
 
+        sessions_list = []
         for player_ids in player_ids_list:
             # Count requests send to avoid spam
             requests_ctn = 0
@@ -230,7 +231,6 @@ class StatsApi():
                 raise Exception(f'WG API did not return any data')
             res_stats_all_data = res_stats_all_raw.get('data')
 
-            sessions_list = []
             for player_id in player_ids:
                 # Get player details and premium status
                 player_details = self.players.find_one({'_id': player_id})
