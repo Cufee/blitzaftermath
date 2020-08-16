@@ -355,76 +355,9 @@ class StatsApi():
             raise Exception(
                 f'Failed to get player stats, WG responded with {stats_all_res.status_code}')
 
-        # Request and check detailed stats
-        stats_detailed_url = api_domain + \
-            self.wg_api_vehicle_statistics + str(player_id)
-        stats_detailed_res = requests.get(stats_detailed_url)
-        stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
-
-        if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
-            print(
-                f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
-            session_detailed = {}
-        else:
-            # Get current detailed stats
-            # Sort dict by last played battle
-            stats_detailed_tanks = sorted(stats_detailed_res_raw.get(
-                'data').get(str(player_id)), key=lambda x: x['last_battle_time'], reverse=True)
-            stats_detailed_data = {}
-            for tank_stats in stats_detailed_tanks:
-                tank_id = tank_stats.get('tank_id')
-                tank_stats_all = tank_stats
-                stats_detailed_data.update({str(tank_id): tank_stats_all})
-
-            # Get last session object
-            if session_duration:
-                last_detailed_stats_data = self.sessions.find_one(
-                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}, 'timestamp': {'$gt': session_duration}}, sort=[('timestamp', 1)])
-            else:
-                last_detailed_stats_data = self.sessions.find_one(
-                    {'player_id': player_id, 'vehicles': {'$exists': True, '$ne': stats_detailed_data}}, sort=[('timestamp', -1)])
-
-            if not last_detailed_stats_data:
-                print('Last detailed session not available.')
-                session_detailed = {}
-            else:
-                session_detailed = {}
-                # Limiting detailed stats to 10 tanks to avoid running out of memory
-                tank_count = 0
-                for tank in stats_detailed_data.keys():
-                    session_old = last_detailed_stats_data.get(
-                        tank, {}).get('all')
-                    session_current = stats_detailed_data.get(
-                        tank, {}).get('all')
-
-                    if session_old:
-                        diff = {key: (session_current.get(key) - session_old.get(
-                            key)) for key in session_current.keys()}
-                    else:
-                        diff = session_current
-
-                    if diff.get('battles') != 0 and tank_count < 10:
-                        tank_glossary = self.glossary.find_one(
-                            {'tank_id': int(tank)}) or {}
-                        tank_name = tank_glossary.get('name') or 'Unknown'
-                        tank_tier = tank_glossary.get('tier') or 0
-                        tank_nation = tank_glossary.get(
-                            'nation') or 'other'
-                        tank_id = tank_glossary.get('tank_id') or 0
-
-                        tank_data = {
-                            'tank_name': tank_name,
-                            'tank_tier': tank_tier,
-                            'tank_nation': tank_nation,
-                            'tank_id': tank_id
-                        }
-                        diff.update(tank_data)
-                        diff = self.add_vehicle_wn8(diff)
-                        session_detailed.update({tank: diff})
-                        tank_count += 1
-
         # Check Basic stats
         player_data = stata_all_res_raw.get('data').get(str(player_id))
+        last_battle_time = player_data.get('last_battle_time')
         stats_random = player_data.get('statistics', {}).get('all', {})
         stats_rating = player_data.get('statistics', {}).get('rating', {})
 
@@ -432,22 +365,13 @@ class StatsApi():
             # No code to check Rating mode atm
             # last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
             #                        'stats_rating': {'$exists': True, '$ne': stats_rating}}], 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
-            last_stats_list = list(self.sessions.find({'player_id': player_id, 'stats_random': {
-                                   '$exists': True, '$ne': stats_random}, 'timestamp': {'$gt': session_duration}}).sort('timestamp', 1).limit(1))
-            if not last_stats_list:
-                last_stats = None
-            else:
-                last_stats = last_stats_list[0]
+            last_stats = self.sessions.find_one({'player_id': player_id, 'stats_random': {
+                '$ne': stats_random}, 'timestamp': {'$gt': session_duration}}, sort=[('timestamp', 1)])
         else:
             # No code to check Rating mode atm
             # last_stats_list = list(self.sessions.find({'player_id': player_id, '$or': [{'stats_random': {'$exists': True, '$ne': stats_random}}, {
-            #                        'stats_rating': {'$exists': True, '$ne': stats_rating}}]}).sort('timestamp', -1).limit(1))
-            last_stats_list = list(self.sessions.find({'player_id': player_id, 'stats_random': {
-                                   '$exists': True, '$ne': stats_random}}).sort('timestamp', -1).limit(1))
-            if not last_stats_list:
-                last_stats = None
-            else:
-                last_stats = last_stats_list[0]
+            last_stats = self.sessions.find_one({'player_id': player_id, 'stats_random': {
+                '$ne': stats_random}}, sort=[('timestamp', -1)])
 
         # Compare stats
         if last_stats:
@@ -475,6 +399,65 @@ class StatsApi():
             'live_stats_random': stats_random,
             'live_stats_rating': stats_rating,
         }
+
+        # Request and check detailed stats
+        stats_detailed_url = api_domain + \
+            self.wg_api_vehicle_statistics + str(player_id)
+        stats_detailed_res = requests.get(stats_detailed_url)
+        stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
+
+        if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
+            print(
+                f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+            session_detailed = {}
+        else:
+            # Get current detailed stats
+            # Sort dict by last played battle
+            stats_detailed_tanks = sorted(stats_detailed_res_raw.get(
+                'data').get(str(player_id)), key=lambda x: x['last_battle_time'], reverse=True)
+            stats_detailed_data = {}
+            for tank_stats in stats_detailed_tanks:
+                tank_id = tank_stats.get('tank_id')
+                tank_stats_all = tank_stats
+                stats_detailed_data.update({str(tank_id): tank_stats_all})
+
+            # Get last session object
+            last_detailed_stats_data = last_stats.get('vehicles')
+            session_detailed = {}
+            # Limiting detailed stats to 10 tanks to avoid running out of memory
+            tank_count = 0
+            for tank in stats_detailed_data.keys():
+                session_old = last_detailed_stats_data.get(
+                    tank, {}).get('all')
+                session_current = stats_detailed_data.get(
+                    tank, {}).get('all')
+
+                if session_old:
+                    diff = {key: (session_current.get(key) - session_old.get(
+                        key)) for key in session_current.keys()}
+                else:
+                    diff = session_current
+
+                if diff.get('battles') != 0 and tank_count < 10:
+                    tank_glossary = self.glossary.find_one(
+                        {'tank_id': int(tank)}) or {}
+                    tank_name = tank_glossary.get('name') or 'Unknown'
+                    tank_tier = tank_glossary.get('tier') or 0
+                    tank_nation = tank_glossary.get(
+                        'nation') or 'other'
+                    tank_id = tank_glossary.get('tank_id') or 0
+
+                    tank_data = {
+                        'tank_name': tank_name,
+                        'tank_tier': tank_tier,
+                        'tank_nation': tank_nation,
+                        'tank_id': tank_id
+                    }
+                    diff.update(tank_data)
+                    diff = self.add_vehicle_wn8(diff)
+                    session_detailed.update({tank: diff})
+                    tank_count += 1
+
         return player_details, live_stats_all, session_all, session_detailed
 
     def get_vehicle_stats(self, player_id: int, tank_id: int, timestamp: datetime = None):
