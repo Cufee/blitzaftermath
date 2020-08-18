@@ -473,6 +473,10 @@ class StatsApi():
             return(session_stats)
 
     def add_vehicle_wn8(self, tank_data: dict):
+        tank_battles = tank_data.get("battles", 0)
+        if tank_battles == 0 or not tank_battles:
+            print('Tank has 0 battles')
+            return tank_data
         tank_id = int(tank_data.get('tank_id', 0))
         tank_averages = self.glossary_averages.find_one(
             {'tank_id': tank_id}) or None
@@ -481,43 +485,39 @@ class StatsApi():
             return tank_data
         else:
             # Expected values
-            exp_dmg = tank_averages.get('meanSd', {}).get('dpbMean')
-            exp_spott = tank_averages.get('meanSd', {}).get('spbMean')
-            exp_frag = tank_averages.get('meanSd', {}).get('kpbMean')
+            exp_dmg = tank_averages.get('special', {}).get('damagePerBattle')
+            exp_spott = tank_averages.get('special', {}).get('spotsPerBattle')
+            exp_frag = tank_averages.get('special', {}).get('killsPerBattle')
             exp_def = (tank_averages.get('all').get(
                 'dropped_capture_points') / tank_averages.get('all').get('battles'))
-            exp_wr = tank_averages.get('meanSd', {}).get('winrateMean')
+            exp_wr = tank_averages.get('special', {}).get('winrate')
             # Organize data
-            tank_battles = tank_data.get("battles", 0)
-            if tank_battles == 0 or not tank_battles:
-                tank_battles = 1
-            tank_avg_wr = round(
-                ((tank_data.get("wins") / tank_battles) * 100), 2)
+            tank_avg_wr = (tank_data.get("wins") / tank_battles) * 100
             tank_avg_dmg = round(tank_data.get(
                 'damage_dealt', 0) / tank_battles)
-            tank_avg_spott = round(tank_data.get('spotted', 0) / tank_battles)
-            tank_avg_frag = round(tank_data.get('frags', 0) / tank_battles)
-            tank_avg_def = round(tank_data.get(
-                'dropped_capture_points', 0) / tank_battles)
+            tank_avg_spott = tank_data.get('spotted', 0) / tank_battles
+            tank_avg_frag = tank_data.get('frags', 0) / tank_battles
+            tank_avg_def = tank_data.get(
+                'dropped_capture_points', 0) / tank_battles
 
-            # Calculate WN8 metrics
-            rDMG = tank_avg_dmg / exp_dmg
-            rSPOTT = tank_avg_spott / exp_spott
-            rFRAG = tank_avg_frag / exp_frag
-            rDEF = tank_avg_def / exp_def
-            rWR = tank_avg_wr / exp_wr
+        # Calculate WN8 metrics
+        rDMG = tank_avg_dmg / exp_dmg
+        rSPOTT = tank_avg_spott / exp_spott
+        rFRAG = tank_avg_frag / exp_frag
+        rDEF = tank_avg_def / exp_def
+        rWR = tank_avg_wr / exp_wr
 
-            rDMGc = max(0, ((rDMG - 0.22) / (1 - 0.22)))
-            rSPOTTc = max(0, (min(rDMGc + 0.1, (rSPOTT - 0.38) / (1 - 0.38))))
-            rFRAGc = max(0, (min(rDMGc + 0.2, (rFRAG - 0.12) / (1 - 0.12))))
-            rDEFc = max(0, (min(rDMGc + 0.1, (rDEF - 0.10) / (1 - 0.10))))
-            rWRc = max(0, ((rWR - 0.71) / (1 - 0.71)))
+        rWRc = max(0, ((rWR - 0.71) / (1 - 0.71)))
+        rDMGc = max(0, ((rDMG - 0.22) / (1 - 0.22)))
+        rFRAGc = max(0, (min(rDMGc + 0.2, (rFRAG - 0.12) / (1 - 0.12))))
+        rSPOTTc = max(0, (min(rDMGc + 0.1, (rSPOTT - 0.38) / (1 - 0.38))))
+        rDEFc = max(0, (min(rDMGc + 0.1, (rDEF - 0.10) / (1 - 0.10))))
 
-            wn8 = round((980*rDMGc) + (210*rDMGc*rFRAGc) + (155*rFRAGc *
-                                                            rSPOTTc) + (75*rDEFc*rFRAGc) + (145*min(1.8, rWRc)))
+        wn8 = round((980*rDMGc) + (210*rDMGc*rFRAGc) + (155*rFRAGc *
+                                                        rSPOTTc) + (75*rDEFc*rFRAGc) + (145*(min(1.8, rWRc))))
 
-            tank_data.update({'tank_wn8': wn8})
-            return tank_data
+        tank_data.update({'tank_wn8': wn8})
+        return tank_data
 
     def add_career_wn8(self, player_ids: list):
         # Count requests to avoid API spam
