@@ -483,22 +483,22 @@ class StatsApi():
         if not tank_averages or not tank_averages.get('meanSd'):
             print(f'Missing data for tank {tank_id}')
             return tank_data
-        else:
-            # Expected values
-            exp_dmg = tank_averages.get('special', {}).get('damagePerBattle')
-            exp_spott = tank_averages.get('special', {}).get('spotsPerBattle')
-            exp_frag = tank_averages.get('special', {}).get('killsPerBattle')
-            exp_def = (tank_averages.get('all').get(
-                'dropped_capture_points') / tank_averages.get('all').get('battles'))
-            exp_wr = tank_averages.get('special', {}).get('winrate')
-            # Organize data
-            tank_avg_wr = (tank_data.get("wins") / tank_battles) * 100
-            tank_avg_dmg = round(tank_data.get(
-                'damage_dealt', 0) / tank_battles)
-            tank_avg_spott = tank_data.get('spotted', 0) / tank_battles
-            tank_avg_frag = tank_data.get('frags', 0) / tank_battles
-            tank_avg_def = tank_data.get(
-                'dropped_capture_points', 0) / tank_battles
+
+        # Expected values
+        exp_dmg = tank_averages.get('meanSd', {}).get('dpbMean')
+        exp_spott = tank_averages.get('meanSd', {}).get('spbMean')
+        exp_frag = tank_averages.get('meanSd', {}).get('kpbMean')
+        exp_def = (tank_averages.get('all').get(
+            'dropped_capture_points') / tank_averages.get('all').get('battles'))
+        exp_wr = tank_averages.get('meanSd', {}).get('winrateMean')
+        # Organize data
+        tank_avg_wr = (tank_data.get("wins") / tank_battles) * 100
+        tank_avg_dmg = tank_data.get(
+            'damage_dealt', 0) / tank_battles
+        tank_avg_spott = tank_data.get('spotted', 0) / tank_battles
+        tank_avg_frag = tank_data.get('frags', 0) / tank_battles
+        tank_avg_def = tank_data.get(
+            'dropped_capture_points', 0) / tank_battles
 
         # Calculate WN8 metrics
         rDMG = tank_avg_dmg / exp_dmg

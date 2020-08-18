@@ -209,7 +209,7 @@ class Render:
         winrate_text_w, _ = stats_draw.textsize(
             'Winrate', font=self.font)
         wn8_text_w, wn8_text_h = stats_draw.textsize(
-            'WN8', font=self.font_bold)
+            'WN8m', font=self.font_bold)
         # Session Stats
         session_dmg_w, _ = stats_draw.textsize(
             session_dmg_avg, font=self.font)
@@ -243,7 +243,7 @@ class Render:
         draw_wn8_name_w = int((2 * self.text_margin_w) + stats_margin_w +
                               ((stats_margin_w - wn8_text_w) / 2))
         draw_wn8_name_h = metric_names_row_h
-        stats_draw.text((draw_wn8_name_w, draw_wn8_name_h), 'WN8',
+        stats_draw.text((draw_wn8_name_w, draw_wn8_name_h), 'WN8m',
                         self.font_color_base, font=self.font)
         # Draw winrate
         draw_winrate_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
