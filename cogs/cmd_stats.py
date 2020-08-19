@@ -34,11 +34,10 @@ class blitz_aftermath_stats(commands.Cog):
         if message.author == self.client.user:
             return
         # Convert session hours into int
-        if hours:
-            try:
-                session_hours = int(hours)
-            except:
-                session_hours = None
+        try:
+            session_hours = int(hours)
+        except:
+            session_hours = None
         try:
             if not player_name_str and not hours:
                 player_id = UsersApi.get_default_player_id(
