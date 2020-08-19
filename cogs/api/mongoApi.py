@@ -61,6 +61,31 @@ class GuildApi():
         pass
 
 
+class DiscordUsersApi():
+    def __init__(self):
+        client = MongoClient("mongodb://51.222.13.110:27017")
+        self.users_collection = client.stats.users
+
+    def link_to_player(self, discord_user_id, player_id):
+        '''Links Discord UserID to WG PlayerID in stats.users collection'''
+        user_filter = {'_id': discord_user_id}
+        user_data = {
+            'default_player_id': player_id
+        }
+        result = self.users_collection.update_one(
+            user_filter, {'$set': user_data}, upsert=True)
+        return None
+
+    def get_default_player_id(self, discord_user_id):
+        user_filter = {'_id': discord_user_id}
+        user_data = self.users_collection.find_one(
+            user_filter)
+        if user_data:
+            return user_data.get('default_player_id', None)
+        else:
+            return None
+
+
 class StatsApi():
     def __init__(self):
         client = MongoClient("mongodb://51.222.13.110:27017")
