@@ -29,6 +29,7 @@ def run(realm):
 def refresh_wn8(realm):
     player_list = players_db.find({'realm': realm}).distinct('_id')
     Api.add_career_wn8(player_list)
+    print(f"Done refreshing career WN8 {realm}")
 
 
 def refresh_tank_avg_cache():
