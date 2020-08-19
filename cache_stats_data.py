@@ -23,6 +23,7 @@ def run(realm):
         return
     else:
         Api.update_stats(player_ids_long=player_list, hard=True)
+        Api.update_players(player_ids_long=player_list, realm=realm)
 
 
 def refresh_wn8(realm):
