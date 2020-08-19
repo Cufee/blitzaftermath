@@ -24,10 +24,10 @@ tankaverages = glossary.tankaverages
 clan_marks = db.marksOfMastery
 
 
-statsApi = StatsApi()
+# statsApi = StatsApi()
 # Render(1013072123)
 
-statsApi.get_vehicle_stats(player_id=1013072123, tank_id=18209)
+# statsApi.get_vehicle_stats(player_id=1013072123, tank_id=18209)
 
 # clan_data = list(clans.find())
 # for clan in clan_data:
@@ -56,12 +56,12 @@ statsApi.get_vehicle_stats(player_id=1013072123, tank_id=18209)
 # for player_id in player_list:
 #     statsApi.add_premium_time(player_id, days_to_add=14)
 
-# all_guilds = requests.get('http://127.0.0.1:5000/guilds')
+all_guilds = requests.get('http://127.0.0.1:5000/guilds')
 
-# data = rapidjson.loads(all_guilds.text)
+data = rapidjson.loads(all_guilds.text)
 
-# for i in data:
-#     guilds_settings.insert_one(i)
+for i in data:
+    guilds_settings.update_one(i, {'$set': i}, upsert=True)
 
 # wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 
