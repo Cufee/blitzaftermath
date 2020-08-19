@@ -269,7 +269,7 @@ class blitz_aftermath_replays(commands.Cog):
 
             currently_enabled_channels = ', '.join(currently_enabled_channels)
 
-            await ctx.send(f'It looks like you already have me watching {currently_enabled_channels}. You will need to be a premium member to enable more channels. You can also override those channels by using `{self.client.command_prefix}WatchHereOnly`', delete_after=30)
+            await ctx.send(f'It looks like you already have me watching {currently_enabled_channels}. You will need to be a premium member to enable more channels. You can also override those channels by using `{self.client.command_prefix[0]}LookOnlyHere`', delete_after=30)
             return
         else:
             new_enabled_channels = enabled_channels.copy()
@@ -317,7 +317,7 @@ class blitz_aftermath_replays(commands.Cog):
                 await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {res.get("status_code")}', delete_after=30)
                 return
         else:
-            await ctx.send(f'I am not watching #{channel_name} right now. You can add this channel by typing `{self.client.command_prefix}WatchHere`', delete_after=30)
+            await ctx.send(f'I am not watching #{channel_name} right now. You can add this channel by typing `{self.client.command_prefix[0]}LookHere`', delete_after=30)
 
     @commands.command(aliases=['olh', 'LookOnlyHere', 'onlylookhere', 'lookonlyhere'])
     @commands.has_permissions(manage_messages=True)
