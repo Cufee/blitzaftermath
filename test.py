@@ -15,7 +15,7 @@ db = client.summer2020contest
 glossary = client.glossary
 stats = client.stats
 
-guilds = db.guilds
+guilds = client.guilds.guilds_settings
 clans = db.clans
 players = db.players
 players_stats = stats.players
@@ -56,12 +56,12 @@ clan_marks = db.marksOfMastery
 # for player_id in player_list:
 #     statsApi.add_premium_time(player_id, days_to_add=14)
 
-all_guilds = requests.get('http://127.0.0.1:5000/guilds')
+# all_guilds = requests.get('http://127.0.0.1:5000/guilds')
 
-data = rapidjson.loads(all_guilds.text)
+# data = rapidjson.loads(all_guilds.text)
 
-for i in data:
-    guilds_settings.update_one(i, {'$set': i}, upsert=True)
+# for i in data:
+#     guilds_settings.update_one(i, {'$set': i}, upsert=True)
 
 # wg_player_medals_api_url_base = 'http://api.wotblitz.com/wotb/tanks/achievements/?application_id=add73e99679dd4b7d1ed7218fe0be448&account_id='
 
