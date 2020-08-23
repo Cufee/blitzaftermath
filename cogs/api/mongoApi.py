@@ -29,7 +29,7 @@ def get_wg_api_domain(realm=None, player_id=None):
     else:
         print(player_id)
         raise Exception(
-            f'{realm} is not a supported server.\nTry NA, EU or NA.')
+            f'{realm} is not a supported server.\nTry RU, EU or NA.')
     return api_domain, player_realm
 
 
