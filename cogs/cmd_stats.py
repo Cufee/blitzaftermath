@@ -48,7 +48,7 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(file=image)
                     return None
                 else:
-                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.\nOr use `{self.client.command_prefix[0]}stats Username@Server` to check your stats.', delete_after=30)
+                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.\nOr use `{self.client.command_prefix[0]}stats Username@Server` to check your stats.')
                     return None
 
             elif '@' in player_name_str:
