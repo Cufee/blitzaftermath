@@ -25,10 +25,11 @@ def get_wg_api_domain(realm=None, player_id=None):
     elif realm == 'NA' or id_length == 10:
         player_realm = 'NA'
         api_domain = 'http://api.wotblitz.com'
+
     else:
         print(player_id)
         raise Exception(
-            'Unable to find this player on RU, EU or NA. ASIA server queries are not supported by WG.')
+            f'{realm} is not a supported server.\nTry NA, EU or NA.')
     return api_domain, player_realm
 
 
@@ -145,7 +146,7 @@ class StatsApi():
             if res_players.status_code != 200 or res_player_clans.status_code != 200:
                 raise Exception(
                     f'WG API returned:\nPlayer data:{res_players.status_code}\nClan data:{res_player_clans.status_code}')
-            elif not res_player_data_raw or not res_player_clans_raw:
+            elif not res_player_data_raw.get('data') or not res_player_clans_raw.get('data'):
                 raise Exception(f'WG API did not return any data')
 
             res_player_data = res_player_data_raw.get('data')
@@ -557,7 +558,7 @@ class StatsApi():
             requests_cnt += 1
             stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
 
-            if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
+            if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw.get('data', {}).get(str(player_id)):
                 print(
                     f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
             else:
