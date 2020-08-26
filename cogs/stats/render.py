@@ -52,6 +52,8 @@ class Render:
         self.font_size = 32
         self.font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", self.font_size)
+        self.font_half_size = ImageFont.truetype(
+            "./cogs/replays/render/fonts/font.ttf", int(self.font_size / 2))
         self.font_bold = ImageFont.truetype(
             "./cogs/replays/render/fonts/font_fat.ttf", self.font_size)
         self.font_slim = ImageFont.truetype(
@@ -74,6 +76,20 @@ class Render:
             2000: (46, 174, 193, 255),
             2450: (208, 108, 255, 255),
             2900: (142, 65, 177, 255)
+        }
+
+        self.tank_tier_dict = {
+            0: "",
+            1: "I",
+            2: "II",
+            3: "III",
+            4: "IV",
+            5: "V",
+            6: "VI",
+            7: "VII",
+            8: "VIII",
+            9: "IX",
+            10: "X",
         }
 
         self.frame_margin_w = 50
@@ -322,7 +338,9 @@ class Render:
         stats_draw = ImageDraw.Draw(stats_detailed_card)
 
         # Organize tank data
-        tank_name = tank_stats.get('tank_name')
+        tank_tier_int = tank_stats.get('tank_tier')
+        tank_tier = self.tank_tier_dict.get(tank_tier_int)
+        tank_name = f"{tank_stats.get('tank_name')}"
         tank_battles = tank_stats.get("battles")
         # Performance
         tank_wr_value = round(((tank_stats.get('wins') / tank_battles) * 100))
@@ -353,6 +371,8 @@ class Render:
                 (last_session.get('xp') / last_battles))
 
         # Get text size
+        tier_text_w, tier_text_h = stats_draw.textsize(
+            tank_tier, font=self.font_half_size)
         _, name_text_h = stats_draw.textsize(
             tank_name, font=self.font_bold)
         wr_text_w, wr_text_h = stats_draw.textsize(
@@ -361,7 +381,7 @@ class Render:
             tank_xp, font=self.font)
         dmg_text_w, dmg_text_h = stats_draw.textsize(
             tank_dmg, font=self.font)
-        wn8_text_w, _ = stats_draw.textsize(
+        wn8_text_w, wn8_text_h = stats_draw.textsize(
             tank_wn8, font=self.font_bold)
 
         # Margins
@@ -375,6 +395,13 @@ class Render:
         draw_name_h = text_h_margin
         stats_draw.text((draw_name_w, draw_name_h), tank_name,
                         self.font_color_base, font=self.font_bold)
+        # Draw tank tier
+        # Color premium vehicles
+        tier_color = self.font_color_base
+        draw_tier_w = draw_name_w - tier_text_w - int(self.font_size / 3)
+        draw_tier_h = text_h_margin + int((wn8_text_h - tier_text_h) / 2)
+        stats_draw.text((draw_tier_w, draw_tier_h), tank_tier,
+                        tier_color, font=self.font_half_size)
         # Draw tank WN8
         draw_wn8_w = int((stats_detailed_w - wn8_text_w - text_w_margin))
         draw_wn8_h = draw_name_h
