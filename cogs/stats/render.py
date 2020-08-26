@@ -40,8 +40,8 @@ class Render:
         self.tank_count = len(session_detailed)
         self.render_prep()
         self.render_header(player_details=player_details)
-        self.render_all_stats(stats_all=session_all,
-                              live_stats_all=live_stats_all, session_detailed=session_detailed, player_details=player_details)
+        self.render_stats_card(stats_all=session_all,
+                               live_stats_all=live_stats_all, session_detailed=session_detailed, player_details=player_details)
         # Render a card for each tank in detailed stats
         for i, tank_id in enumerate(list(session_detailed)):
             tank_stats = session_detailed.get(tank_id)
@@ -166,6 +166,164 @@ class Render:
         # Render card on frame
         self.frame.paste(header_card, box=(
             self.frame_margin_w, int(self.frame_margin_h / 2)), mask=header_card.split()[3])
+
+    def render_stats_card(self, stats_all: dict, live_stats_all: dict, session_detailed: dict, player_details: dict):
+        stats_all_w = self.base_card_w * 2
+        stats_all_h = self.base_card_h * 2
+        stats_all_card = Image.new(
+            'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
+        stats_draw = ImageDraw.Draw(stats_all_card)
+        player_wn8 = player_details.get('career_wn8', '-')
+        if player_wn8 != '-':
+            player_wn8_color = self.color_dict.get(player_wn8, self.color_dict[min(
+                self.color_dict.keys(), key=lambda k: (k-player_wn8) < 0)])
+
+        # Organize Data
+        live_stats_random = live_stats_all.get('live_stats_random')
+        # live_stats_rating = live_stats_all.get('live_stats_rating')
+        session_stats_random = stats_all.get('stats_random') or {}
+        # session_stats_rating = stats_all.get('stats_rating') or {}
+        # Session Stats
+        session_battles = session_stats_random.get('battles')
+        session_dmg_all = session_stats_random.get('damage_dealt')
+        session_wins_all = session_stats_random.get('wins')
+        session_dmg_avg = f"{round(session_dmg_all / session_battles)}"
+        session_wr_avg = f"{round(((session_wins_all / session_battles) * 100), 2)}%"
+        # Calculate WN8
+        session_total_wn8 = 0
+        session_detailed_battles = 0
+        for tank in session_detailed:
+            tank_data = session_detailed.get(tank)
+            tank_wn8 = tank_data.get('tank_wn8')
+            if not tank_wn8:
+                continue
+            tank_battles = tank_data.get('battles')
+            weighted_wn8 = tank_wn8 * tank_battles
+            session_detailed_battles += tank_battles
+            session_total_wn8 += weighted_wn8
+
+        if session_detailed_battles != 0:
+            session_wn8 = round(session_total_wn8 / session_detailed_battles)
+            session_wn8_color = self.color_dict.get(session_wn8, self.color_dict[min(
+                self.color_dict.keys(), key=lambda k: (k-session_wn8) < 0)])
+        else:
+            session_wn8 = '-'
+            session_wn8_color = self.font_color_none
+
+        # Live stats
+        live_battles = live_stats_random.get('battles')
+        live_dmg_all = live_stats_random.get('damage_dealt')
+        live_wins_all = live_stats_random.get('wins')
+        live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
+        live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
+        # Calculate WN8
+        live_wn8 = str(player_wn8)
+
+        # Get text size
+        btls_text_w, _ = stats_draw.textsize(
+            'Battles', font=self.font)
+        damage_text_w, _ = stats_draw.textsize(
+            'Damage', font=self.font)
+        winrate_text_w, _ = stats_draw.textsize(
+            'Winrate', font=self.font)
+        wn8_text_w, wn8_text_h = stats_draw.textsize(
+            'WN8m', font=self.font_bold)
+        # Session Stats
+        session_btls_w, session_btls_h = stats_draw.textsize(
+            str(session_battles), font=self.font)
+        session_dmg_w, _ = stats_draw.textsize(
+            session_dmg_avg, font=self.font)
+        session_wn8_w, session_wn8_h = stats_draw.textsize(
+            str(session_wn8), font=self.font_bold)
+        session_wr_w, session_wr_h = stats_draw.textsize(
+            session_wr_avg, font=self.font)
+        # Live stats
+        live_btls_w, _ = stats_draw.textsize(
+            str(live_battles), font=self.font)
+        live_dmg_w, _ = stats_draw.textsize(
+            live_dmg_avg, font=self.font)
+        live_wn8_w, live_wn8_h = stats_draw.textsize(
+            live_wn8, font=self.font_bold)
+        live_wr_w, _ = stats_draw.textsize(
+            live_wr_avg, font=self.font)
+
+        # Margins
+        metric_names_row_h = self.text_margin_h
+        session_stats_row_h = int(wn8_text_h + (self.text_margin_h * 2))
+        all_stats_row = int(session_stats_row_h +
+                            session_wn8_h + (self.text_margin_h))
+        stats_margin_w = int((stats_all_w - (4 * self.text_margin_w)) / 3)
+
+        # 1st row margins
+        block_h_r1 = wn8_text_h + self.text_margin_h + \
+            live_wn8_h + self.text_margin_h + session_wn8_h
+        block_w_r1 = int((stats_all_w - (4 * self.text_margin_w)) / 3)
+        # 1st row live - Battles, WN8, WR
+        # Draw "Battles"
+        draw_btls_txt_w = int((2 * self.text_margin_w) +
+                              ((block_w_r1 - btls_text_w) / 2))
+        draw_btls_txt_h = 0
+        stats_draw.text((draw_btls_txt_w, draw_btls_txt_h), 'Battles',
+                        self.font_color_base, font=self.font)
+        # Draw "WN8"
+        draw_rating_txt_w = int((2 * self.text_margin_w) +
+                                ((block_w_r1 - wn8_text_w) / 2)) + block_w_r1
+        draw_rating_txt_h = 0
+        stats_draw.text((draw_rating_txt_w, draw_rating_txt_h), 'WN8m',
+                        self.font_color_base, font=self.font)
+        # Draw "Winrate"
+        draw_wr_txt_w = int((2 * self.text_margin_w) +
+                            ((block_w_r1 - winrate_text_w) / 2)) + (block_w_r1 * 2)
+        draw_wr_txt_h = 0
+        stats_draw.text((draw_wr_txt_w, draw_wr_txt_h), 'Winrate',
+                        self.font_color_base, font=self.font)
+
+        # Draw battles
+        draw_btls_w = int((2 * self.text_margin_w) +
+                          ((block_w_r1 - live_btls_w) / 2))
+        draw_btls_h = wn8_text_h + self.text_margin_h
+        stats_draw.text((draw_btls_w, draw_btls_h), str(live_battles),
+                        self.font_color_base, font=self.font)
+        # Draw rating
+        draw_rating_w = int((2 * self.text_margin_w) +
+                            ((block_w_r1 - live_wn8_w) / 2)) + block_w_r1
+        draw_rating_h = wn8_text_h + self.text_margin_h
+        stats_draw.text((draw_rating_w, draw_rating_h), str(live_wn8),
+                        self.font_color_base, font=self.font)
+        # Draw winrate
+        draw_wr_w = int((2 * self.text_margin_w) +
+                        ((block_w_r1 - live_wr_w) / 2)) + (block_w_r1 * 2)
+        draw_wr_h = wn8_text_h + self.text_margin_h
+        stats_draw.text((draw_wr_w, draw_wr_h), live_wr_avg,
+                        self.font_color_base, font=self.font)
+
+        # 1st row session
+        # Draw battles
+        draw_btls_w = int((2 * self.text_margin_w) +
+                          ((block_w_r1 - live_btls_w) / 2))
+        draw_btls_h = block_h_r1 - session_btls_h
+        stats_draw.text((draw_btls_w, draw_btls_h), str(session_battles),
+                        self.font_color_base, font=self.font)
+        # Draw rating
+        draw_rating_w = int((2 * self.text_margin_w) +
+                            ((block_w_r1 - live_wn8_w) / 2)) + block_w_r1
+        draw_rating_h = block_h_r1 - session_wn8_h
+        stats_draw.text((draw_rating_w, draw_rating_h), str(session_wn8),
+                        self.font_color_base, font=self.font)
+        # Draw winrate
+        draw_wr_w = int((2 * self.text_margin_w) +
+                        ((block_w_r1 - live_wr_w) / 2)) + (block_w_r1 * 2)
+        draw_wr_h = block_h_r1 - session_btls_h
+        stats_draw.text((draw_wr_w, draw_wr_h), str(session_wr_avg),
+                        self.font_color_base, font=self.font)
+
+        # 2nd row margins
+        block_h_r2 = int(wn8_text_h + (self.text_margin_h * 2))
+        block_w_r2 = int((stats_all_w - (5 * self.text_margin_w)) / 4)
+        # 2nd row live - DMG, DMG Ratio, Accuracy, XP
+        # 2nd row session
+
+        stats_all_card.show()
 
     def render_all_stats(self, stats_all: dict, live_stats_all: dict, session_detailed: dict, player_details: dict):
         stats_all_w = self.base_card_w
