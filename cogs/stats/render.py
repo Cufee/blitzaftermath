@@ -53,7 +53,7 @@ class Render:
         self.font = ImageFont.truetype(
             "./cogs/replays/render/fonts/font.ttf", self.font_size)
         self.font_half_size = ImageFont.truetype(
-            "./cogs/replays/render/fonts/font.ttf", int(self.font_size / 2))
+            "./cogs/replays/render/fonts/font.ttf", int(self.font_size / 1.5))
         self.font_bold = ImageFont.truetype(
             "./cogs/replays/render/fonts/font_fat.ttf", self.font_size)
         self.font_slim = ImageFont.truetype(
