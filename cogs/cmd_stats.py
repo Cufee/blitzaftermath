@@ -77,7 +77,7 @@ class blitz_aftermath_stats(commands.Cog):
                         print(api_url)
                         print(res_data)
                         raise Exception(
-                            f'WG: Player not found. Are the username and server spelled correctly?')
+                            f'WG: Player not found. Is the username spelled correctly?')
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
@@ -151,7 +151,7 @@ class blitz_aftermath_stats(commands.Cog):
                         print(api_url)
                         print(res_data)
                         raise Exception(
-                            f'WG: Player not found. Are the username and server spelled correctly?')
+                            f'WG: Player not found. Is the username spelled correctly?')
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
@@ -169,7 +169,12 @@ class blitz_aftermath_stats(commands.Cog):
                 user_id = message.author.id
                 UsersApi.link_to_player(
                     discord_user_id=user_id, player_id=player_id)
-                await message.channel.send(f'Awesome! You can now check your stats with `{self.client.command_prefix[0]}stats`.')
+                if late_update:
+                    message_text = f'Awesome! You will be able to check your stats with `{self.client.command_prefix[0]}stats` once you play one more battle.'
+                else:
+                    message_text = f'Awesome! You can now check your stats with `{self.client.command_prefix[0]}stats`.'
+
+                await message.channel.send(message_text)
 
                 if late_update:
                     API.update_players([player_id])
