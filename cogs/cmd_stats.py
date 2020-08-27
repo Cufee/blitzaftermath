@@ -94,6 +94,12 @@ class blitz_aftermath_stats(commands.Cog):
                 else:
                     player_id = player_details.get('_id')
 
+                default_player_id = UsersApi.get_default_player_id(
+                    discord_user_id=(message.author.id))
+                if not default_player_id:
+                    UsersApi.link_to_player(
+                        discord_user_id=(message.author.id), player_id=player_id)
+
                 image = Render(player_id=player_id,
                                hours=session_hours).render_image()
                 await message.channel.send(file=image)
@@ -105,7 +111,7 @@ class blitz_aftermath_stats(commands.Cog):
                     {'nickname': re.compile(player_name, re.IGNORECASE)}).distinct('_id')
                 if len(player_id_list) > 1:
                     await message.channel.send(
-                        'Multiple players found with this username. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
+                        f'Multiple players found with this username. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
                 elif len(player_id_list) == 1:
                     player_id = player_id_list[0]
                     image = Render(player_id=player_id,
