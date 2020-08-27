@@ -350,10 +350,8 @@ class Render:
         tank_xp_value = round((tank_stats.get('xp') / tank_battles))
         tank_xp = f"XP: {tank_xp_value}"
         tank_wn8_value = tank_stats.get('tank_wn8', '')
-        tank_amr_value = tank_stats.get('tank_amr', '')
         # Extra spaces to fit the color bar
         tank_wn8 = f"{tank_wn8_value}"
-        tank_amr = f"AMR: {tank_amr_value}"
         if tank_wn8_value != '':
             tank_wn8_color = self.color_dict.get(
                 tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k:(k - tank_wn8_value) <= 0)])
@@ -387,16 +385,14 @@ class Render:
             tank_dmg, font=self.font)
         wn8_text_w, wn8_text_h = stats_draw.textsize(
             tank_wn8, font=self.font_bold)
-        amr_text_w, _ = stats_draw.textsize(
-            tank_amr, font=self.font_bold)
 
         # Margins
         text_w_margin = self.text_margin_w * 2
         text_h_margin = int((stats_detailed_h - (name_text_h + wr_text_h)) / 3)
         bottom_metrics_text_w = (dmg_text_w + int(dmg_text_h)) + (
-            xp_text_w + int(dmg_text_h)) + (wr_text_w + int(dmg_text_h)) + (amr_text_w) + (self.text_margin_w * 4)
+            xp_text_w + int(dmg_text_h)) + (wr_text_w + int(dmg_text_h)) + (self.text_margin_w * 8)
         bottom_metric_margin = int(
-            (bottom_metrics_text_w) / 4)
+            (bottom_metrics_text_w) / 3)
         bottom_metrics_min_margin = int(
             (stats_detailed_w - bottom_metrics_text_w) / 2)
 
@@ -467,14 +463,6 @@ class Render:
             pos_h = draw_wr_h + int((dmg_text_h - arrow_size) / 1.5)
             self.draw_progress_arrow(
                 draw=stats_draw, pos_w=pos_w, pos_h=pos_h, size=arrow_size, isup=(tank_wr_value > last_wr_value))
-
-        # Draw AMR
-        draw_amr_w = int((bottom_metric_margin * 3) +
-                         ((bottom_metric_margin - amr_text_w) / 2)) + bottom_metrics_min_margin
-        draw_amr_h = draw_dmg_h
-        stats_draw.text((draw_amr_w, draw_amr_h), tank_amr,
-                        self.font_color_base, font=self.font)
-        # Draw tank tier
 
         # Render card on frame
         stats_detailed_render_h = int(

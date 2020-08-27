@@ -481,7 +481,6 @@ class StatsApi():
                     }
                     diff.update(tank_data)
                     diff = self.add_vehicle_wn8(diff)
-                    diff = self.add_vehicle_amr(diff)
                     session_detailed.update({tank: diff})
                     tank_count += 1
 
@@ -544,65 +543,6 @@ class StatsApi():
                                                         rSPOTTc) + (75*rDEFc*rFRAGc) + (145*(min(1.8, rWRc))))
 
         tank_data.update({'tank_wn8': wn8})
-        return tank_data
-
-    def add_vehicle_amr(self, tank_data: dict):
-        tank_battles = tank_data.get("battles", 0)
-        if tank_battles == 0 or not tank_battles:
-            print('Tank has 0 battles')
-            return tank_data
-        tank_id = int(tank_data.get('tank_id', 0))
-        tank_averages = self.glossary_averages.find_one(
-            {'tank_id': tank_id}) or None
-        if not tank_averages or not tank_averages.get('meanSd'):
-            print(f'Missing data for tank {tank_id}')
-            return tank_data
-
-        # Organize data
-        tank_avg_wr = (tank_data.get("wins") / tank_battles) * 100
-        tank_avg_def = tank_data.get(
-            'dropped_capture_points', 0) / tank_battles
-
-        # Rating Metrics
-        # Damage dpbMean, damageRatioMean
-        exp_dmg = tank_averages.get('meanSd', {}).get('dpbMean')
-        tank_dmg = tank_data.get('damage_dealt', 0) / tank_battles
-        damage_rating = ((tank_dmg / exp_dmg) * 100)
-        rating_amr = damage_rating
-
-        # Kills kdrMean, kpbMean
-        exp_frag = tank_averages.get('meanSd', {}).get('kpbMean')
-        tank_frag = tank_data.get('frags', 0) / tank_battles
-        kill_rating = ((tank_frag / exp_frag) * 100)
-
-        # Spotting spbMean
-        exp_spot = tank_averages.get('meanSd', {}).get('spbMean')
-        tank_spot = tank_data.get('spotted', 0) / tank_battles
-        spot_rating = (tank_spot / exp_spot) * 100
-
-        # Accuracy hitRateMean
-        exp_hit_ratio = tank_averages.get('meanSd', {}).get('hitRateMean')
-        try:
-            tank_hit_ratio = (tank_data.get(
-                'damage_dealt', 0) / tank_data.get('damage_received', 1)) * 100
-        except ZeroDivisionError:
-            tank_hit_ratio = 0
-        accuracy_rating = (tank_hit_ratio / exp_hit_ratio) * 100
-
-        # Survival survivalRateMean
-        exp_survival = tank_averages.get('meanSd', {}).get('survivalRateMean')
-        try:
-            tank_survival = (
-                tank_battles / tank_data.get('survived_battles', 1) * 100)
-        except ZeroDivisionError:
-            tank_survival = 0
-        survival_rating = (tank_survival / exp_survival) * 100
-
-        # Calculate AMR metrics
-        rating_amr = round(((survival_rating * 0.1) + (accuracy_rating * 0.2) +
-                            (spot_rating * 0.1) + (kill_rating * 0.2) + (damage_rating * 0.4)) / 5) * 10
-
-        tank_data.update({'tank_amr': rating_amr})
         return tank_data
 
     def add_career_wn8(self, player_ids: list):
