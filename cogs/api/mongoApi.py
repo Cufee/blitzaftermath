@@ -568,11 +568,11 @@ class StatsApi():
         exp_dmg = tank_averages.get('meanSd', {}).get('dpbMean')
         tank_dmg = tank_data.get('damage_dealt', 0) / tank_battles
         damage_rating = ((tank_dmg / exp_dmg) * 100)
+        rating_amr = damage_rating
 
         # Kills kdrMean, kpbMean
         exp_frag = tank_averages.get('meanSd', {}).get('kpbMean')
         tank_frag = tank_data.get('frags', 0) / tank_battles
-
         kill_rating = ((tank_frag / exp_frag) * 100)
 
         # Spotting spbMean
@@ -597,10 +597,11 @@ class StatsApi():
         except ZeroDivisionError:
             tank_survival = 0
         survival_rating = (tank_survival / exp_survival) * 100
+
         # Calculate AMR metrics
-        rating_amr = round((survival_rating + accuracy_rating +
-                            spot_rating + kill_rating + damage_rating) / 10
-                           )
+        rating_amr = round(((survival_rating * 0.1) + (accuracy_rating * 0.2) +
+                            (spot_rating * 0.1) + (kill_rating * 0.2) + (damage_rating * 0.4)) / 5) * 10
+
         tank_data.update({'tank_amr': rating_amr})
         return tank_data
 
