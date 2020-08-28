@@ -94,6 +94,7 @@ class blitz_aftermath_stats(commands.Cog):
                 else:
                     player_id = player_details.get('_id')
 
+                # Set a default player_id  if it is not set already
                 default_player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
                 if not default_player_id:
@@ -103,8 +104,7 @@ class blitz_aftermath_stats(commands.Cog):
                 image = Render(player_id=player_id,
                                hours=session_hours).render_image()
                 await message.channel.send(file=image)
-                # Doing a forced session reset every 24 hours
-                # API.update_stats([player_id])
+
             else:
                 player_name = player_name_str
                 player_id_list = players.find(

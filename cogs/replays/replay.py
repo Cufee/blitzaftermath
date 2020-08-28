@@ -29,6 +29,7 @@ class Replay:
             7: 'Rating Battle',
             8: 'Mad Games',
             22: 'Realistic Battle',
+            23: 'Uprising',
             24: 'Gravity Force',
         }
         # Will default to extended results screen
