@@ -374,15 +374,41 @@ class StatsApi():
         api_domain, _ = get_wg_api_domain(player_id=player_id)
         stats_all_url = api_domain + \
             self.wg_api_statistics_all + str(player_id)
+        url_player_clans = api_domain + self.wg_api_clan_info + str(player_id)
 
         stats_all_res = requests.get(stats_all_url)
-        stata_all_res_raw = rapidjson.loads(stats_all_res.text)
-        if stats_all_res.status_code != 200 or not stata_all_res_raw:
+        stats_all_res_raw = rapidjson.loads(stats_all_res.text)
+
+        res_player_clans = requests.get(url_player_clans)
+        player_clans_raw = rapidjson.loads(res_player_clans.text)
+
+        if stats_all_res.status_code != 200 or not stats_all_res_raw or not player_clans_raw:
             raise Exception(
                 f'Failed to get player stats, WG responded with {stats_all_res.status_code}')
 
         # Check Basic stats
-        player_data = stata_all_res_raw.get('data').get(str(player_id))
+        player_data = stats_all_res_raw.get('data').get(str(player_id))
+        player_clan_data = player_clans_raw.get(
+            'data').get(str(player_id), {}).get('clan')
+
+        # Update clan data if needed
+        if player_clan_data and player_details.get("clan_tag") != player_clan_data.get("tag"):
+            player_clan_role = player_clans_raw.get(
+                'data').get(str(player_id)).get("role")
+            player_clan_joined_at = datetime.utcfromtimestamp(player_clans_raw.get(
+                'data').get(str(player_id)).get("joined_at"))
+
+            clan_update = {
+                "clan_id": player_clan_data.get("clan_id"),
+                "clan_joined_at": player_clan_joined_at,
+                "clan_name": player_clan_data.get("name"),
+                "clan_role": player_clan_role,
+                "clan_tag": player_clan_data.get("tag")
+            }
+            self.players.update_one(
+                player_details, {"$set": clan_update}, upsert=False)
+            player_details.update(clan_update)
+
         last_battle_time = player_data.get('last_battle_time')
         stats_random = player_data.get('statistics', {}).get('all', {})
         stats_rating = player_data.get('statistics', {}).get('rating', {})
