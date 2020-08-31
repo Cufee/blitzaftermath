@@ -39,22 +39,29 @@ clan_marks = db.marksOfMastery
 
 # Migrate DB
 Guilds_API = API_v2()
-all_guild_raw = requests.get("http://127.0.0.1:5000/guilds")
-all_guilds = rapidjson.loads(all_guild_raw.text)
-for guild_settings in all_guilds:
-    guild_id = str(guild_settings.get("guild_id"))
-    guild_name = str(guild_settings.get("guild_name"))
-    replay_channels_raw = str(guild_settings.get("guild_channels_replays"))
-    Guilds_API.add_new_guild(guild_id, guild_name)
+# all_guild_raw = requests.get("http://127.0.0.1:5000/guilds")
+# all_guilds = rapidjson.loads(all_guild_raw.text)
+# for guild_settings in all_guilds:
+#     guild_id = str(guild_settings.get("guild_id"))
+#     guild_name = str(guild_settings.get("guild_name"))
+#     replay_channels_raw = str(guild_settings.get("guild_channels_replays"))
+#     Guilds_API.add_new_guild(guild_id, guild_name)
 
-    if ";" in replay_channels_raw:
-        replay_channels = replay_channels_raw.split(";")
-    else:
-        replay_channels = [replay_channels_raw]
+#     if ";" in replay_channels_raw:
+#         replay_channels = replay_channels_raw.split(";")
+#     else:
+#         replay_channels = [replay_channels_raw]
 
-    new_settings = {
-        "guild_channels_replays": replay_channels
-    }
+#     new_settings = {
+#         "guild_channels_replays": replay_channels
+#     }
 
-    Guilds_API.update_guild(guild_id, settings=new_settings)
-    print(f"Migrated {guild_name}")
+#     Guilds_API.update_guild(guild_id, settings=new_settings)
+#     print(f"Migrated {guild_name}")
+
+all_guilds, _ = Guilds_API.get_all_guilds()
+for guild in all_guilds:
+    print(guild)
+    if guild.get("guild_channels_replays") == None:
+        guild_id = guild.get("guild_id")
+        Guilds_API.update_guild(guild_id, settings={"guild_channels_replays": []})

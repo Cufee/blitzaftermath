@@ -8,10 +8,10 @@ import traceback
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
-from cogs.api.guild_settings_api import Api
+from cogs.api.guild_settings_api import API_v2
 
 debug = False
-Api = Api()
+Guilds_API = API_v2()
 
 
 class maintenance(commands.Cog):
@@ -96,6 +96,31 @@ You can also check a specific session with `v-stats Player@Server Hours`.
 # You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
 
         await ctx.send(help_str)
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def broadcast(self, ctx):
+        all_guilds, status_code = Guilds_API.get_all_guilds()
+        if status_code != 200:
+            ctx.send(f"Error `{status_code}`")
+            return
+
+        brk_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
+        if not brk_message:
+            return
+        
+        message_failed_guilds = []
+        for guild_data in all_guilds:
+            default_replay_channels = guild_data.get("guild_channels_replays")
+            if not default_replay_channels:
+                guild_name = guild_data.get("guild_name")
+                message_failed_guilds.append(guild_name)
+                continue
+            
+            channel = self.client.get_channel(int(default_replay_channels[0]))
+            if channel:
+                await channel.send(brk_message)
 
 
 def setup(client):

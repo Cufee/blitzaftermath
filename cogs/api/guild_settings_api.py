@@ -97,6 +97,16 @@ class API_v2():
         self.guild_settings_collection = client.guilds.guilds_settings
         # features_collection = client.guilds.features      # Not used
     
+    def get_all_guilds(self):
+        """Get all setting for all guilds"""
+        guild_settings = self.guild_settings_collection.find()
+
+        if guild_settings:
+            status = 200
+        else:
+            status = 404
+        return guild_settings, status
+    
     def get_all_guild_settings(self, guild_id: str):
         """Get all setting for a guild"""
         guild_settings = self.guild_settings_collection.find_one({"guild_id": guild_id})
