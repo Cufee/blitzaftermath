@@ -7,9 +7,9 @@ import traceback
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
-from cogs.api.api import Api
+from cogs.api.guild_settings_api import API_v2
 
-Api = Api()
+Guilds_API = API_v2()
 
 
 def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=0, raw=0):
@@ -35,7 +35,7 @@ def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, d
         room_type_mod = 1
 
     image_file = Render(
-        replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).image(bg=bg, brand=brand, darken=darken, mapname=mapname)
+        replay_data, replay_id, stats=stats, stats_bottom=stats_bottom).make_image(bg=bg, brand=brand, darken=darken, mapname=mapname)
 
     return image_file, replay_id, replay_link, room_type_mod
 
@@ -69,15 +69,9 @@ class blitz_aftermath_replays(commands.Cog):
         replays = []
         if attachments:
             guild_id = str(message.guild.id)
-            guild_name = str(message.guild.name)
-
-            guild_settings = Api.guild_get(guild_id, guild_name)
-            if guild_settings.get('status_code') != 200:
+            enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+            if status_code != 200:
                 return
-
-            enabled_channels = guild_settings.get('enabled_channels')
-            stats = guild_settings.get('stats')
-            guild_is_premium = guild_settings.get('guild_is_premium')
 
             # Verify channel
             if str(message.channel.id) in enabled_channels:
@@ -89,10 +83,9 @@ class blitz_aftermath_replays(commands.Cog):
 
                 if replays:
                     rating = 'mBRT1_1A'
-                    stats_bot = None
                     try:
                         image_file, replay_id, replay_link, room_type_mod = get_image(
-                            replays, stats=stats, rating=rating)
+                            replays, rating=rating)
 
                         embed_desc = f'React with {self.emoji_02} for a transparent picture'
                         embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
@@ -129,7 +122,7 @@ class blitz_aftermath_replays(commands.Cog):
                         channel_invite = await message.channel.create_invite(max_age=300)
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_name} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
+                        await dm_channel.send(f'An error occured in {guild_id} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
             else:
                 return
 
@@ -144,20 +137,16 @@ class blitz_aftermath_replays(commands.Cog):
             return
 
         guild_id = str(guild.id)
-        guild_name = str(guild.name)
         channel = self.client.get_channel(payload.channel_id)
-        guild_settings = Api.guild_get(guild_id, guild_name)
-        if guild_settings.get('status_code') != 200:
-            await channel.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
+        enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+        if status_code != 200:
+            await channel.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
             return
 
-        enabled_channels = guild_settings.get('enabled_channels')
-        stats = guild_settings.get('stats')
-        guild_is_premium = guild_settings.get('guild_is_premium')
+        # guild_is_premium = guild_settings.get('guild_is_premium')     # Not used
 
         if str(payload.channel_id) in enabled_channels:
             message = await channel.fetch_message(payload.message_id)
-            message_channel = message.channel
 
             # Detailed Rating reaction
             if payload.emoji == self.emoji_01:
@@ -170,10 +159,10 @@ class blitz_aftermath_replays(commands.Cog):
                          'shot_rating', 'spotting_rating', 'assist_rating', 'blocked_rating']
 
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, room_type_mod = get_image(
+                image_file, replay_id, replay_link, _ = get_image(
                     replays, rating='mBRT1_1', stats=stats)
 
-                stats_message = await channel.send('Here is a Rating breakdown for this battle:', file=image_file)
+                await channel.send('Here is a Rating breakdown for this battle:', file=image_file)
                 return
 
             # Detailed performance reaction
@@ -187,10 +176,10 @@ class blitz_aftermath_replays(commands.Cog):
                          'enemies_spotted', 'distance_travelled', 'time_alive']
 
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, room_type_mod = get_image(
+                image_file, replay_id, replay_link, _ = get_image(
                     replays, rating='mBRT1_1', stats=stats, raw=1)
 
-                stats_message = await channel.send('Here is a detailed performance breakdown for each player:', file=image_file)
+                await channel.send('Here is a detailed performance breakdown for each player:', file=image_file)
                 return
 
             # Transparent picture reaction
@@ -198,7 +187,7 @@ class blitz_aftermath_replays(commands.Cog):
                 print('Sending DM')
                 replays = []
                 replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, room_type_mod = get_image(
+                image_file, replay_id, replay_link, _ = get_image(
                     replays, bg=0, brand=1, darken=0, mapname=0)
 
                 embed = discord.Embed(
@@ -239,49 +228,51 @@ class blitz_aftermath_replays(commands.Cog):
         if ctx.author.bot or ctx.author == self.client.user:
             return
 
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except:
+            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
 
         guild_id = str(ctx.guild.id)
         guild_name = str(ctx.guild.name)
         channel_id = str(ctx.channel.id)
         channel_name = str(ctx.channel.name)
-        user_id = str(ctx.author.id)
-        user = ctx.author
 
-        guild_settings = Api.guild_get(guild_id, guild_name)
-        if guild_settings.get('status_code') != 200:
-            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
+        enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+        if status_code == 404:
+            Guilds_API.add_new_guild(guild_id=guild_id, guild_name=guild_name)
+            enabled_channels = []
+        elif status_code != 200:
+            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
             return
 
-        enabled_channels = guild_settings.get('enabled_channels')
 
         if channel_id in enabled_channels:
             await ctx.send(f'It looks like you already have me watching #{channel_name}.', delete_after=30)
             return
 
-        guild_is_premium = guild_settings.get('guild_is_premium')
-
-        if len(enabled_channels) >= 1 and not guild_is_premium:
-            currently_enabled_channels = []
-            for channel in enabled_channels:
-                currently_enabled_channels.append(
-                    f'#{discord.utils.get(ctx.guild.channels, id=int(channel))}')
-
-            currently_enabled_channels = ', '.join(currently_enabled_channels)
-
-            await ctx.send(f'It looks like you already have me watching {currently_enabled_channels}. You will need to be a premium member to enable more channels. You can also override those channels by using `{self.client.command_prefix[0]}LookOnlyHere`', delete_after=30)
-            return
+        guild_is_premium, _ = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_is_premium")
+        if enabled_channels:
+            new_enabled_channels = enabled_channels.append(channel_id)
         else:
-            new_enabled_channels = enabled_channels.copy()
-            new_enabled_channels.append(channel_id)
-            new_settings = {'guild_channels_replays': new_enabled_channels}
-            res = Api.guild_put(guild_id, new_settings)
-            if res:
-                await ctx.send(f'Roger that! I am now watching #{channel_name} for WoT Blitz replays.', delete_after=30)
-                return
+            new_enabled_channels = [channel_id]
+
+        if len(new_enabled_channels) > 2 and not guild_is_premium:
+            channel_names = []
+            for channel in enabled_channels:
+                channel_names.append(self.client.get_channel(channel).name)
+            try:
+                await ctx.send(f"It looks like you already have me watching {channel_names[0]} and {channel_names[1]}. You will need to be a premium member to enable more channels.")
+            except:
+                 await ctx.send(f"It looks like you already have me watching multiple channels. You will need to be a premium member to enable more channels.")
+
+        else:
+            new_settings = {"guild_channels_replays": new_enabled_channels}
+            _, status_code = Guilds_API.update_guild(guild_id=guild_id, settings=new_settings)
+            if status_code == 200:
+                await ctx.send(f"I am now watching #{channel_name} for replays!")
             else:
-                await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {res.get("status_code")}', delete_after=30)
-                return
+                await ctx.send(f"I was not able to add this channel. `{status_code}`")
 
     @commands.command(aliases=['la', 'lookaway'])
     @commands.has_permissions(manage_messages=True)
@@ -289,32 +280,30 @@ class blitz_aftermath_replays(commands.Cog):
         if ctx.author.bot or ctx.author == self.client.user:
             return
 
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except:
+            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
 
         guild_id = str(ctx.guild.id)
-        guild_name = str(ctx.guild.name)
         channel_id = str(ctx.channel.id)
         channel_name = str(ctx.channel.name)
-        user_id = str(ctx.author.id)
-        user = ctx.author
 
-        guild_settings = Api.guild_get(guild_id, guild_name)
-        if guild_settings.get('status_code') != 200:
-            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
+        enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+        if status_code != 200:
+            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
             return
-
-        enabled_channels = guild_settings.get('enabled_channels')
 
         if channel_id in enabled_channels:
             new_enabled_channels = enabled_channels.copy()
             new_enabled_channels.remove(channel_id)
             new_settings = {'guild_channels_replays': new_enabled_channels}
-            res = Api.guild_put(guild_id, new_settings)
-            if res:
+            _, status_code = Guilds_API.update_guild(guild_id=guild_id, settings=new_settings)
+            if status_code == 200:
                 await ctx.send(f'Roger that! I am not watching #{channel_name} anymore.', delete_after=30)
                 return
             else:
-                await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {res.get("status_code")}', delete_after=30)
+                await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
                 return
         else:
             await ctx.send(f'I am not watching #{channel_name} right now. You can add this channel by typing `{self.client.command_prefix[0]}LookHere`', delete_after=30)
@@ -325,27 +314,28 @@ class blitz_aftermath_replays(commands.Cog):
         if ctx.author.bot or ctx.author == self.client.user:
             return
 
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except:
+            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
+
 
         guild_id = str(ctx.guild.id)
-        guild_name = str(ctx.guild.name)
         channel_id = str(ctx.channel.id)
         channel_name = str(ctx.channel.name)
-        user_id = str(ctx.author.id)
-        user = ctx.author
 
-        guild_settings = Api.guild_get(guild_id, guild_name)
-        if guild_settings.get('status_code') != 200:
-            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {guild_settings.get("status_code")}', delete_after=30)
+        _, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+        if status_code != 200:
+            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
             return
 
         new_settings = {'guild_channels_replays': [channel_id]}
-        res = Api.guild_put(guild_id, new_settings)
-        if res:
+        _, status_code = Guilds_API.update_guild(guild_id=guild_id, settings=new_settings)
+        if status_code == 200:
             await ctx.send(f'Roger that! I am now watching #{channel_name} for WoT Blitz replays and nothing else!', delete_after=30)
             return
         else:
-            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {res.get("status_code")}', delete_after=30)
+            await ctx.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
             return
 
 

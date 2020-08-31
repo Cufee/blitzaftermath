@@ -72,7 +72,7 @@ class Render():
             'players').get(str(self.protagonist_id)).get('nickname')
         self.players_data = self.replay_data.get('players')
 
-    def image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1, detailed_colors=1, hpbars=1):
+    def make_image(self, bg=1, brand=1, darken=1, mapname=0, mastery=1, detailed_colors=1, hpbars=1):
         """
         bg - Draw background image \n
         brand - Draw branding \n
@@ -179,9 +179,6 @@ class Render():
                 if text_w > max_width:
                     self.global_stat_max_width[stat] = text_w
 
-        longest_stat, _ = text_check.textsize(
-            f'{self.longest_stat}', self.font)
-
         if self.team_length_all[0] > self.team_length_all[1]:
             self.larger_team = self.team_length_all[0]
         else:
@@ -246,7 +243,7 @@ class Render():
             brand_ratio = (self.image_step / 2) / raw_brand_wi_h
             overlay_brand_wi = overlay_brand_wi.resize(
                 (int(raw_brand_wi_w * brand_ratio), int((raw_brand_wi_h * brand_ratio))))
-            overlay_brand_wi_w, overlay_brand_wi_h = overlay_brand_wi.size
+            overlay_brand_wi_w, _ = overlay_brand_wi.size
 
             wi_branding_h = self.text_margin_w
             wi_branding_w = frame_w - wi_branding_h - overlay_brand_wi_w
@@ -349,9 +346,9 @@ class Render():
         # Get map name and battle result text sizes
         map_name_str = f'{self.map_name} {self.battle_type_str}'
         battle_result_str = f'{self.battle_result} {self.room_type_str}'
-        map_name_w, map_name_h = draw_bot.textsize(
+        _, map_name_h = draw_bot.textsize(
             map_name_str, font=self.font)
-        battle_result_w, battle_result_h = draw_bot.textsize(
+        _, battle_result_h = draw_bot.textsize(
             battle_result_str, font=self.font)
 
         # Get battle start time text sizes
@@ -384,13 +381,12 @@ class Render():
 
         protagonist_card_unique = Image.new(
             'RGBA', (self.player_card_w, (self.image_step - 10)), (0, 0, 0, 0))
-        protagonist_card_w, protagonist_card_h = protagonist_card_unique.size
+        _, protagonist_card_h = protagonist_card_unique.size
         draw_bot_pr_card = ImageDraw.Draw(protagonist_card_unique)
 
         last_icon_pos = 0
         for icon in self.stats_bottom:
             icon_name = icon
-            icon_value = self.battle_summary.get(icon_name)
             stat_value = str(self.battle_summary.get(icon))
 
             icon = Image.open(f'./cogs/replays/render/icons/{icon_name}.png')
@@ -400,7 +396,6 @@ class Render():
                 stat_value, font=self.bottom_stats_font)
 
             # In case multiple rows need to be added
-            max_width = self.global_stat_max_width.get(icon_name)
             icon_budle_width = icon_w + stat_text_w + (self.text_margin_w)
 
             icon_draw_w = last_icon_pos
@@ -486,7 +481,8 @@ class Render():
             top_card_draw_w, top_card_draw_h), mask=team_card_top.split()[3])
 
         for team in [0, 1]:
-            team_rating = self.team_rating[team]
+            # Not drawn currently
+            # team_rating = self.team_rating[team]
 
             team_offs = self.image_min_w + \
                 (self.enemy_team_offset_w * team)
@@ -516,7 +512,7 @@ class Render():
             # Draw Team points if battle type is Supremacy
             if self.battle_type == 1:
                 team_points = f'Points: ~{self.team_points.get(team)}'
-                points_w, points_h = team_card_draw.textsize(
+                _, points_h = team_card_draw.textsize(
                     team_points, font=self.bottom_stats_font)
                 points_draw_w = player_list_draw_w + player_list_w + self.text_margin_w
                 points_draw_h = int((team_card_h - points_h) / 2)
@@ -536,7 +532,7 @@ class Render():
                     icon = Image.open(
                         './cogs/replays/render/icons/default_icon.png')
                 icon = icon.resize((icon_frame_w, icon_frame_h))
-                icon_w, icon_h = icon.size
+                icon_w, _ = icon.size
                 max_width = self.global_stat_max_width.get(
                     icon_name, self.global_stat_max_width.get('damage_made'))
 
@@ -556,20 +552,13 @@ class Render():
         """
         Renders a complete [player_card]
         """
-        rating = player.get('rating') or 0
-        rating_value = player.get('rating_value') or 0
         survived = player.get('survived') or 0
         hero_bonus_exp = player.get('hero_bonus_exp') or 0
-        damage = player.get('damage') or 0
-        kills = player.get('kills') or 0
         platoon = player.get('platoon_str') or 0
         team = player.get('team') or 0
         nickname = player.get('nickname') or 0
-        player_wr = player.get('player_wr') or 0
         clan = player.get("clan_tag") or 0
         vehicle = player.get('player_vehicle') or 0
-        vehicle_battles = player.get('vehicle_battles') or 0
-        vehicle_wr = player.get('vehicle_wr') or 0
         damage_recieved = player.get(
             'performance').get('damage_received') or 1
         hp_left = player.get('performance').get('hitpoints_left') or 0
@@ -624,7 +613,7 @@ class Render():
             draw_platoon = ImageDraw.Draw(platoon_img)
 
             platoon_str = f'{platoon}'
-            text_w, text_h = draw.textsize(platoon_str, font=platoon_font)
+            text_w, _ = draw.textsize(platoon_str, font=platoon_font)
             platoon_img_w, platoon_img_h = self.platoon_image.size
 
             draw_w = int((platoon_img_w - text_w) / 2)
@@ -641,7 +630,7 @@ class Render():
         # Render Tank, Player name, Clan
         tank_font = self.font
         name_font = self.font_slim
-        font_color = self.font_color_base
+        # font_color = self.font_color_base     # Not used
         font_color_info = self.font_color_base
         font_color_name = self.font_color_base
         if nickname == self.protagonist_name:
@@ -652,9 +641,8 @@ class Render():
         clan_str = f'{clan_tag}'
         tank_str = f'{vehicle}'
         name_str = f'{nickname}'
-        tank_text_w, tank_text_h = draw.textsize(tank_str, font=tank_font)
+        tank_text_w, _ = draw.textsize(tank_str, font=tank_font)
         name_text_w, name_text_h = draw.textsize(name_str, font=name_font)
-        clan_text_w, clan_text_h = draw.textsize(clan_str, font=name_font)
 
         draw_w = self.platoon_icon_margin
         tank_draw_w = int(self.platoon_icon_margin + (hp_bar_w * 3))
@@ -717,8 +705,6 @@ class Render():
 
                 best_value_w, _ = draw.textsize(
                     str(best_value), font=stat_font)
-                stat_str_w, _ = draw.textsize(
-                    stat_str, font=stat_font)
 
                 rating_percent = float(stat_value) / best_value * 100
                 if rating_percent > 90:

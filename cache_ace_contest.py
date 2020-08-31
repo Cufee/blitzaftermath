@@ -93,7 +93,7 @@ class UpdateCache():
         clan_res = requests.get(clans_url)
         if clan_res.status_code != 200:
             raise Exception(
-                f'Unable to access WG clan API usin {clan_id}. [{clan_res.status_code}]')
+                f'Unable to access WG clan API. [{clan_res.status_code}]')
 
         requests_cnt = 0
         player_name_check = []
@@ -365,7 +365,7 @@ def reset_gained_aces():
         }}, upsert=True)
         player_updates.append(player_update)
 
-    result_clans = players.bulk_write(
+    players.bulk_write(
         player_updates, ordered=False)
 
     print('Done resetting player Aces')

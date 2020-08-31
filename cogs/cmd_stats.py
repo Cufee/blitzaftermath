@@ -7,7 +7,8 @@ import traceback
 import re
 
 from cogs.stats.render import Render
-from cogs.api.mongoApi import StatsApi, MongoClient, get_wg_api_domain, DiscordUsersApi
+from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
+from cogs.api.discord_users_api import DiscordUsersApi
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 players = client.stats.players
@@ -161,9 +162,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
-                    print(player_data_1)
                     player_id = player_data_1.get('account_id')
-                    player_name_fixed = player_data_1.get('nickname')
 
                     late_update = True
 

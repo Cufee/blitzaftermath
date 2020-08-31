@@ -8,7 +8,7 @@ import traceback
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
-from cogs.api.api import Api
+from cogs.api.guild_settings_api import Api
 
 debug = False
 Api = Api()

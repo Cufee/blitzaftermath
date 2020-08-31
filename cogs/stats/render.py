@@ -9,7 +9,7 @@ from io import BytesIO
 import requests
 import rapidjson
 
-from cogs.api.mongoApi import StatsApi
+from cogs.api.stats_api import StatsApi
 
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -104,23 +104,25 @@ class Render:
         self.frame_w = self.base_card_w + (self.frame_margin_w * 2)
         self.frame_h = int((self.frame_margin_h - self.card_margin_h) + ((self.header_h + self.base_card_h) + (self.card_margin_h * 2)) +
                            (self.tank_count * (self.detailed_card_h + self.card_margin_h)))
-        self.frame = Image.new(
-            'RGBA', (self.frame_w, self.frame_h), (0, 0, 0, 255))
 
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
             'RGB', (self.frame_w, self.frame_h), (255, 255, 255))
-        bg_image = Image.open('./cogs/replays/render/bg_frame.png')
-        bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
-        bg_image_w, bg_image_h = bg_image.size
-        bg_image_ratio = self.frame_h / bg_image_h
-        if bg_image_ratio < self.frame_w / bg_image_w:
-            bg_image_ratio = self.frame_w / bg_image_w
-        bg_image = bg_image.resize(
-            (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
-        solid_bg.paste(bg_image, box=(
-            0, 0))
-        self.frame.paste(solid_bg)
+        try:
+            bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+            bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
+            bg_image_w, bg_image_h = bg_image.size
+            bg_image_ratio = self.frame_h / bg_image_h
+            if bg_image_ratio < self.frame_w / bg_image_w:
+                bg_image_ratio = self.frame_w / bg_image_w
+            bg_image = bg_image.resize(
+                (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
+            solid_bg.paste(bg_image, box=(
+                0, 0))
+        except:
+            print("Failed to render BG image")
+            
+        self.frame = solid_bg
 
         # Draw session start time
         frame_draw = ImageDraw.Draw(self.frame)

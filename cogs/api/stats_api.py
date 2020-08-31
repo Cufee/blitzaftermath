@@ -39,54 +39,6 @@ def divide_chunks(list, n=99):
         yield list[i:i + n]
 
 
-class GuildApi():
-    def __init__(self):
-        client = MongoClient("mongodb://51.222.13.110:27017")
-        self.guilds_collection = client.guilds
-        self.features = client.guilds.features
-        self.guilds_settings = client.guilds.guilds_settings
-
-    def get_guild(self, guild_id: int):
-        pass
-
-    def add_guild(self, guild_dict: dict):
-        pass
-
-    def check_one_param(self, guild_id: int, key):
-        pass
-
-    def check_guild_replays_channel(self, guild_id: int):
-        pass
-
-    def check_guild_stats_channel(self, guild_id: int, channel_id: int):
-        pass
-
-
-class DiscordUsersApi():
-    def __init__(self):
-        client = MongoClient("mongodb://51.222.13.110:27017")
-        self.users_collection = client.stats.users
-
-    def link_to_player(self, discord_user_id, player_id):
-        '''Links Discord UserID to WG PlayerID in stats.users collection'''
-        user_filter = {'_id': discord_user_id}
-        user_data = {
-            'default_player_id': player_id
-        }
-        result = self.users_collection.update_one(
-            user_filter, {'$set': user_data}, upsert=True)
-        return None
-
-    def get_default_player_id(self, discord_user_id):
-        user_filter = {'_id': discord_user_id}
-        user_data = self.users_collection.find_one(
-            user_filter)
-        if user_data:
-            return user_data.get('default_player_id', None)
-        else:
-            return None
-
-
 class StatsApi():
     def __init__(self):
         client = MongoClient("mongodb://51.222.13.110:27017")
@@ -263,11 +215,6 @@ class StatsApi():
                 if not player_details:
                     print(f'Player {player_id} not in DB, skipping')
                     continue
-                am_premium_expiration = player_details.get(
-                    'am_premium_expiration') or datetime.utcnow()
-                player_is_premium = False
-                if datetime.utcnow() < am_premium_expiration:
-                    player_is_premium = True
 
                 # Get last player data and sessions
                 last_session_list = list(self.sessions.find(
@@ -409,7 +356,6 @@ class StatsApi():
                 player_details, {"$set": clan_update}, upsert=False)
             player_details.update(clan_update)
 
-        last_battle_time = player_data.get('last_battle_time')
         stats_random = player_data.get('statistics', {}).get('all', {})
         stats_rating = player_data.get('statistics', {}).get('rating', {})
 
