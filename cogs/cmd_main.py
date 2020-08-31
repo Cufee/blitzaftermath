@@ -4,6 +4,7 @@ import requests
 import rapidjson
 import sys
 import traceback
+from datetime import datetime
 
 from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
@@ -25,6 +26,27 @@ class maintenance(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'[Beta] Aftermath Stats cog is ready.')
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        guild_id = str(guild.id)
+        guild_name = str(guild.id)
+        _, status_code = Guilds_API.add_new_guild(guild_id, guild_name)
+
+        owner_member = self.client.get_user(202905960405139456)
+        dm_channel = await owner_member.create_dm()
+        await dm_channel.send(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        guild_id = str(guild.id)
+        guild_name = str(guild.id)
+        new_settings = {"kicked_on": datetime.utcnow()}
+        _, status_code = Guilds_API.update_guild(guild_id, new_settings, safe=False)
+
+        owner_member = self.client.get_user(202905960405139456)
+        dm_channel = await owner_member.create_dm()
+        await dm_channel.send(f"Aftermath was removed from {guild_name}. Edit complete with `{status_code}`.")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
