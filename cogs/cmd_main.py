@@ -105,17 +105,24 @@ class maintenance(commands.Cog):
 To analyze a WoT Blitz replay, just send a file and I will do the rest.
 
 **AfterStats**:
-Use `v-stats Player@Server` to check the last session of a player.
-*All sessions are reset at 02:00 daily, based on server timezone.*
+Command: `v-stats`
+Aliases: `v-wr`, `v-session`
+Use `v-stats PlayerName` to check the last session of a player.
+*For example: v-stats Vovko*
 
-You can also check a specific session with `v-stats Player@Server Hours`.
-*For example:* `v-stats Vovko@na 24`
+*All sessions are reset at 02:00 daily, based on server timezone.
+Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
+
+You can also check a specific session with `v-stats PlayerName hours`.
+*For example:* `v-stats Vovko@na 48`
         """)
 
 # **DISABLED**
 # **AfterContest**:
 # Use `v-check TAG@SERVER` to check the current Ace Tanker count of a clan. Individual player contributions are reset every 24 hours.
 # You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
+
+
 
         await ctx.send(help_str)
 
