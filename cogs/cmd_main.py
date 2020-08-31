@@ -107,8 +107,9 @@ To analyze a WoT Blitz replay, just send a file and I will do the rest.
 **AfterStats**:
 Command: `v-stats`
 Aliases: `v-wr`, `v-session`
+
 Use `v-stats PlayerName` to check the last session of a player.
-*For example: v-stats Vovko*
+*For example: `v-stats Vovko`*
 
 *All sessions are reset at 02:00 daily, based on server timezone.
 Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
