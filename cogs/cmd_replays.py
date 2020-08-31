@@ -231,7 +231,7 @@ class blitz_aftermath_replays(commands.Cog):
         try:
             await ctx.message.delete()
         except:
-            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
+            await ctx.send("It looks like I do not have `Manage Messages` permissions in this channel, this may affect my functionality.")
 
         guild_id = str(ctx.guild.id)
         guild_name = str(ctx.guild.name)
@@ -283,7 +283,7 @@ class blitz_aftermath_replays(commands.Cog):
         try:
             await ctx.message.delete()
         except:
-            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
+            await ctx.send("It looks like I do not have `Manage Messages` permissions in this channel, this may affect my functionality.")
 
         guild_id = str(ctx.guild.id)
         channel_id = str(ctx.channel.id)
@@ -317,7 +317,7 @@ class blitz_aftermath_replays(commands.Cog):
         try:
             await ctx.message.delete()
         except:
-            await ctx.send("It looks like I do not Manage Messages permissions in this channel, this may affect my functionality.")
+            await ctx.send("It looks like I do not have `Manage Messages` permissions in this channel, this may affect my functionality.")
 
 
         guild_id = str(ctx.guild.id)
