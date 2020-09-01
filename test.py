@@ -45,10 +45,14 @@ sa = StatsApi()
 
 details = cr.get_clan_details(realm="NA", clan_tag="RUS_")
 
-member = 1022924331
+members = details.get("members_ids")
 
 time_start = time.time()
 duration = datetime.now() - timedelta(days=8)
-_ = sa.get_session_stats(member, session_duration=duration)
+for m in members:
+    try:
+        _ = sa.get_session_stats(m, session_duration=duration)
+    except:
+        continue
 time_end = time.time()
 print(time_end - time_start)
