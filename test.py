@@ -43,16 +43,18 @@ from cogs.api.clan_rating_api import ClansRating
 cr = ClansRating()
 sa = StatsApi()
 
-details = cr.get_clan_details(realm="NA", clan_tag="RUS_")
+cr.add_clan(realm="NA", clan_tag="-MM")
 
-members = details.get("members_ids")
+# details = cr.get_clan_details(realm="NA", clan_tag="-MM")
 
-time_start = time.time()
-duration = datetime.now() - timedelta(days=8)
-for m in members:
-    try:
-        _ = sa.get_session_stats(m, session_duration=duration)
-    except:
-        continue
-time_end = time.time()
-print(time_end - time_start)
+# members = details.get("members_ids")
+
+# time_start = time.time()
+# duration = datetime.now() - timedelta(days=8)
+# for m in members:
+#     try:
+#         _ = sa.get_session_stats(m, session_duration=duration)
+#     except:
+#         continue
+# time_end = time.time()
+# print(time_end - time_start)

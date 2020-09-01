@@ -30,7 +30,7 @@ class maintenance(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         guild_id = str(guild.id)
-        guild_name = str(guild.id)
+        guild_name = str(guild.name)
         _, status_code = Guilds_API.add_new_guild(guild_id, guild_name)
 
         owner_member = self.client.get_user(202905960405139456)
@@ -40,7 +40,7 @@ class maintenance(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         guild_id = str(guild.id)
-        guild_name = str(guild.id)
+        guild_name = str(guild.name)
         new_settings = {"kicked_on": datetime.utcnow()}
         _, status_code = Guilds_API.update_guild(guild_id, new_settings, safe=False)
 

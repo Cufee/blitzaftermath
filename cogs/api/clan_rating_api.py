@@ -97,6 +97,7 @@ class ClansRating():
         clan_data = rapidjson.loads(clan_data_res.text).get("data", {}).get(str(clan_id))
         if not clan_data or clan_data.get("is_clan_disbanded"):
             raise Exception("Invalid clan id provided.")
+        clan_data.update({"realm": realm_upper})
 
         self.clans_collection.update_one({"_id": clan_id}, {"$set": clan_data}, upsert=True)
 
