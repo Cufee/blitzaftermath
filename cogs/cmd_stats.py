@@ -31,21 +31,21 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Commands
     @commands.command(aliases=['wr', 'session'])
-    async def stats(self, message, player_name_str=None, hours=None):
+    async def stats(self, message, *args):
         if message.author == self.client.user:
             return
 
         # Convert session hours into int
         try:
-            session_hours = int(hours)
+            session_hours = int(args[-1])
+            args = args[:-1]
         except:
-            session_hours = None            
-            # Handle spaces in 
-            if "@" in hours:
-                player_name_str += hours
+            session_hours = None
+
+        player_name_str = "".join(args).strip()
 
         try:
-            if not player_name_str and not hours:
+            if not player_name_str and not session_hours:
                 player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
                 if player_id:
