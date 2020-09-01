@@ -48,8 +48,8 @@ class ClansRating():
         """Retrieves n clans from DB usig the metric("total_points" by default) on a set realm."""
         realm_upper = realm.upper()
         clans_filter = {"realm": realm_upper}
-        clans_selector = self.clans_collection.find(clans_filter).sort(metric, -1).limit(n)
-        clans_list = list(clans_selector)
+        clans_cursor = self.clans_collection.find(clans_filter).sort(metric, -1).limit(n)
+        clans_list = list(clans_cursor)
         if not clans_list:
             raise Exception(f"No clans found on {realm_upper} when sorting by {metric}")
 
@@ -68,7 +68,7 @@ class ClansRating():
     def add_clan(self, realm: str, clan_id: int = None, clan_tag: str = None):
         """Add a clan to DB by clan id or clan tag and realm"""
         realm_upper = realm.upper()
-        api_domain = get_wg_api_domain(realm=realm)
+        api_domain, _ = get_wg_api_domain(realm=realm)
         if not clan_id and not clan_tag:
             raise Exception("No clan tag or id provided")
         elif not clan_id and clan_tag:

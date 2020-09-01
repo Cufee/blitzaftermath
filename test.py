@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import time
 # from apscheduler.triggers.cron import CronTrigger
 # from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
@@ -8,23 +9,23 @@ from pymongo import InsertOne, UpdateOne
 
 from cogs.api.guild_settings_api import API_v2
 
-# from cogs.api.mongoApi import StatsApi
+from cogs.api.stats_api import StatsApi
 # from cogs.stats.render import Render
 
-client = MongoClient("mongodb://51.222.13.110:27017")
-guilds_settings = client.guilds.guilds_settings
+# client = MongoClient("mongodb://51.222.13.110:27017")
+# guilds_settings = client.guilds.guilds_settings
 
-db = client.summer2020contest
-glossary = client.glossary
-stats = client.stats
+# db = client.summer2020contest
+# glossary = client.glossary
+# stats = client.stats
 
-guilds = client.guilds.guilds_settings
-clans = db.clans
-players = db.players
-players_stats = stats.players
-db_tanks = glossary.tanks
-tankaverages = glossary.tankaverages
-clan_marks = db.marksOfMastery
+# guilds = client.guilds.guilds_settings
+# clans = db.clans
+# players = db.players
+# players_stats = stats.players
+# db_tanks = glossary.tanks
+# tankaverages = glossary.tankaverages
+# clan_marks = db.marksOfMastery
 
 
 # # Cache glossary
@@ -37,31 +38,17 @@ clan_marks = db.marksOfMastery
 #     tanks.update_one({"tank_id": tank.get('tank_id')},
 #                      {"$set": tank}, upsert=True)
 
-# Migrate DB
-Guilds_API = API_v2()
-# all_guild_raw = requests.get("http://127.0.0.1:5000/guilds")
-# all_guilds = rapidjson.loads(all_guild_raw.text)
-# for guild_settings in all_guilds:
-#     guild_id = str(guild_settings.get("guild_id"))
-#     guild_name = str(guild_settings.get("guild_name"))
-#     replay_channels_raw = str(guild_settings.get("guild_channels_replays"))
-#     Guilds_API.add_new_guild(guild_id, guild_name)
+from cogs.api.clan_rating_api import ClansRating
 
-#     if ";" in replay_channels_raw:
-#         replay_channels = replay_channels_raw.split(";")
-#     else:
-#         replay_channels = [replay_channels_raw]
+cr = ClansRating()
+sa = StatsApi()
 
-#     new_settings = {
-#         "guild_channels_replays": replay_channels
-#     }
+details = cr.get_clan_details(realm="NA", clan_tag="RUS_")
 
-#     Guilds_API.update_guild(guild_id, settings=new_settings)
-#     print(f"Migrated {guild_name}")
+member = 1022924331
 
-all_guilds, _ = Guilds_API.get_all_guilds()
-for guild in all_guilds:
-    print(guild)
-    if guild.get("guild_channels_replays") == None:
-        guild_id = guild.get("guild_id")
-        Guilds_API.update_guild(guild_id, settings={"guild_channels_replays": []})
+time_start = time.time()
+duration = datetime.now() - timedelta(days=8)
+_ = sa.get_session_stats(member, session_duration=duration)
+time_end = time.time()
+print(time_end - time_start)
