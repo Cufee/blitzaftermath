@@ -34,11 +34,16 @@ class blitz_aftermath_stats(commands.Cog):
     async def stats(self, message, player_name_str=None, hours=None):
         if message.author == self.client.user:
             return
+
         # Convert session hours into int
         try:
             session_hours = int(hours)
         except:
-            session_hours = None
+            session_hours = None            
+            # Handle spaces in 
+            if "@" in hours:
+                player_name_str += hours
+
         try:
             if not player_name_str and not hours:
                 player_id = UsersApi.get_default_player_id(

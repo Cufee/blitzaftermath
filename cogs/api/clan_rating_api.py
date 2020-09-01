@@ -74,7 +74,7 @@ class ClansRating():
         elif not clan_id and clan_tag:
             # Get clan id from clan tag
             clan_tag_upper = clan_tag.upper()
-            clan_search_base = "https://api.wotblitz.com/wotb/clans/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=clan_id,tag&search="
+            clan_search_base = "/wotb/clans/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=clan_id,tag&search="
             search_url = api_domain + clan_search_base + str(clan_tag_upper)
             search_res = requests.get(search_url)
             if search_res.status_code != 200:
@@ -87,10 +87,6 @@ class ClansRating():
             
             if not clan_id:
                 raise Exception(f"{clan_tag_upper} not found on {realm_upper}")
-
-        else:
-            # clan_id is provided
-            pass
 
         clans_api_base = "/wotb/clans/info/?application_id=add73e99679dd4b7d1ed7218fe0be448&extra=members&clan_id="
         full_url = api_domain + clans_api_base + str(clan_id)
