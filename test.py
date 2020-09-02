@@ -36,14 +36,14 @@ from cogs.api.stats_api import StatsApi
 
 # for tank in res_json.get('data').values():
 #     tanks.update_one({"tank_id": tank.get('tank_id')},
-#                      {"$set": tank}, upsert=True)
+# #                      {"$set": tank}, upsert=True)
 
-from cogs.api.clan_rating_api import ClansRating
+# from cogs.api.clan_rating_api import ClansRating
 
-cr = ClansRating()
-sa = StatsApi()
+# cr = ClansRating()
+# sa = StatsApi()
 
-cr.add_clan(realm="NA", clan_tag="-MM")
+# # cr.add_clan(realm="NA", clan_tag="-MM")
 
 # details = cr.get_clan_details(realm="NA", clan_tag="-MM")
 
@@ -58,3 +58,7 @@ cr.add_clan(realm="NA", clan_tag="-MM")
 #         continue
 # time_end = time.time()
 # print(time_end - time_start)
+
+# Need to write async mongo api using Motor
+# https://towardsdatascience.com/fast-and-async-in-python-accelerate-your-requests-using-asyncio-62dafca83c33
+# https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore

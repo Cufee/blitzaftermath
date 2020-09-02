@@ -1,7 +1,7 @@
 import requests
 import rapidjson
 
-from cogs.api.mongoApi import StatsApi
+from cogs.api.stats_api import StatsApi
 from pymongo import MongoClient
 from pymongo import InsertOne, UpdateOne
 
