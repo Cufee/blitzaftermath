@@ -134,7 +134,6 @@ class AsyncClanActivityAPI():
 
             # Update all players in a clan
             players = clan_details.get("members", {})  # Need to add players to DB
-            tasks = []
             for player_data in players.values():
                 player_id = player_data.get("account_id")
                 t = self.update_player_in_db(player_data)
@@ -165,7 +164,7 @@ class AsyncClanActivityAPI():
         c_filter = {"_id": clan_id}
         result = await self.clans_collection.update_one(c_filter, {"$set": new_clan_entry}, upsert=True)
         # print('Clan updated: %s' % repr(result.raw_result))
-        if result.raw_result.get("ok", 0) > 1:
+        if result.raw_result.get("ok", 0) > 0:
             return 200
         else:
             return 500
@@ -192,10 +191,14 @@ class AsyncClanActivityAPI():
             "joined_at": joined_at,
             "premium_expiration": 0,
         }
+        exists = await self.players_collection.find_one(new_player_entry)
+        if exists:
+            return 409
+            
         c_filter = {"_id": player_id}
         result = await self.players_collection.update_one(c_filter, {"$set": new_player_entry}, upsert=True)
         # print('Player updated: %s' % repr(result.raw_result))
-        if result.raw_result.get("ok", 0) > 1:
+        if result.raw_result.get("ok", 0) > 0:
             return 200
         else:
             return 500
@@ -224,7 +227,6 @@ class AsyncClanActivityAPI():
             # Request limit reached
             # This is a janky solution, sleep and restart the task
             await asyncio.sleep(1)
-            print("limit")
             status_code = await self.loop.create_task(self.update_player_rating(player_id))
             return status_code
 
@@ -234,6 +236,8 @@ class AsyncClanActivityAPI():
             vehicle_data = vehicle.get("all")
             vehicle_data.update({"tank_id": vehicle.get('tank_id')})
             result, status_code = await self.loop.create_task(self.calc_tank_rating(vehicle_data))
+            if status_code != 200:
+                continue
             r_battles = result.get("battles")
             r_raw_rating = result.get("rating")
             battles += r_battles
@@ -241,10 +245,8 @@ class AsyncClanActivityAPI():
 
         if battles == player_data.get("battles", 0):
             # Skip if no battles played
-            print(409)
             return 409
         elif battles == 0:
-            print(404)
             return 404
 
         average_rating = round(raw_rating / battles)
@@ -256,7 +258,7 @@ class AsyncClanActivityAPI():
         c_filter = {"_id": player_id}
         result = await self.players_collection.update_one(c_filter, {"$set": new_player_entry}, upsert=True)
         print('Player updated: %s' % repr(result.raw_result))
-        if result.raw_result.get("ok", 0) > 1:
+        if result.raw_result.get("ok", 0) > 0:
             self.counter += 1
             return 200
         else:
