@@ -62,3 +62,9 @@ from cogs.api.stats_api import StatsApi
 # Need to write async mongo api using Motor
 # https://towardsdatascience.com/fast-and-async-in-python-accelerate-your-requests-using-asyncio-62dafca83c33
 # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Semaphore
+
+from cogs.clan_activity.service.async_mongo_api import AsyncClanActivityAPI
+
+API = AsyncClanActivityAPI()
+
+API.enable_for_clan(("NA", "RUS_"))
