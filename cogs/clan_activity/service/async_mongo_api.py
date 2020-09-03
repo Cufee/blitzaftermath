@@ -139,12 +139,8 @@ class AsyncClanActivityAPI():
                 player_id = player_data.get("account_id")
                 t = self.update_player_in_db(player_data)
                 t2 = self.update_player_rating(player_id)
-                tasks.append(t)
-                tasks.append(t2)
-
-            for c in tasks:
-                await self.loop.create_task(c)
-
+                await self.loop.create_task(t)
+                await self.loop.create_task(t2)
 
             status_code = await self.update_clan_in_db(clan_details)
             return status_code
