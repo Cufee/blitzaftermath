@@ -116,6 +116,8 @@ Newly added players will need to play at least one battle before Aftermath start
 
 You can also check a specific session with `v-stats PlayerName hours`.
 *For example:* `v-stats Vovko@na 48`
+
+To change the default account Aftermath looks up for you, use `v-iam NewName`.
         """)
 
 # **DISABLED**

@@ -54,7 +54,7 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(file=image)
                     return None
                 else:
-                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.\nOr use `{self.client.command_prefix[0]}stats Username@Server` to check your stats.')
+                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
                     return None
 
             elif '@' in player_name_str:
@@ -92,7 +92,15 @@ class blitz_aftermath_stats(commands.Cog):
                     player_name_fixed = player_data_1.get('nickname')
 
                     API.update_players([player_id])
-                    await message.channel.send(f'Enabling for {player_name_fixed} on {player_realm}. You will need to play at least one battle to start tracking.')
+                    await message.channel.send(f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one battle** to start tracking.')
+                    
+                    # Set a default player_id  if it is not set already
+                    default_player_id = UsersApi.get_default_player_id(
+                        discord_user_id=(message.author.id))
+                    if not default_player_id:
+                        UsersApi.link_to_player(
+                            discord_user_id=(message.author.id), player_id=player_id)
+                    
                     API.update_stats([player_id])
                     API.add_career_wn8([player_id])
                     return
@@ -180,7 +188,7 @@ class blitz_aftermath_stats(commands.Cog):
                 UsersApi.link_to_player(
                     discord_user_id=user_id, player_id=player_id)
                 if late_update:
-                    message_text = f'Awesome! You will be able to check your stats with `{self.client.command_prefix[0]}stats` once you play one more battle.'
+                    message_text = f'Awesome! You will be able to check your stats with `{self.client.command_prefix[0]}stats` **once you play one more battle**.'
                 else:
                     message_text = f'Awesome! You can now check your stats with `{self.client.command_prefix[0]}stats`.'
 
