@@ -75,13 +75,12 @@ class blitz_aftermath_replays(commands.Cog):
 
             # Verify channel
             if str(message.channel.id) in enabled_channels:
-                print('valid message')
-
                 for attachment in attachments:
                     if attachment.url.endswith('.wotbreplay'):
                         replays.append(attachment.url)
 
                 if replays:
+                    print(f'valid message - {message.guild.name}')
                     rating = 'mBRT1_1A'
                     try:
                         image_file, replay_id, replay_link, room_type_mod = get_image(
