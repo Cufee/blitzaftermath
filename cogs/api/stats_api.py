@@ -178,7 +178,6 @@ class StatsApi():
 
     def update_stats(self, player_ids_long: list, realm=None, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
-        self.hard = hard
         if len(player_ids_long) > 100:
             player_ids_list = self.list_to_chunks(
                 lst=player_ids_long, chunk_size=99)
@@ -225,8 +224,8 @@ class StatsApi():
                     last_session = {}
 
                 last_battles_random = last_session.get('battles_random', 0)
-                last_battles_rating = last_session.get('battles_rating', 0)
-                last_battles_total = last_battles_random + last_battles_rating
+                # last_battles_rating = last_session.get('battles_rating', 0)
+                # last_battles_total = last_battles_random + last_battles_rating
 
                 player_data = res_stats_all_data.get(str(player_id))
                 if not player_data:
@@ -241,10 +240,10 @@ class StatsApi():
                     'rating', {}).get('battles', 0)
                 last_battle_time = datetime.utcfromtimestamp(
                     player_data.get('last_battle_time'))
-                battles_total = battles_random + battles_rating
+                # battles_total = battles_random + battles_rating
 
                 # Checking self.hard to allow force resets
-                if last_battles_total == battles_total and battles_total != 0 and not self.hard:
+                if last_battles_random == battles_random and battles_random != 0 and not hard:
                     print(f'Player {player_id} played 0 battles')
                     continue
 
@@ -391,7 +390,7 @@ class StatsApi():
                     'I just refreshed your session, please try again.')
             else:
                 raise Exception(
-                    'Not enough data. I tried to refresh your session, but you did not play a single battle yet.')
+                    'Not enough data. I tried to refresh your session, but you did not play a single regular battle yet.')
 
         live_stats_all = {
             'live_stats_random': stats_random,
