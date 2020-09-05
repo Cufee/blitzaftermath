@@ -37,7 +37,7 @@ class blitz_aftermath_stats(commands.Cog):
 
         # Convert session hours into int
         try:
-            session_hours = int(args[-1])
+            session_hours = int(args[-1]) * 24
             args = args[:-1]
         except:
             session_hours = None

@@ -390,7 +390,7 @@ class StatsApi():
                     'I just refreshed your session, please try again.')
             else:
                 raise Exception(
-                    'Not enough data. I tried to refresh your session, but you did not play a single regular battle yet.')
+                    'Not enough data. You did not play a single regular battle.')
 
         live_stats_all = {
             'live_stats_random': stats_random,

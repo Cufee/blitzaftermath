@@ -114,8 +114,8 @@ Use `v-stats PlayerName` to check the last session of a player.
 *All sessions are reset at 02:00 daily, based on server timezone.
 Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
 
-You can also check a specific session with `v-stats PlayerName hours`.
-*For example:* `v-stats Vovko@na 48`
+You can also check a specific session with `v-stats PlayerName days`.
+*For example:* `v-stats Vovko@na 3`
 
 To change the default account Aftermath looks up for you, use `v-iam NewName`.
         """)
