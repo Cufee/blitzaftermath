@@ -244,29 +244,28 @@ class Render:
             live_wr_avg, font=self.font)
 
         # Margins
-        metric_names_row_h = self.text_margin_h
-        session_stats_row_h = int(wn8_text_h + (self.text_margin_h * 2))
-        all_stats_row = int(session_stats_row_h +
-                            session_wn8_h + (self.text_margin_h))
         stats_margin_w = int((stats_all_w - (4 * self.text_margin_w)) / 3)
+        all_text_h = int((wn8_text_h * 3) + (self.text_margin_h * 2))
+        top_bot_margin = int((self.base_card_h - all_text_h) / 2)
+        row_step = int(wn8_text_h + self.text_margin_h)
 
         # Top row
         # Draw damage
         draw_damage_w = int((2 * self.text_margin_w) +
                             ((stats_margin_w - damage_text_w) / 2))
-        draw_damage_h = metric_names_row_h
+        draw_damage_h = top_bot_margin
         stats_draw.text((draw_damage_w, draw_damage_h), 'Damage',
                         self.font_color_base, font=self.font)
         # Draw WN8
         draw_wn8_name_w = int((2 * self.text_margin_w) + stats_margin_w +
                               ((stats_margin_w - wn8_text_w) / 2))
-        draw_wn8_name_h = metric_names_row_h
+        draw_wn8_name_h = top_bot_margin
         stats_draw.text((draw_wn8_name_w, draw_wn8_name_h), 'WN8',
                         self.font_color_base, font=self.font)
         # Draw winrate
         draw_winrate_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                              ((stats_margin_w - winrate_text_w) / 2))
-        draw_winrate_h = metric_names_row_h
+        draw_winrate_h = top_bot_margin
         stats_draw.text((draw_winrate_w, draw_winrate_h), 'Winrate',
                         self.font_color_base, font=self.font)
 
@@ -274,13 +273,13 @@ class Render:
         # Draw damage
         draw_dmg_w = int((2 * self.text_margin_w) +
                          ((stats_margin_w - session_dmg_w) / 2))
-        draw_dmg_h = session_stats_row_h
+        draw_dmg_h = top_bot_margin + row_step
         stats_draw.text((draw_dmg_w, draw_dmg_h), session_dmg_avg,
                         self.font_color_base, font=self.font)
         # Draw WN8
         draw_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
                          ((stats_margin_w - session_wn8_w) / 2))
-        draw_wn8_h = session_stats_row_h
+        draw_wn8_h = top_bot_margin + row_step
         stats_draw.text((draw_wn8_w, draw_wn8_h), str(session_wn8),
                         self.font_color_base, font=self.font_bold)
         # Draw WN8 color bar
@@ -294,7 +293,7 @@ class Render:
         # Draw winrate
         draw_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                         ((stats_margin_w - session_wr_w) / 2))
-        draw_wr_h = session_stats_row_h
+        draw_wr_h = top_bot_margin + row_step
         stats_draw.text((draw_wr_w, draw_wr_h), session_wr_avg,
                         self.font_color_base, font=self.font)
 
@@ -302,13 +301,13 @@ class Render:
         # Draw damage
         draw_live_dmg_w = int((self.text_margin_w * 2) +
                               ((stats_margin_w - live_dmg_w) / 2))
-        draw_live_dmg_h = all_stats_row
+        draw_live_dmg_h = top_bot_margin + (2 * row_step)
         stats_draw.text((draw_live_dmg_w, draw_live_dmg_h), live_dmg_avg,
                         self.font_color_base, font=self.font)
         # Draw WN8
         draw_live_wn8_w = int((2 * self.text_margin_w) + stats_margin_w +
                               ((stats_margin_w - live_wn8_w) / 2))
-        draw_live_wn8_h = all_stats_row
+        draw_live_wn8_h = top_bot_margin + (2 * row_step)
         stats_draw.text((draw_live_wn8_w, draw_live_wn8_h), live_wn8,
                         self.font_color_base, font=self.font_bold)
         # Draw WN8 color bar
@@ -322,7 +321,7 @@ class Render:
         # Draw winrate
         draw_live_wr_w = int((2 * self.text_margin_w) + (stats_margin_w * 2) +
                              ((stats_margin_w - live_wr_w) / 2))
-        draw_live_wr_h = all_stats_row
+        draw_live_wr_h = top_bot_margin + (2 * row_step)
         stats_draw.text((draw_live_wr_w, draw_live_wr_h), live_wr_avg,
                         self.font_color_base, font=self.font)
 
