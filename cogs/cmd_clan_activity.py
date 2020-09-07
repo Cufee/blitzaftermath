@@ -5,6 +5,7 @@ import rapidjson
 import sys
 import traceback
 from datetime import datetime
+from operator import itemgetter
 
 
 class clan_activity(commands.Cog):
@@ -48,12 +49,21 @@ class clan_activity(commands.Cog):
                 await ctx.send(f"It looks like {clan_data.get('clan_name')} have not played a single battle yet.")
                 return
 
-            header = f"**Session info for {clan_data.get('clan_name')}**"
-            legend = f"*Nickname - Battles Total [WN8] / Session [WN8]*\n"
+            players_data = sorted(players_data, key=itemgetter('session_battles'), reverse=True) 
 
-            body = []
+            header = f"**Session info for {clan_data.get('clan_name')}**"
+            legend = f"```Nickname{(' ' * (16 - len('Nickname')))}Battles WN8```"
+
+            body = ["```"]
             for player in players_data:
-                body.append(f'{player.get("nickname")} - {player.get("battles")} [{player.get("average_rating")}] / **{player.get("session_battles")}** [{player.get("session_rating")}]')
+                player_str = f'{player.get("nickname")}{(" " * (18 - len(player.get("nickname"))))}{player.get("session_battles")}{(" " * (4 - len(str(player.get("session_battles")))))}{player.get("session_rating")}'
+                if player.get("session_rating") > player.get("average_rating"):
+                    player_str += " ˄"
+                elif player.get("session_rating") < player.get("average_rating"):
+                    player_str += " ˅"
+
+                body.append(player_str)
+            body.append("```")
             body = "\n".join(body)
 
             await ctx.send("\n".join([header, legend, body]))
