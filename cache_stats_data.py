@@ -22,13 +22,13 @@ def run(realm):
         print(f'No players on {realm}')
         return
     else:
-        Api.update_stats(player_ids_long=player_list, hard=True)
+        Api.update_stats(player_ids_long=player_list, hard=True, realm=realm)
         Api.update_players(player_ids_long=player_list, realm=realm)
 
 
 def refresh_wn8(realm):
     player_list = players_db.find({'realm': realm}).distinct('_id')
-    Api.add_career_wn8(player_list)
+    Api.add_career_wn8(player_list, realm=realm)
     print(f"Done refreshing career WN8 {realm}")
 
 
