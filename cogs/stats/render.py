@@ -18,17 +18,17 @@ Stats = StatsApi()
 
 
 class Render:
-    def __init__(self, player_id, hours=None):
+    def __init__(self, player_id: int, realm: str, hours=None):
         if hours:
             session_duration = (datetime.utcnow() - timedelta(hours=hours))
         else:
             session_duration = None
 
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
-            player_id=player_id, session_duration=session_duration)
+            player_id=player_id, session_duration=session_duration, realm=realm)
 
         self.session_timestamp = session_all.get('timestamp')
-        if player_details.get('realm') == 'NA':
+        if realm.upper() == 'NA':
             self.last_stamp_conv = (self.session_timestamp.replace(
                 tzinfo=timezone('UTC'))).astimezone(timezone('US/Pacific')).strftime("Session from %I:%M %p PST %m/%d")
         else:

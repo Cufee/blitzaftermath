@@ -8,28 +8,26 @@ from datetime import datetime, timedelta
 from time import sleep
 
 
-def get_wg_api_domain(realm=None, player_id=None):
-    # Detect realm
-    id_length = len(str(player_id))
-    if realm:
-        realm = realm.upper()
-
-    if realm == 'RU' or id_length == 8:
+def get_wg_api_domain(realm=None):
+    if realm == 'RU':
         player_realm = 'RU'
         api_domain = 'http://api.wotblitz.ru'
 
-    elif realm == 'EU' or id_length == 9:
+    elif realm == 'EU':
         player_realm = 'EU'
         api_domain = 'http://api.wotblitz.eu'
 
-    elif realm == 'NA' or id_length == 10:
+    elif realm == 'NA':
         player_realm = 'NA'
         api_domain = 'http://api.wotblitz.com'
 
+    elif realm == 'ASIA' or realm == "AS":
+        player_realm = 'ASIA'
+        api_domain = 'http://api.wotblitz.asia'
+
     else:
-        print(player_id)
         raise Exception(
-            f'{realm} is not a supported server.\nTry RU, EU or NA.')
+            f'{realm} is not a supported server.\nTry RU, EU, NA or ASIA')
     return api_domain, player_realm
 
 
@@ -65,7 +63,7 @@ class StatsApi():
         print(len(fixed_list), len(fixed_list[-1]))
         return fixed_list
 
-    def update_players(self, player_ids_long: list, realm=None):
+    def update_players(self, player_ids_long: list, realm: str):
         """Takes in a list of player ids and realm (optional). Adds/Updates all players to the database with default settings.\nDoes not cache any stats."""
         if len(player_ids_long) > 100:
             player_ids_list = self.list_to_chunks(
@@ -73,12 +71,8 @@ class StatsApi():
         else:
             player_ids_list = [player_ids_long]
 
-        # Get API domain through passed realm or first player_id on the list
-        if realm:
-            api_domain, _ = get_wg_api_domain(realm=realm)
-        else:
-            api_domain, realm = get_wg_api_domain(
-                player_id=player_ids_list[0][0])
+        #Get API domain
+        api_domain, _ = get_wg_api_domain(realm=realm)
 
         players_updated = 0
         new_players_list = []
@@ -176,7 +170,7 @@ class StatsApi():
                 print(e)
             return None
 
-    def update_stats(self, player_ids_long: list, realm=None, hard=False):
+    def update_stats(self, player_ids_long: list, realm: str, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
         if len(player_ids_long) > 100:
             player_ids_list = self.list_to_chunks(
@@ -185,10 +179,7 @@ class StatsApi():
             player_ids_list = [player_ids_long]
 
         # Get API domain through passed realm or first player_id on the list
-        if realm:
-            api_domain, _ = get_wg_api_domain(realm=realm)
-        else:
-            api_domain, _ = get_wg_api_domain(player_id=player_ids_list[0][0])
+        api_domain, _ = get_wg_api_domain(realm=realm)
 
         sessions_list = []
         for player_ids in player_ids_list:
@@ -310,14 +301,14 @@ class StatsApi():
         }
         self.players.update_one(player_details, {'$set': player_update})
 
-    def get_session_stats(self, player_id: int, session_duration: datetime = None):
+    def get_session_stats(self, player_id: int, realm: str, session_duration: datetime = None):
         """Get a dict of the session specified. Where session_duration is a datetime obj (timedelta), will default to last session vs current stats."""
         player_details = self.players.find_one({'_id': player_id})
         if not player_details:
             raise Exception(f'Player with ID {player_id} not found')
 
         # Request and check basic stats
-        api_domain, _ = get_wg_api_domain(player_id=player_id)
+        api_domain, _ = get_wg_api_domain(realm=realm)
         stats_all_url = api_domain + \
             self.wg_api_statistics_all + str(player_id)
         url_player_clans = api_domain + self.wg_api_clan_info + str(player_id)
@@ -334,8 +325,14 @@ class StatsApi():
 
         # Check Basic stats
         player_data = stats_all_res_raw.get('data').get(str(player_id))
-        player_clan_data = player_clans_raw.get(
-            'data').get(str(player_id), {}).get('clan')
+        print(player_clans_raw)
+        player_clan_data_raw = player_clans_raw.get(
+            'data', {}).get(str(player_id), {})
+
+        if player_clan_data_raw:
+            player_clan_data = player_clan_data_raw.get('clan')
+        else:
+            player_clan_data = None
 
         # Update clan data if needed
         if player_clan_data and player_details.get("clan_tag") != player_clan_data.get("tag"):
@@ -383,7 +380,7 @@ class StatsApi():
                 'timestamp': last_stats.get('timestamp')
             }
         else:
-            result = self.update_stats(player_ids_long=[player_id])
+            result = self.update_stats(player_ids_long=[player_id], realm=realm)
             print(result)
             if result:
                 raise Exception(
@@ -516,12 +513,12 @@ class StatsApi():
         tank_data.update({'tank_wn8': wn8})
         return tank_data
 
-    def add_career_wn8(self, player_ids: list):
+    def add_career_wn8(self, player_ids: list, realm: str):
         # Count requests to avoid API spam
         requests_cnt = 0
         for player_id in player_ids:
             # Request and check basic stats
-            api_domain, _ = get_wg_api_domain(player_id=player_id)
+            api_domain, _ = get_wg_api_domain(realm=realm)
             # Request detailed stats
             stats_detailed_url = api_domain + \
                 self.wg_api_vehicle_statistics + str(player_id)
@@ -532,6 +529,9 @@ class StatsApi():
             if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw.get('data', {}).get(str(player_id)):
                 print(
                     f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+                if len(player_ids) == 1:
+                    raise Exception("There is no data associated with this account.")
+                
             else:
                 # Get current detailed stats
                 # Sort dict by last played battle

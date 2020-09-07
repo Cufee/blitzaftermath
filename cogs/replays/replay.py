@@ -271,4 +271,5 @@ class Replay:
         else:
             player_realm = 'asia'
             api_domain = 'http://api.wotblitz.asia'
+
         return api_domain, player_realm
