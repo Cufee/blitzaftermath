@@ -53,7 +53,7 @@ class clan_activity(commands.Cog):
 
             body = []
             for player in players_data:
-                body.append(f'{player.get("nickname")} - {player.get("battles")} [{player.get("average_rating")}] / {player.get("session_battles")} [{player.get("session_rating")}]')
+                body.append(f'{player.get("nickname")} - {player.get("battles")} [{player.get("average_rating")}] / **{player.get("session_battles")}** [{player.get("session_rating")}]')
             body = "\n".join(body)
 
             await ctx.send("\n".join([header, legend, body]))
