@@ -125,8 +125,8 @@ class blitz_aftermath_stats(commands.Cog):
 
             else:
                 player_name = player_name_str
-                players_list = players.find(
-                    {'nickname': re.compile(player_name, re.IGNORECASE)})
+                players_list = list(players.find(
+                    {'nickname': re.compile(player_name, re.IGNORECASE)}))
                 
 
                 if len(players_list) > 1:
