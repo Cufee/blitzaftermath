@@ -29,6 +29,27 @@ class blitz_aftermath_stats(commands.Cog):
     async def on_ready(self):
         print(f'[Beta] Aftermath Stats cog is ready.')
 
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        if ctx.author == self.client.user:
+            return
+
+        # Blitzbot Member object
+        blitzbot = self.client.get_user(173628074846453761)
+        if not blitzbot or not ctx.mentions or ctx.mentions[0] != blitzbot or "wr" not in ctx.content:
+            return
+
+        player_id = UsersApi.get_default_player_id(
+                    discord_user_id=(ctx.author.id))
+        if player_id:
+            player_realm = players.find_one(
+                {'_id': player_id}).get("realm")
+            image = Render(player_id=player_id, realm=player_realm).render_image()
+            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*", file=image)
+        else:
+            await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
+    
+
     # Commands
     @commands.command(aliases=['wr', 'session'])
     async def stats(self, message, *args):

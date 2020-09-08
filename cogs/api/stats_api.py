@@ -60,7 +60,6 @@ class StatsApi():
         fixed_list = []
         for i in range(0, len(lst), chunk_size):
             fixed_list.append(lst[i:i + chunk_size])
-        print(len(fixed_list), len(fixed_list[-1]))
         return fixed_list
 
     def update_players(self, player_ids_long: list, realm: str):
@@ -325,7 +324,6 @@ class StatsApi():
 
         # Check Basic stats
         player_data = stats_all_res_raw.get('data').get(str(player_id))
-        print(player_clans_raw)
         player_clan_data_raw = player_clans_raw.get(
             'data', {}).get(str(player_id), {})
 
