@@ -37,7 +37,7 @@ class clan_activity(commands.Cog):
 
             clan_dict = {
                 "clan_tag" : clan_tag,
-                "realm": clan_realm
+                "clan_realm": clan_realm
             }
 
             full_url = "http://localhost:10000/clan"
