@@ -50,6 +50,7 @@ class clan_activity(commands.Cog):
 
             clan_data = res_data.get("clan_data")
             players_data = res_data.get("players")
+            print(len(players_data))
             if not players_data:
                 await ctx.send(f"It looks like {clan_data.get('clan_name')} have not played a single battle yet.")
                 return
