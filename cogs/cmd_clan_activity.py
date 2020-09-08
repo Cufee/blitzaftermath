@@ -35,8 +35,13 @@ class clan_activity(commands.Cog):
             clan_tag = clan_str[0].upper()
             clan_realm = clan_str[-1].upper()
 
-            full_url = "http://localhost:10000/clans/" + clan_tag
-            res = requests.get(full_url)
+            clan_dict = {
+                "clan_tag" : clan_tag,
+                "realm": clan_realm
+            }
+
+            full_url = "http://localhost:10000/clan
+            res = requests.get(full_url, json=clan_dict)
             if res.status_code != 200:
                 error_msg = rapidjson.loads(res.text).get("error", "")
                 await ctx.send(f"Error [{res.status_code}] {error_msg}")
