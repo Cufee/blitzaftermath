@@ -216,8 +216,14 @@ class Render:
         live_battles = live_stats_random.get('battles')
         live_dmg_all = live_stats_random.get('damage_dealt')
         live_wins_all = live_stats_random.get('wins')
-        live_dmg_avg = f"{round(live_dmg_all / live_battles)}"
-        live_wr_avg = f"{round(((live_wins_all / live_battles) * 100), 2)}%"
+
+        old_battles = live_battles - session_battles
+        old_dmg_all = live_dmg_all - session_dmg_all
+        old_wins = live_wins_all - session_wins_all
+
+        live_dmg_avg = f"{round(old_dmg_all / old_battles)}"
+        live_wr_avg = f"{round(((old_wins / old_battles) * 100), 2)}%"
+
         # Calculate WN8
         live_wn8 = str(player_wn8)
 
