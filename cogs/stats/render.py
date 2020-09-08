@@ -221,8 +221,14 @@ class Render:
         old_dmg_all = live_dmg_all - session_dmg_all
         old_wins = live_wins_all - session_wins_all
 
+        wr_change = round((((live_wins_all / live_battles) * 100) - ((old_wins / old_battles) * 100)), 2)
+        if wr_change > 0:
+            wr_change_str = f"+{wr_change}%"
+        else:
+            wr_change_str = f"{wr_change}%"
+
         live_dmg_avg = f"{round(old_dmg_all / old_battles)}"
-        live_wr_avg = f"{round(((old_wins / old_battles) * 100), 2)}%"
+        live_wr_avg = f"{round(((old_wins / old_battles) * 100), 2)}% ({wr_change_str})"
 
         # Calculate WN8
         live_wn8 = str(player_wn8)
