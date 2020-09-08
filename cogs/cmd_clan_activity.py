@@ -40,7 +40,7 @@ class clan_activity(commands.Cog):
                 "realm": clan_realm
             }
 
-            full_url = "http://localhost:10000/clan
+            full_url = "http://localhost:10000/clan"
             res = requests.get(full_url, json=clan_dict)
             if res.status_code != 200:
                 error_msg = rapidjson.loads(res.text).get("error", "")
