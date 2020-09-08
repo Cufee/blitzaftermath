@@ -24,6 +24,31 @@ class clan_activity(commands.Cog):
 
     # Commands
     @commands.command(aliases=[])
+    async def updateclan(self, ctx, *args):
+        if ctx.author == self.client.user:
+            return
+
+        clan_str = "".join(args).strip()
+
+        full_url = "http://localhost:10000/clan"
+
+        # Realm was specified
+        clan_str = clan_str.split("@")
+        clan_tag = clan_str[0].upper()
+        clan_realm = clan_str[-1].upper()
+        clan_dict = {
+            "clan_tag" : clan_tag,
+            "clan_realm": clan_realm
+        }
+        res = requests.put(full_url, json=clan_dict)
+        if res.status_code == 200:
+            ctx.send(200)
+        else:
+            ctx.send("Error")
+
+
+    # Commands
+    @commands.command(aliases=[])
     async def clan(self, ctx, *args):
         if ctx.author == self.client.user:
             return
