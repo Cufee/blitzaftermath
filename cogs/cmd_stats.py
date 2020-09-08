@@ -45,9 +45,9 @@ class blitz_aftermath_stats(commands.Cog):
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
             image = Render(player_id=player_id, realm=player_realm).render_image()
-            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :).\n*Use v-help to learn more about Aftermath.*", file=image)
+            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
-            await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n*Use v-help to learn more about Aftermath.*")
+            await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
     
 
     # Commands
