@@ -42,9 +42,9 @@ class clan_activity(commands.Cog):
         }
         res = requests.put(full_url, json=clan_dict)
         if res.status_code == 200:
-            ctx.send(200)
+            await ctx.send(200)
         else:
-            ctx.send("Error")
+            await ctx.send("Error")
 
 
     # Commands
