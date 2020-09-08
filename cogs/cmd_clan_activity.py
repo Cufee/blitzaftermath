@@ -83,9 +83,8 @@ class clan_activity(commands.Cog):
             players_data = sorted(players_data, key=itemgetter('session_battles'), reverse=True) 
 
             header = f"**Session info for {clan_data.get('clan_name')}**"
-            legend = f"```Nickname{(' ' * (16 - len('Nickname')))}Battles WN8```"
 
-            body = ["```"]
+            body = [f"```Nickname{(' ' * (15 - len('Nickname')))}Battles WN8\n"]
             for player in players_data:
                 player_str = f'{player.get("nickname")}{(" " * (18 - len(player.get("nickname"))))}{player.get("session_battles")}{(" " * (4 - len(str(player.get("session_battles")))))}{player.get("session_rating")}'
                 if player.get("session_rating") > player.get("average_rating"):
@@ -97,7 +96,7 @@ class clan_activity(commands.Cog):
             body.append("```")
             body = "\n".join(body)
 
-            await ctx.send("\n".join([header, legend, body]))
+            await ctx.send("\n".join([header, body]))
 
         else:
             # No realm specified
