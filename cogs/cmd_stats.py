@@ -57,16 +57,19 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         # Convert session hours into int
-        try:
-            session_hours = int(args[-1]) * 24
-            args = args[:-1]
-        except:
+        if args and  len(args[-1]) < 3:
+            try:
+                session_hours = int(args[-1]) * 24
+                args = args[:-1]
+            except:
+                session_hours = None
+        else:
             session_hours = None
 
         player_name_str = "".join(args).strip()
 
         try:
-            if not player_name_str and not session_hours:
+            if not player_name_str:
                 player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
 
