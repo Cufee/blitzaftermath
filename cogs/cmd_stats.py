@@ -51,7 +51,7 @@ class blitz_aftermath_stats(commands.Cog):
     
 
     # Commands
-    @commands.command(aliases=['wr', 'session'])
+    @commands.command(aliases=['wr', 'session', 'Stats', 'Wr'])
     async def stats(self, message, *args):
         if message.author == self.client.user:
             return
@@ -69,6 +69,9 @@ class blitz_aftermath_stats(commands.Cog):
         player_name_str = "".join(args).strip()
 
         try:
+            # Used later to check if a default account should be set
+            trydefault = False
+
             if not player_name_str:
                 player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
@@ -136,16 +139,12 @@ class blitz_aftermath_stats(commands.Cog):
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
 
-                # Set a default player_id  if it is not set already
-                default_player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(message.author.id))
-                if not default_player_id:
-                    UsersApi.link_to_player(
-                        discord_user_id=(message.author.id), player_id=player_id)
-
                 image = Render(player_id=player_id,
                                hours=session_hours, realm=player_realm).render_image()
                 await message.channel.send(file=image)
+
+                # Try to set a new default account for new users
+                trydefault = True
 
             else:
                 player_name = player_name_str
@@ -162,9 +161,22 @@ class blitz_aftermath_stats(commands.Cog):
                     image = Render(player_id=player_id,
                                    hours=session_hours, realm=player_realm).render_image()
                     await message.channel.send(file=image)
+                    # Try to set a new default account for new users
+                    trydefault = True
+
                 else:
                     await message.channel.send(
                         f'Player {player_name} not found. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
+
+            if trydefault and player_id:
+                # Set a default player_id  if it is not set already
+                default_player_id = UsersApi.get_default_player_id(
+                    discord_user_id=(message.author.id))
+                if not default_player_id:
+                    UsersApi.link_to_player(
+                        discord_user_id=(message.author.id), player_id=player_id)
+                    print(f"Set a new default for {message.author.nick}")
+
 
         except Exception as e:
             print(traceback.format_exc())
