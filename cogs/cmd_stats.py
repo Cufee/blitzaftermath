@@ -109,11 +109,32 @@ class blitz_aftermath_stats(commands.Cog):
                             f'WG API responded with {res.status_code}')
 
                     res_data = res_data_raw.get('data')
+
+                    # Check other servers
                     if not res_data:
-                        print(api_url)
-                        print(res_data)
-                        raise Exception(
-                            f'WG: Player not found. Is the username spelled correctly?')
+                        other_domains = ["NA", "EU", "ASIA", "RU"]
+                        other_domains.remove(player_realm)
+                        res_data = None
+                        other_realm = None
+                        for r in other_domains:
+                            api_domain, _ = get_wg_api_domain(realm=r)
+                            api_url = api_domain + \
+                                '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
+                            res = requests.get(api_url)
+                            res_data_raw = rapidjson.loads(res.text)
+                            if res.status_code != 200 or not res_data_raw:
+                                print(f"WG API responded with {res.status_code}")
+                                continue
+                            res_data = res_data_raw.get('data')
+                            if res_data:
+                                other_realm = r
+                                break
+                        if not res_data:
+                            raise Exception(
+                                f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
+                        else:
+                            await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}@{other_realm}` to check it.*")
+                            return
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
@@ -122,7 +143,8 @@ class blitz_aftermath_stats(commands.Cog):
                     player_name_fixed = player_data_1.get('nickname')
 
                     API.update_players([player_id], realm=player_realm)
-                    await message.channel.send(f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.')
+                    msg_str = f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.'
+                    await message.channel.send(msg_str)
                     
                     # Set a default player_id  if it is not set already
                     default_player_id = UsersApi.get_default_player_id(
