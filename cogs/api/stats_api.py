@@ -244,11 +244,18 @@ class StatsApi():
                 requests_ctn += 1
                 vehicles_stats_raw = rapidjson.loads(
                     vehicles_stats_res.text)
+
                 if vehicles_stats_res.status_code != 200 or not vehicles_stats_raw:
                     raise Exception(
                         f'Failed to get data from WG API, status code {vehicles_stats_res.status_code}')
+
                 vehicles_stats_data = vehicles_stats_raw.get(
                     'data').get(str(player_id))
+
+                if not vehicles_stats_data:
+                    print("Player has no battles")
+                    raise Exception(f"This looks like a new account with no battles played, are you typing the correct server?")
+
                 vehicles_stats = {}
                 for tank_stats in vehicles_stats_data:
                     tank_id = tank_stats.get('tank_id')
