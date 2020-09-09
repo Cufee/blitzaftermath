@@ -24,6 +24,31 @@ class clan_activity(commands.Cog):
 
     # Commands
     @commands.command(aliases=[])
+    async def updateclan(self, ctx, *args):
+        if ctx.author == self.client.user:
+            return
+
+        clan_str = "".join(args).strip()
+
+        full_url = "http://localhost:10000/clan"
+
+        # Realm was specified
+        clan_str = clan_str.split("@")
+        clan_tag = clan_str[0].upper()
+        clan_realm = clan_str[-1].upper()
+        clan_dict = {
+            "clan_tag" : clan_tag,
+            "clan_realm": clan_realm
+        }
+        res = requests.put(full_url, json=clan_dict)
+        if res.status_code == 200:
+            await ctx.send(200)
+        else:
+            await ctx.send("Error")
+
+
+    # Commands
+    @commands.command(aliases=[])
     async def clan(self, ctx, *args):
         if ctx.author == self.client.user:
             return
@@ -50,7 +75,6 @@ class clan_activity(commands.Cog):
 
             clan_data = res_data.get("clan_data")
             players_data = res_data.get("players")
-            print(len(players_data))
             if not players_data:
                 await ctx.send(f"It looks like {clan_data.get('clan_name')} have not played a single battle yet.")
                 return
@@ -58,9 +82,8 @@ class clan_activity(commands.Cog):
             players_data = sorted(players_data, key=itemgetter('session_battles'), reverse=True) 
 
             header = f"**Session info for {clan_data.get('clan_name')}**"
-            legend = f"```Nickname{(' ' * (16 - len('Nickname')))}Battles WN8```"
 
-            body = ["```"]
+            body = [f"```Nickname{(' ' * (15 - len('Nickname')))}Battles WN8\n"]
             for player in players_data:
                 player_str = f'{player.get("nickname")}{(" " * (18 - len(player.get("nickname"))))}{player.get("session_battles")}{(" " * (4 - len(str(player.get("session_battles")))))}{player.get("session_rating")}'
                 if player.get("session_rating") > player.get("average_rating"):
@@ -72,7 +95,7 @@ class clan_activity(commands.Cog):
             body.append("```")
             body = "\n".join(body)
 
-            await ctx.send("\n".join([header, legend, body]))
+            await ctx.send("\n".join([header, body]))
 
         else:
             # No realm specified
