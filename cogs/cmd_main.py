@@ -155,5 +155,17 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.
                 await channel.send(brk_message)
 
 
+
+    @commands.command()
+    async def invite(self, ctx):
+        try:
+            await ctx.message.delete()
+        except:
+            print(f"Failed to delete a message in {ctx.guild.name}")
+
+        dm_channel = await ctx.author.create_dm()
+        await dm_channel.send("You can invite me to your server by following this link:\nhttps://byvko.dev/")
+
+
 def setup(client):
     client.add_cog(maintenance(client))
