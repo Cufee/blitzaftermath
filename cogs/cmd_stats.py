@@ -57,7 +57,7 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         # Convert session hours into int
-        if len(args[-1]) < 3:
+        if args and  len(args[-1]) < 3:
             try:
                 session_hours = int(args[-1]) * 24
                 args = args[:-1]
