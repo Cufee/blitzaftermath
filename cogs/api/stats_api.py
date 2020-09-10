@@ -156,7 +156,7 @@ class StatsApi():
                 else:
                     p_upd_cnt += 1
 
-        print("Player updates:\nSuccess: {p_upd_cnt}\nFailed: {p_fail_cnt}")
+        print(f"Player updates:\nSuccess: {p_upd_cnt}\nFailed: {p_fail_cnt}")
 
     def update_stats(self, player_ids_long: list, realm: str, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
@@ -226,7 +226,7 @@ class StatsApi():
                 # Checking self.hard to allow force resets
                     # Not sure if this works correctly
                 if last_battles_random == battles_random and battles_random != 0 and not hard:
-                    print(f'Player {player_id} played 0 battles')
+                    # print(f'Player {player_id} played 0 battles')
                     continue
 
                 # Gather per vehicle stats
