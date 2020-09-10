@@ -16,6 +16,7 @@ dnspython = "*"
 requests = "*"
 apscheduler = "*"
 motor = "*"
+cloudinary = "*"
 
 [requires]
 python_version = "3.8"

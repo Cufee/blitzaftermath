@@ -18,7 +18,8 @@ Stats = StatsApi()
 
 
 class Render:
-    def __init__(self, player_id: int, realm: str, hours=None):
+    def __init__(self, player_id: int, realm: str, hours=None, bg_url: str = None):
+
         if hours:
             session_duration = (datetime.utcnow() - timedelta(hours=hours))
         else:
@@ -38,7 +39,7 @@ class Render:
         self.player_id = player_details.get('_id')
 
         self.tank_count = len(session_detailed)
-        self.render_prep()
+        self.render_prep(bg_url)
         self.render_header(player_details=player_details)
         self.render_all_stats(stats_all=session_all,
                               live_stats_all=live_stats_all, session_detailed=session_detailed, player_details=player_details)
@@ -47,7 +48,7 @@ class Render:
             tank_stats = session_detailed.get(tank_id)
             self.render_detailed_stats(tank_stats=tank_stats, card_index=i)
 
-    def render_prep(self):
+    def render_prep(self, bg_url: str):
         # Import fonts
         self.font_size = 32
         self.font = ImageFont.truetype(
@@ -108,8 +109,19 @@ class Render:
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
             'RGB', (self.frame_w, self.frame_h), (255, 255, 255))
-        try:
+
+        if bg_url:
+            # Get image from URL
+            response = requests.get(bg_url)
+            try:
+                bg_image = Image.open(BytesIO(response.content))
+            except:
+                print("Failed to load custom bg image")
+                bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+        else:
             bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+
+        try:
             bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = self.frame_h / bg_image_h
@@ -519,5 +531,5 @@ class Render:
         self.frame.save(final_buffer, 'png')
         final_buffer.seek(0)
         image_file = File(
-            filename=f"top.png", fp=final_buffer)
+            filename=f"result.png", fp=final_buffer)
         return image_file

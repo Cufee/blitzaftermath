@@ -10,13 +10,15 @@ from cogs.stats.render import Render
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
 
+from cogs.pay_to_win.stats_module import CustomBackground
+
 client = MongoClient("mongodb://51.222.13.110:27017")
 players = client.stats.players
 
 debug = False
 API = StatsApi()
 UsersApi = DiscordUsersApi()
-
+bgAPI = CustomBackground()
 
 class blitz_aftermath_stats(commands.Cog):
 
@@ -42,9 +44,10 @@ class blitz_aftermath_stats(commands.Cog):
         player_id = UsersApi.get_default_player_id(
                     discord_user_id=(ctx.author.id))
         if player_id:
+            bg_url = bgAPI.get(str(ctx.author.id))
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
-            image = Render(player_id=player_id, realm=player_realm).render_image()
+            image = Render(player_id=player_id, realm=player_realm, bg_url=bg_url).render_image()
             await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
             await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
@@ -77,10 +80,11 @@ class blitz_aftermath_stats(commands.Cog):
                     discord_user_id=(message.author.id))
 
                 if player_id:
+                    bg_url = bgAPI.get(str(message.author.id))
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
                     image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm).render_image()
+                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
                     return None
                 else:
@@ -161,8 +165,9 @@ class blitz_aftermath_stats(commands.Cog):
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
 
+                bg_url = bgAPI.get(str(message.author.id))
                 image = Render(player_id=player_id,
-                               hours=session_hours, realm=player_realm).render_image()
+                               hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                 await message.channel.send(file=image)
 
                 # Try to set a new default account for new users
@@ -180,8 +185,9 @@ class blitz_aftermath_stats(commands.Cog):
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
+                    bg_url = bgAPI.get(str(message.author.id))
                     image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm).render_image()
+                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
                     # Try to set a new default account for new users
                     trydefault = True
@@ -278,6 +284,63 @@ class blitz_aftermath_stats(commands.Cog):
         except Exception as e:
             print(traceback.format_exc())
             await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
+    @commands.command(aliases=['bg'])
+    async def fancy(self, ctx, url=None):
+        if ctx.author == self.client.user:
+            return
+
+        valid_img_formats = ('.jpeg', ',jpg', '.png')
+        # Fix url
+        try:
+            url = url.strip()
+        except:
+            url = None
+        try:
+            # Set image url
+            if url and url.endswith(valid_img_formats):
+                img_url = url
+            else:
+                img_url = None
+
+            attachments = ctx.message.attachments
+            # Check attachments for jpeg images
+            for att in attachments:
+                if att.url.endswith(valid_img_formats):
+                    img_url = att.url
+                    break
+            # Image url found
+            if img_url:
+                err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
+                if not err:
+                    await ctx.send("Awesome! Your stats will now shine bright :)")
+                    return
+                else:
+                    raise Exception(err)
+            # No valid url
+            else:
+                raise Exception("There is no valid image attached to your message. Make sure your image ends with `.jpg` or `.jpeg`.")
+
+        # Handle exceptions
+        except Exception as e:
+            print(traceback.format_exc())
+            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
+    @commands.command(aliases=['nobg'])
+    async def notfancy(self, ctx):
+        if ctx.author == self.client.user:
+            return
+
+        try:
+            err = bgAPI.delete(str(ctx.author.id))
+            if err:
+                raise Exception(err)
+            await ctx.send("Removed your custom background for stats.")
+
+        # Handle exceptions
+        except Exception as e:
+            print(traceback.format_exc())
+            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
 
 def setup(client):
