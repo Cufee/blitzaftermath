@@ -180,7 +180,6 @@ class StatsApi():
         # Get API domain through passed realm or first player_id on the list
         api_domain, _ = get_wg_api_domain(realm=realm)
 
-        sessions_list = []
         for player_ids in player_ids_list:
             # Count requests send to avoid spam
             requests_ctn = 0
@@ -273,26 +272,27 @@ class StatsApi():
                     'archive': False,
                     'vehicles': vehicles_stats
                 }
-                sessions_list.append(InsertOne(player_stats))
-
+                # Add session to DB
+                _ = self.sessions.insert_one(player_stats)
+                
                 if requests_ctn % 100 == 0:
                     sleep(5)
 
-        try:
-            if sessions_list:
-                result = self.sessions.bulk_write(
-                    sessions_list, ordered=False)
-                print(f'{datetime.utcnow()}\n{result.bulk_api_result}')
-                return 'Done'
-            else:
-                print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-                return None
-        except Exception as e:
-            if e == BulkWriteError:
-                print(e.details)
-            else:
-                print(e)
-            return None
+        # try:
+        #     if sessions_list:
+        #         result = self.sessions.bulk_write(
+        #             sessions_list, ordered=False)
+        #         print(f'{datetime.utcnow()}\n{result.bulk_api_result}')
+        #         return 'Done'
+        #     else:
+        #         print(f'{datetime.utcnow()}\nNo valid objects to insert.')
+        #         return None
+        # except Exception as e:
+        #     if e == BulkWriteError:
+        #         print(e.details)
+        #     else:
+        #         print(e)
+        #     return None
 
     def add_premium_time(self, player_id: int, days_to_add=None):
         player_details = self.players.find_one({'_id': player_id})
