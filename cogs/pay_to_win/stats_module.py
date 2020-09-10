@@ -33,14 +33,12 @@ class CustomBackground():
             headers={'api-key': '0b9a5fc7-76fc-47a5-8b62-4772146c4c98'}
             )
         score = (r.json().get('output', {}).get('nsfw_score', -1))
-        print(score)
         if score == -1:
             return "My NSFW detector broke, try again later."
         if score > 0.7:
             return "This looks like a NSFW image, I am not able to use it."
 
         response = upload(image_url, public_id=user_id)
-        print(response)
         if not response:
             # Request failed / Bad response
             return "No response from server."
@@ -54,7 +52,6 @@ class CustomBackground():
     def delete(self, user_id: str) -> str:
         # Delete user images by public_id
         response = delete_resources(public_ids=user_id)
-        print(response)
         if not response:
             # Request failed / Bad response
             return "No response from server."

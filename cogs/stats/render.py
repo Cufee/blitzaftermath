@@ -130,8 +130,11 @@ class Render:
                 bg_image_ratio = self.frame_w / bg_image_w
             bg_image = bg_image.resize(
                 (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
+
+            new_bg_w, _ = bg_image.size
+            centering_shift =  - int(((new_bg_w - self.frame_w) / 2))
             solid_bg.paste(bg_image, box=(
-                0, 0))
+                centering_shift, 0))
         except:
             print("Failed to render BG image")
             
