@@ -254,7 +254,8 @@ class StatsApi():
 
                 if not vehicles_stats_data:
                     print("Player has no battles")
-                    raise Exception(f"It looks like {player_details.get('nickname')} did not play any battles on {realm} yet.")
+                    # raise Exception(f"It looks like {player_details.get('nickname')} did not play any battles on {realm} yet.")
+                    continue
 
                 vehicles_stats = {}
                 for tank_stats in vehicles_stats_data:
