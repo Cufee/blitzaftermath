@@ -8,7 +8,7 @@ import requests
 class CustomBackground():
     def get(self, user_id: str) -> str:
         # Get image from public_id
-        image_res = resources(public_id=user_id, max_results=1)
+        image_res = resources(public_id=user_id)
         if not image_res:
             # Request failed / Bad response
             return "No response from server."
