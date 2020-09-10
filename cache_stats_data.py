@@ -8,6 +8,8 @@ from pymongo import InsertOne, UpdateOne
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+from datetime import datetime
+
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 Api = StatsApi()
@@ -16,7 +18,7 @@ tankaverages = client.glossary.tankaverages
 
 
 def run(realm):
-    print(f'Working on {realm}')
+    print(f'[{datetime.utcnow()}] Working on {realm} sessions')
     player_list = list(players_db.find({'realm': realm}).distinct('_id'))
     if len(player_list) == 0:
         print(f'No players on {realm}')
@@ -27,12 +29,14 @@ def run(realm):
 
 
 def refresh_wn8(realm):
+    print(f'[{datetime.utcnow()}] Working on {realm} WN8')
     player_list = players_db.find({'realm': realm}).distinct('_id')
     Api.add_career_wn8(player_list, realm=realm)
     print(f"Done refreshing career WN8 {realm}")
 
 
 def refresh_tank_avg_cache():
+    print(f'[{datetime.utcnow()}] Working on tank acerages')
     url = 'https://www.blitzstars.com/api/tankaverages.json'
     res = rapidjson.loads(requests.get(url).text)
     tanks_obj_list = []
