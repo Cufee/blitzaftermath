@@ -290,12 +290,13 @@ class blitz_aftermath_stats(commands.Cog):
         if ctx.author == self.client.user:
             return
 
-        valid_img_formats = ('.jpeg', ',jpg', '.png')
+        valid_img_formats = ('.jpeg', '.jpg', '.png')
         # Fix url
         try:
             url = url.strip()
         except:
             url = None
+        print(url)
         try:
             # Set image url
             if url and url.endswith(valid_img_formats):
@@ -309,6 +310,7 @@ class blitz_aftermath_stats(commands.Cog):
                 if att.url.endswith(valid_img_formats):
                     img_url = att.url
                     break
+
             # Image url found
             print(img_url)
             if img_url:
