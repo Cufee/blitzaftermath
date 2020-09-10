@@ -2,8 +2,8 @@ from discord import Embed
 
 from cloudinary.api import delete_resources, resources
 from cloudinary.uploader import upload
-from cloudinary.utils import cloudinary_url
 
+import requests
 
 class CustomBackground():
     def get(self, user_id: str) -> str:
@@ -24,6 +24,21 @@ class CustomBackground():
 
     def put(self, user_id: str, image_url: str) -> str:
         """Upload a new image or update the existing one"""
+        # Check NSFW images
+        r = requests.post(
+            "https://api.deepai.org/api/nsfw-detector",
+            data={
+                'image': image_url,
+            },
+            headers={'api-key': '0b9a5fc7-76fc-47a5-8b62-4772146c4c98'}
+            )
+        score = (r.json().get('output', {}).get('nsfw_score', -1))
+        print(score)
+        if score == -1:
+            return "My NSFW detector broke, try again later."
+        if score > 0.7:
+            return "This looks like a NSFW image, I am not able to use it."
+
         response = upload(image_url, public_id=user_id)
         print(response)
         if not response:
