@@ -310,6 +310,7 @@ class blitz_aftermath_stats(commands.Cog):
                     img_url = att.url
                     break
             # Image url found
+            print(img_url)
             if img_url:
                 err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
                 if not err:
@@ -319,7 +320,7 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception(err)
             # No valid url
             else:
-                raise Exception("There is no valid image attached to your message. Make sure your image ends with `.jpg` or `.jpeg`.")
+                raise Exception("There is no link to valid image in your message. Make sure your image ends with `.jpg` or `.jpeg`.")
 
         # Handle exceptions
         except Exception as e:
