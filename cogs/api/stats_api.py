@@ -73,8 +73,8 @@ class StatsApi():
         #Get API domain
         api_domain, _ = get_wg_api_domain(realm=realm)
 
-        players_updated = 0
-        new_players_list = []
+        p_fail_cnt = 0
+        p_upd_cnt = 0
         for player_ids in player_ids_list:
             # Count requests send to avoid spam / Not implemented
             requests_ctn = 0
@@ -148,26 +148,15 @@ class StatsApi():
                     new_player.update(
                         {'am_premium_expiration': (datetime.utcnow() + timedelta(days=7))})
 
-                new_players_list.append(UpdateOne({'_id': player_id}, {
-                                        '$set': new_player}, upsert=True))
+                # Add session to DB
+                result = self.players.update_one({'_id': player_id}, {"$set": new_player}, upsert=True)
+                if not result.acknowledged:
+                    print(f"Failed to add a session for {player_id}")
+                    p_fail_cnt += 1
+                else:
+                    p_upd_cnt += 1
 
-                players_updated += 1
-
-        try:
-            if new_players_list:
-                result_players = self.players.bulk_write(
-                    new_players_list, ordered=False)
-                print(f'{datetime.utcnow()}\n{result_players.bulk_api_result}')
-                return (f'Done, updated {players_updated} players')
-            else:
-                print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-                return None
-        except Exception as e:
-            if e == BulkWriteError:
-                print(e.details)
-            else:
-                print(e)
-            return None
+        print("Player updates:\nSuccess: {p_upd_cnt}\nFailed: {p_fail_cnt}")
 
     def update_stats(self, player_ids_long: list, realm: str, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
@@ -179,6 +168,9 @@ class StatsApi():
 
         # Get API domain through passed realm or first player_id on the list
         api_domain, _ = get_wg_api_domain(realm=realm)
+
+        s_upd_cnt = 0
+        s_fail_cnt = 0
 
         for player_ids in player_ids_list:
             # Count requests send to avoid spam
@@ -232,6 +224,7 @@ class StatsApi():
                 # battles_total = battles_random + battles_rating
 
                 # Checking self.hard to allow force resets
+                    # Not sure if this works correctly
                 if last_battles_random == battles_random and battles_random != 0 and not hard:
                     print(f'Player {player_id} played 0 battles')
                     continue
@@ -273,26 +266,17 @@ class StatsApi():
                     'vehicles': vehicles_stats
                 }
                 # Add session to DB
-                _ = self.sessions.insert_one(player_stats)
+                result = self.sessions.insert_one(player_stats)
+                if not result.acknowledged:
+                    print(f"Failed to add a session for {player_id}")
+                    s_fail_cnt += 1
+                else:
+                    s_upd_cnt += 1
                 
                 if requests_ctn % 100 == 0:
                     sleep(5)
 
-        # try:
-        #     if sessions_list:
-        #         result = self.sessions.bulk_write(
-        #             sessions_list, ordered=False)
-        #         print(f'{datetime.utcnow()}\n{result.bulk_api_result}')
-        #         return 'Done'
-        #     else:
-        #         print(f'{datetime.utcnow()}\nNo valid objects to insert.')
-        #         return None
-        # except Exception as e:
-        #     if e == BulkWriteError:
-        #         print(e.details)
-        #     else:
-        #         print(e)
-        #     return None
+        print(f"Session Updates:\nSuccess: {s_upd_cnt}\nFailed: {s_fail_cnt}")
 
     def add_premium_time(self, player_id: int, days_to_add=None):
         player_details = self.players.find_one({'_id': player_id})
