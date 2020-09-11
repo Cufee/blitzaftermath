@@ -62,6 +62,7 @@ class Render:
             "./cogs/replays/render/fonts/font_slim.ttf", int(self.font_size * 0.9))
 
         self.font_color_base = (255, 255, 255)
+        self.font_color_card = (60, 60, 60, 150)
         self.font_color_none = (255, 255, 255, 0)
         self.font_color_none = (0, 0, 0, 0)
         self.font_color_half = (200, 200, 200, 100)
@@ -153,7 +154,7 @@ class Render:
         header_w = self.base_card_w
         header_h = self.header_h
         header_card = Image.new(
-            'RGBA', (header_w, header_h), (0, 0, 0, 100))
+            'RGBA', (header_w, header_h), self.font_color_card)
         header_draw = ImageDraw.Draw(header_card)
 
         nickanme = player_details.get('nickname')
@@ -189,7 +190,7 @@ class Render:
         stats_all_w = self.base_card_w
         stats_all_h = self.base_card_h
         stats_all_card = Image.new(
-            'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
+            'RGBA', (stats_all_w, stats_all_h), self.font_color_card )
         stats_draw = ImageDraw.Draw(stats_all_card)
         player_wn8 = player_details.get('career_wn8', '-')
         if player_wn8 != '-':
@@ -373,7 +374,7 @@ class Render:
         stats_detailed_w = self.base_card_w
         stats_detailed_h = self.detailed_card_h
         stats_detailed_card = Image.new(
-            'RGBA', (stats_detailed_w, stats_detailed_h), (0, 0, 0, 100))
+            'RGBA', (stats_detailed_w, stats_detailed_h), self.font_color_card)
         stats_draw = ImageDraw.Draw(stats_detailed_card)
 
         # Organize tank data
