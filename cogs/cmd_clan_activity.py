@@ -79,19 +79,25 @@ class clan_activity(commands.Cog):
                 await ctx.send(f"It looks like {clan_data.get('clan_name')} have not played a single battle yet.")
                 return
 
-            players_data = sorted(players_data, key=itemgetter('session_battles'), reverse=True) 
+            players_data = sorted(players_data, key=itemgetter('session_battles'), reverse=True)
 
             header = f"**Session info for {clan_data.get('clan_name')}**"
 
             body = [f"```Nickname{(' ' * (15 - len('Nickname')))}Battles WN8\n"]
+            no_battles = 0
             for player in players_data:
-                player_str = f'{player.get("nickname")}{(" " * (18 - len(player.get("nickname"))))}{player.get("session_battles")}{(" " * (4 - len(str(player.get("session_battles")))))}{player.get("session_rating")}'
+                if player.get("session_battles") == 0:
+                    no_battles += 1
+                    continue
+
+                player_str = f'{player.get("nickname")}{(" " * (21 - len(player.get("nickname"))))}{player.get("session_battles")}{(" " * (4 - len(str(player.get("session_battles")))))}{player.get("session_rating")}'
                 if player.get("session_rating") > player.get("average_rating"):
                     player_str += " ˄"
                 elif player.get("session_rating") < player.get("average_rating"):
                     player_str += " ˅"
 
                 body.append(player_str)
+            body.append(f"{no_battles} players played 0 battles.")
             body.append("```")
             body = "\n".join(body)
 

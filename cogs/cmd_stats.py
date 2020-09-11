@@ -10,13 +10,15 @@ from cogs.stats.render import Render
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
 
+from cogs.pay_to_win.stats_module import CustomBackground
+
 client = MongoClient("mongodb://51.222.13.110:27017")
 players = client.stats.players
 
 debug = False
 API = StatsApi()
 UsersApi = DiscordUsersApi()
-
+bgAPI = CustomBackground()
 
 class blitz_aftermath_stats(commands.Cog):
 
@@ -42,16 +44,17 @@ class blitz_aftermath_stats(commands.Cog):
         player_id = UsersApi.get_default_player_id(
                     discord_user_id=(ctx.author.id))
         if player_id:
+            bg_url = bgAPI.get(str(ctx.author.id))
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
-            image = Render(player_id=player_id, realm=player_realm).render_image()
+            image = Render(player_id=player_id, realm=player_realm, bg_url=bg_url).render_image()
             await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
             await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
     
 
     # Commands
-    @commands.command(aliases=['wr', 'session'])
+    @commands.command(aliases=['wr', 'session', 'Stats', 'Wr'])
     async def stats(self, message, *args):
         if message.author == self.client.user:
             return
@@ -69,15 +72,19 @@ class blitz_aftermath_stats(commands.Cog):
         player_name_str = "".join(args).strip()
 
         try:
+            # Used later to check if a default account should be set
+            trydefault = False
+
             if not player_name_str:
                 player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
 
                 if player_id:
+                    bg_url = bgAPI.get(str(message.author.id))
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
                     image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm).render_image()
+                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
                     return None
                 else:
@@ -106,11 +113,32 @@ class blitz_aftermath_stats(commands.Cog):
                             f'WG API responded with {res.status_code}')
 
                     res_data = res_data_raw.get('data')
+
+                    # Check other servers
                     if not res_data:
-                        print(api_url)
-                        print(res_data)
-                        raise Exception(
-                            f'WG: Player not found. Is the username spelled correctly?')
+                        other_domains = ["NA", "EU", "ASIA", "RU"]
+                        other_domains.remove(player_realm)
+                        res_data = None
+                        other_realm = None
+                        for r in other_domains:
+                            api_domain, _ = get_wg_api_domain(realm=r)
+                            api_url = api_domain + \
+                                '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
+                            res = requests.get(api_url)
+                            res_data_raw = rapidjson.loads(res.text)
+                            if res.status_code != 200 or not res_data_raw:
+                                print(f"WG API responded with {res.status_code}")
+                                continue
+                            res_data = res_data_raw.get('data')
+                            if res_data:
+                                other_realm = r
+                                break
+                        if not res_data:
+                            raise Exception(
+                                f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
+                        else:
+                            await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}@{other_realm}` to check it.*")
+                            return
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
@@ -119,7 +147,8 @@ class blitz_aftermath_stats(commands.Cog):
                     player_name_fixed = player_data_1.get('nickname')
 
                     API.update_players([player_id], realm=player_realm)
-                    await message.channel.send(f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.')
+                    msg_str = f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.'
+                    await message.channel.send(msg_str)
                     
                     # Set a default player_id  if it is not set already
                     default_player_id = UsersApi.get_default_player_id(
@@ -136,16 +165,13 @@ class blitz_aftermath_stats(commands.Cog):
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
 
-                # Set a default player_id  if it is not set already
-                default_player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(message.author.id))
-                if not default_player_id:
-                    UsersApi.link_to_player(
-                        discord_user_id=(message.author.id), player_id=player_id)
-
+                bg_url = bgAPI.get(str(message.author.id))
                 image = Render(player_id=player_id,
-                               hours=session_hours, realm=player_realm).render_image()
+                               hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                 await message.channel.send(file=image)
+
+                # Try to set a new default account for new users
+                trydefault = True
 
             else:
                 player_name = player_name_str
@@ -159,12 +185,26 @@ class blitz_aftermath_stats(commands.Cog):
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
+                    bg_url = bgAPI.get(str(message.author.id))
                     image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm).render_image()
+                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
+                    # Try to set a new default account for new users
+                    trydefault = True
+
                 else:
                     await message.channel.send(
                         f'Player {player_name} not found. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
+
+            if trydefault and player_id:
+                # Set a default player_id  if it is not set already
+                default_player_id = UsersApi.get_default_player_id(
+                    discord_user_id=(message.author.id))
+                if not default_player_id:
+                    UsersApi.link_to_player(
+                        discord_user_id=(message.author.id), player_id=player_id)
+                    print(f"Set a new default for {message.author.nick}")
+
 
         except Exception as e:
             print(traceback.format_exc())
@@ -244,6 +284,66 @@ class blitz_aftermath_stats(commands.Cog):
         except Exception as e:
             print(traceback.format_exc())
             await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
+    @commands.command(aliases=['bg'])
+    async def fancy(self, ctx, url=None):
+        if ctx.author == self.client.user:
+            return
+
+        valid_img_formats = ('.jpeg', '.jpg', '.png')
+        # Fix url
+        try:
+            url = url.strip()
+        except:
+            url = None
+        print(url)
+        try:
+            # Set image url
+            if url and url.endswith(valid_img_formats):
+                img_url = url
+            else:
+                img_url = None
+
+            attachments = ctx.message.attachments
+            # Check attachments for jpeg images
+            for att in attachments:
+                if att.url.endswith(valid_img_formats):
+                    img_url = att.url
+                    break
+
+            # Image url found
+            print(img_url)
+            if img_url:
+                err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
+                if not err:
+                    await ctx.send("Awesome! Your stats will now shine bright :)")
+                    return
+                else:
+                    raise Exception(err)
+            # No valid url
+            else:
+                raise Exception('There is no link to a valid image in your message.\nUsage example:\nv-fancy https://i.imgflip.com/1ovalo.jpg')
+
+        # Handle exceptions
+        except Exception as e:
+            print(traceback.format_exc())
+            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
+    @commands.command(aliases=['nobg'])
+    async def notfancy(self, ctx):
+        if ctx.author == self.client.user:
+            return
+
+        try:
+            err = bgAPI.delete(str(ctx.author.id))
+            if err:
+                raise Exception(err)
+            await ctx.send("Removed your custom background for stats.")
+
+        # Handle exceptions
+        except Exception as e:
+            print(traceback.format_exc())
+            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
 
 def setup(client):

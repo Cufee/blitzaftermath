@@ -8,31 +8,46 @@ from pymongo import InsertOne, UpdateOne
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+from datetime import datetime
+
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 Api = StatsApi()
 players_db = client.stats.players
 tankaverages = client.glossary.tankaverages
+db_tanks = client.glossary.tanks
 
+
+def g_update():
+    res = requests.get(
+    'https://api.wotblitz.com/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
+
+    res_json = rapidjson.loads(res.text)
+
+    for tank in res_json.get('data').values():
+        db_tanks.update_one({"tank_id": tank.get('tank_id')},
+                        {"$set": tank}, upsert=True)
 
 def run(realm):
-    print(f'Working on {realm}')
+    print(f'[{datetime.utcnow()}] Working on {realm} sessions')
     player_list = list(players_db.find({'realm': realm}).distinct('_id'))
     if len(player_list) == 0:
         print(f'No players on {realm}')
         return
     else:
-        Api.update_stats(player_ids_long=player_list, hard=True, realm=realm)
+        Api.update_stats(player_ids_long=player_list, hard=False, realm=realm)
         Api.update_players(player_ids_long=player_list, realm=realm)
 
 
 def refresh_wn8(realm):
+    print(f'[{datetime.utcnow()}] Working on {realm} WN8')
     player_list = players_db.find({'realm': realm}).distinct('_id')
     Api.add_career_wn8(player_list, realm=realm)
     print(f"Done refreshing career WN8 {realm}")
 
 
 def refresh_tank_avg_cache():
+    print(f'[{datetime.utcnow()}] Working on tank acerages')
     url = 'https://www.blitzstars.com/api/tankaverages.json'
     res = rapidjson.loads(requests.get(url).text)
     tanks_obj_list = []

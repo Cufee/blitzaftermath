@@ -18,7 +18,9 @@ Stats = StatsApi()
 
 
 class Render:
-    def __init__(self, player_id: int, realm: str, hours=None):
+    def __init__(self, player_id: int, realm: str, bg_url: str, hours=None):
+        print(bg_url)
+
         if hours:
             session_duration = (datetime.utcnow() - timedelta(hours=hours))
         else:
@@ -38,7 +40,7 @@ class Render:
         self.player_id = player_details.get('_id')
 
         self.tank_count = len(session_detailed)
-        self.render_prep()
+        self.render_prep(bg_url)
         self.render_header(player_details=player_details)
         self.render_all_stats(stats_all=session_all,
                               live_stats_all=live_stats_all, session_detailed=session_detailed, player_details=player_details)
@@ -47,7 +49,7 @@ class Render:
             tank_stats = session_detailed.get(tank_id)
             self.render_detailed_stats(tank_stats=tank_stats, card_index=i)
 
-    def render_prep(self):
+    def render_prep(self, bg_url: str):
         # Import fonts
         self.font_size = 32
         self.font = ImageFont.truetype(
@@ -60,6 +62,7 @@ class Render:
             "./cogs/replays/render/fonts/font_slim.ttf", int(self.font_size * 0.9))
 
         self.font_color_base = (255, 255, 255)
+        self.font_color_card = (0, 0, 0, 100)
         self.font_color_none = (255, 255, 255, 0)
         self.font_color_none = (0, 0, 0, 0)
         self.font_color_half = (200, 200, 200, 100)
@@ -94,9 +97,20 @@ class Render:
 
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
-            'RGB', (self.frame_w, self.frame_h), (255, 255, 255))
-        try:
+            'RGB', (self.frame_w, self.frame_h), (0, 0, 0))
+
+        if bg_url:
+            # Get image from URL
+            response = requests.get(bg_url)
+            try:
+                bg_image = Image.open(BytesIO(response.content))
+            except:
+                print("Failed to load custom bg image")
+                bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+        else:
             bg_image = Image.open('./cogs/replays/render/bg_frame.png')
+
+        try:
             bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = self.frame_h / bg_image_h
@@ -104,10 +118,14 @@ class Render:
                 bg_image_ratio = self.frame_w / bg_image_w
             bg_image = bg_image.resize(
                 (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
+
+            new_bg_w, new_bg_h = bg_image.size
+            centering_shift_w =  - int(((new_bg_w - self.frame_w) / 2))
+            centering_shift_h =  - int(((new_bg_h - self.frame_h) / 2))
             solid_bg.paste(bg_image, box=(
-                0, 0))
+                centering_shift_w, centering_shift_h))
         except:
-            print("Failed to render BG image")
+            print("Failed to render bg image")
             
         self.frame = solid_bg
 
@@ -147,7 +165,7 @@ class Render:
         header_w = self.base_card_w
         header_h = self.header_h
         header_card = Image.new(
-            'RGBA', (header_w, header_h), (0, 0, 0, 100))
+            'RGBA', (header_w, header_h), self.font_color_card)
         header_draw = ImageDraw.Draw(header_card)
 
         nickanme = player_details.get('nickname')
@@ -183,7 +201,7 @@ class Render:
         stats_all_w = self.base_card_w
         stats_all_h = self.base_card_h
         stats_all_card = Image.new(
-            'RGBA', (stats_all_w, stats_all_h), (0, 0, 0, 100))
+            'RGBA', (stats_all_w, stats_all_h), self.font_color_card )
         stats_draw = ImageDraw.Draw(stats_all_card)
         player_wn8 = player_details.get('career_wn8', '-')
         if player_wn8 != '-':
@@ -365,7 +383,7 @@ class Render:
         stats_detailed_w = self.base_card_w
         stats_detailed_h = self.detailed_card_h
         stats_detailed_card = Image.new(
-            'RGBA', (stats_detailed_w, stats_detailed_h), (0, 0, 0, 100))
+            'RGBA', (stats_detailed_w, stats_detailed_h), self.font_color_card)
         stats_draw = ImageDraw.Draw(stats_detailed_card)
 
         # Organize tank data
@@ -436,7 +454,7 @@ class Render:
         # Color premium vehicles
         tier_color = self.font_color_base
         draw_tier_w = draw_name_w - tier_text_w - int(self.font_size / 3)
-        draw_tier_h = text_h_margin + int((wn8_text_h - tier_text_h) / 2)
+        draw_tier_h = text_h_margin + int((name_text_h - tier_text_h) / 2)
         stats_draw.text((draw_tier_w, draw_tier_h), tank_tier,
                         tier_color, font=self.font_half_size)
         # Draw tank WN8
@@ -526,5 +544,5 @@ class Render:
         self.frame.save(final_buffer, 'png')
         final_buffer.seek(0)
         image_file = File(
-            filename=f"top.png", fp=final_buffer)
+            filename=f"result.png", fp=final_buffer)
         return image_file
