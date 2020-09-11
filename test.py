@@ -13,30 +13,31 @@ from cogs.api.stats_api import StatsApi
 # from cogs.stats.render import Render
 
 client = MongoClient("mongodb://51.222.13.110:27017")
-# guilds_settings = client.guilds.guilds_settings
+guilds_settings = client.guilds.guilds_settings
 
-# db = client.summer2020contest
+db = client.summer2020contest
 glossary = client.glossary
-# stats = client.stats
+stats = client.stats
 
 # guilds = client.guilds.guilds_settings
 # clans = db.clans
 # players = db.players
 # players_stats = stats.players
-db_tanks = glossary.tanks
+# db_tanks = glossary.tanks
 # tankaverages = glossary.tankaverages
 # clan_marks = db.marksOfMastery
+users = stats.users
 
 
 # Cache glossary
-res = requests.get(
-    'https://api.wotblitz.com/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
+# res = requests.get(
+#     'https://api.wotblitz.com/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
 
-res_json = rapidjson.loads(res.text)
+# res_json = rapidjson.loads(res.text)
 
-for tank in res_json.get('data').values():
-    db_tanks.update_one({"tank_id": tank.get('tank_id')},
-                     {"$set": tank}, upsert=True)
+# for tank in res_json.get('data').values():
+#     db_tanks.update_one({"tank_id": tank.get('tank_id')},
+#                      {"$set": tank}, upsert=True)
 
 # from cogs.api.clan_rating_api import ClansRating
 
@@ -68,3 +69,18 @@ for tank in res_json.get('data').values():
 # API = AsyncClanActivityAPI()
 
 # API.enable_for_clan(("NA", "RUS_"))
+
+# from cogs.pay_to_win.stats_module import CustomBackground
+# bg = CustomBackground()
+
+# for u in users.find():
+#     u_id_str = str(u.get("_id"))
+#     # print(u_id_str)
+#     res = bg.get("202905960405139456")
+#     if res and "Aftermath" not in res:
+#         # print(res)
+#         # res
+#         res = bg.put("202905960405139456", res)
+#         print(res)
+
+# # print(res)

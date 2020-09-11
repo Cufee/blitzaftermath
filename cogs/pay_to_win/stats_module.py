@@ -8,17 +8,19 @@ import requests
 class CustomBackground():
     def get(self, user_id: str) -> str:
         # Get image from public_id
-        image_res = resources(public_id=user_id)
+        image_res = resources(public_id=f"Aftermath/{user_id}", folder="Aftermath")
         if not image_res:
             # Request failed / Bad response
             return "No response from server."
         else:
             # Search through res to get the image
             image_url = None
+
             for r in image_res.get('resources', []):
-                if r.get('public_id') == user_id:
+                if r.get('public_id') == f"Aftermath/{user_id}":
                     image_url = r.get('url')
                     break
+
             return image_url
 
 
@@ -38,7 +40,7 @@ class CustomBackground():
         if score > 0.7:
             return "This looks like a NSFW image, I am not able to use it."
 
-        response = upload(image_url, public_id=user_id)
+        response = upload(image_url,public_id=user_id, folder="Aftermath")
         if not response:
             # Request failed / Bad response
             return "No response from server."
@@ -51,14 +53,19 @@ class CustomBackground():
 
     def delete(self, user_id: str) -> str:
         # Delete user images by public_id
-        response = delete_resources(public_ids=user_id)
+        response = delete_resources(public_ids=f"Aftermath/{user_id}")
+        print(response)
         if not response:
             # Request failed / Bad response
             return "No response from server."
 
-        elif response.get('deleted').get(user_id, "") == 'deleted':
+        elif response.get('deleted').get(f"Aftermath/{user_id}", "") == 'deleted':
             # Image was deleted
             return None
+
+        elif response.get('deleted').get(f"Aftermath/{user_id}", "") == 'not_found':
+            # Image not found / other errors
+            return "You do not have a custom background set."
 
         else:
             # Image not found / other errors
