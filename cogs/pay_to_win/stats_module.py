@@ -14,25 +14,8 @@ class CustomBackground():
             api_secret = "qidZPaMrwgw5wK5ra0ZE33ns468" 
             )
 
-    def get(self, user_id: str) -> str:
-        # Get image from public_id
-        image_res = resources(public_id=f"Aftermath/{user_id}", folder="Aftermath")
-        if not image_res:
-            # Request failed / Bad response
-            return "No response from server."
-        else:
-            # Search through res to get the image
-            image_url = None
 
-            for r in image_res.get('resources', []):
-                if r.get('public_id') == f"Aftermath/{user_id}":
-                    image_url = r.get('url')
-                    break
-
-            return image_url
-
-
-    def put(self, user_id: str, image_url: str) -> str:
+    def put(self, user_id: str, image_url: str) -> (str, str):
         """Upload a new image or update the existing one"""
         # Check NSFW images
         r = requests.post(
@@ -43,16 +26,15 @@ class CustomBackground():
             headers={'api-key': '0b9a5fc7-76fc-47a5-8b62-4772146c4c98'}
             )
         score = (r.json().get('output', {}).get('nsfw_score', -1))
-        print(score)
 
         if r.json().get("err") == "error processing given inputs from request":
-            return "This does not look like a valid image, try a different format."
+            return "This does not look like a valid image, try a different format.", None
 
         elif score == -1:
-            return "My NSFW detector broke, try again later."
+            return "My NSFW detector broke, try again later.", None
 
         elif score > 0.7:
-            return "This looks like a NSFW image, I am not able to use it."
+            return "This looks like a NSFW image, I am not able to use it.", None
 
         response = upload(image_url, public_id=user_id, folder="Aftermath", crop="scale", width=400, format="jpg")
         if not response:
@@ -60,9 +42,11 @@ class CustomBackground():
             return "No response from server."
         elif response.get("public_id", None):
             # Upload success
-            return None
+            new_url = response.get('secure_url')
+            print(new_url)
+            return None, new_url
         else:
-            return "Upload failed"
+            return "Upload failed", None
 
 
     def delete(self, user_id: str) -> str:

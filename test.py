@@ -70,17 +70,25 @@ users = stats.users
 
 # API.enable_for_clan(("NA", "RUS_"))
 
+# Migration script
 # from cogs.pay_to_win.stats_module import CustomBackground
+# from cogs.api.discord_users_api import DiscordUsersApi
+
+# du = DiscordUsersApi()
 # bg = CustomBackground()
 
 # for u in users.find():
-#     u_id_str = str(u.get("_id"))
-#     # print(u_id_str)
-#     res = bg.get("202905960405139456")
-#     if res and "Aftermath" not in res:
-#         # print(res)
-#         # res
-#         res = bg.put("202905960405139456", res)
-#         print(res)
-
-# # print(res)
+#     u_id = u.get("_id")
+#     u_id_str = str(u_id)
+#     res = bg.get(u_id_str)
+#     if res:
+#         continue
+#     else:
+#         raw_url = f"https://res.cloudinary.com/vkodev/image/upload/v1599849089/Aftermath/{u_id}.jpg"
+#         try:
+#             err, link = bg.put(u_id_str, raw_url)
+#             if err:
+#                 continue
+#             print("ok")
+#         except:
+#             continue

@@ -44,7 +44,7 @@ class blitz_aftermath_stats(commands.Cog):
         player_id = UsersApi.get_default_player_id(
                     discord_user_id=(ctx.author.id))
         if player_id:
-            bg_url = bgAPI.get(str(ctx.author.id))
+            bg_url = UsersApi.get_custom_bg(ctx.author.id)
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
             image = Render(player_id=player_id, realm=player_realm, bg_url=bg_url).render_image()
@@ -80,7 +80,7 @@ class blitz_aftermath_stats(commands.Cog):
                     discord_user_id=(message.author.id))
 
                 if player_id:
-                    bg_url = bgAPI.get(str(message.author.id))
+                    bg_url = UsersApi.get_custom_bg(message.author.id)
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
                     image = Render(player_id=player_id,
@@ -164,8 +164,8 @@ class blitz_aftermath_stats(commands.Cog):
                 else:
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
-
-                bg_url = bgAPI.get(str(message.author.id))
+                
+                bg_url = UsersApi.get_custom_bg(message.author.id)
                 image = Render(player_id=player_id,
                                hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                 await message.channel.send(file=image)
@@ -185,7 +185,7 @@ class blitz_aftermath_stats(commands.Cog):
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
-                    bg_url = bgAPI.get(str(message.author.id))
+                    bg_url = UsersApi.get_custom_bg(message.author.id)
                     image = Render(player_id=player_id,
                                    hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
@@ -312,8 +312,9 @@ class blitz_aftermath_stats(commands.Cog):
 
             # Image url found
             if img_url:
-                err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
+                err, secure_url = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
                 if not err:
+                    UsersApi.add_custom_bg(ctx.author.id, secure_url)
                     await ctx.send("Awesome! Your stats will now shine bright :)")
                     return
                 else:
@@ -333,6 +334,7 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         try:
+            UsersApi.remove_custom_bg(ctx.author.id)
             err = bgAPI.delete(str(ctx.author.id))
             if err:
                 raise Exception(err)

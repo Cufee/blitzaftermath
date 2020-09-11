@@ -54,6 +54,33 @@ class DiscordUsersApi():
             user_filter, {'$set': user_data}, upsert=True)
         return None
 
+    def get_custom_bg(self, discord_user_id):
+        '''Links Discord UserID to URL for a custom image bg'''
+        user_filter = {'_id': discord_user_id}
+        user_data = self.users_collection.find_one(user_filter)
+        url = user_data.get('custom_bg', None)
+        return url
+
+    def add_custom_bg(self, discord_user_id, url):
+        '''Links Discord UserID to URL for a custom image bg'''
+        user_filter = {'_id': discord_user_id}
+        user_data = {
+            'custom_bg': url
+        }
+        self.users_collection.update_one(
+            user_filter, {'$set': user_data}, upsert=True)
+        return None
+
+    def remove_custom_bg(self, discord_user_id):
+        '''Links Discord UserID to URL for a custom image bg'''
+        user_filter = {'_id': discord_user_id}
+        user_data = {
+            'custom_bg': None
+        }
+        self.users_collection.update_one(
+            user_filter, {'$set': user_data}, upsert=True)
+        return None
+
     def get_default_player_id(self, discord_user_id):
         user_filter = {'_id': discord_user_id}
         user_data = self.users_collection.find_one(
