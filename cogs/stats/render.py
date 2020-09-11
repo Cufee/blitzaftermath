@@ -447,7 +447,7 @@ class Render:
         # Color premium vehicles
         tier_color = self.font_color_base
         draw_tier_w = draw_name_w - tier_text_w - int(self.font_size / 3)
-        draw_tier_h = text_h_margin + int((wn8_text_h - tier_text_h) / 2)
+        draw_tier_h = text_h_margin + int((name_text_h - tier_text_h) / 2)
         stats_draw.text((draw_tier_w, draw_tier_h), tank_tier,
                         tier_color, font=self.font_half_size)
         # Draw tank WN8
