@@ -140,7 +140,7 @@ class Render:
 
     def get_rating_col(self, rating: int):
         color_dict = {
-            0: (0, 0, 0, 255),          # Black
+            0: (0, 0, 0, 100),          # Matching BG
             300: (251, 83, 83, 255),    # Red
             450: (255, 160, 49, 255),   # Orange yellow
             650: (255, 244, 65, 255),   # Yellow
