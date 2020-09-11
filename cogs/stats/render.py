@@ -111,7 +111,6 @@ class Render:
             bg_image = Image.open('./cogs/replays/render/bg_frame.png')
 
         try:
-            bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=4))
             bg_image_w, bg_image_h = bg_image.size
             bg_image_ratio = self.frame_h / bg_image_h
             if bg_image_ratio < self.frame_w / bg_image_w:
@@ -119,9 +118,13 @@ class Render:
             bg_image = bg_image.resize(
                 (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
 
+            blur_radius = 10
+            bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
             new_bg_w, new_bg_h = bg_image.size
             centering_shift_w =  - int(((new_bg_w - self.frame_w) / 2))
-            centering_shift_h =  - int(((new_bg_h - self.frame_h) / 2))
+            centering_shift_h = -int(((new_bg_h - self.frame_h) / 2))
+            
             solid_bg.paste(bg_image, box=(
                 centering_shift_w, centering_shift_h))
         except Exception as e:
