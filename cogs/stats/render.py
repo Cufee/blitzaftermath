@@ -19,8 +19,6 @@ Stats = StatsApi()
 
 class Render:
     def __init__(self, player_id: int, realm: str, bg_url: str, hours=None):
-        print(bg_url)
-
         if hours:
             session_duration = (datetime.utcnow() - timedelta(hours=hours))
         else:
