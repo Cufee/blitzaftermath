@@ -65,19 +65,6 @@ class Render:
         self.font_color_half = (200, 200, 200, 100)
         self.font_color_session_time = (200, 200, 200, 255)
 
-        self.color_dict = {
-            -1: (142, 65, 177, 255),
-            300: (251, 83, 83, 255),
-            450: (255, 160, 49, 255),
-            650: (255, 244, 65, 255),
-            900: (149, 245, 62, 255),
-            1200: (103, 190, 51, 255),
-            1600: (106, 236, 255, 255),
-            2000: (46, 174, 193, 255),
-            2450: (208, 108, 255, 255),
-            2900: (142, 65, 177, 255)
-        }
-
         self.tank_tier_dict = {
             0: "",
             1: "I",
@@ -133,6 +120,29 @@ class Render:
         frame_draw.text((time_draw_w, time_draw_h), self.last_stamp_conv,
                         self.font_color_session_time, font=self.font_slim)
 
+    def get_rating_col(self, rating: int):
+        color_dict = {
+            0: (0, 0, 0, 255),          # Black
+            300: (251, 83, 83, 255),    # Red
+            450: (255, 160, 49, 255),   # Orange yellow
+            650: (255, 244, 65, 255),   # Yellow
+            900: (149, 245, 62, 255),   # Lime green
+            1200: (103, 190, 51, 255),  # Dark green
+            1600: (106, 236, 255, 255), # Teal
+            2000: (46, 174, 193, 255),  # Blue
+            2450: (208, 108, 255, 255), # Pink
+            2900: (142, 65, 177, 255)   # Magenta
+        }
+
+        for k in color_dict.keys():
+            d = k - rating
+            if d <= 0:
+                color = color_dict.get(k)
+            else:
+                break
+
+        return color
+
     def render_header(self, player_details: dict):
         header_w = self.base_card_w
         header_h = self.header_h
@@ -177,8 +187,7 @@ class Render:
         stats_draw = ImageDraw.Draw(stats_all_card)
         player_wn8 = player_details.get('career_wn8', '-')
         if player_wn8 != '-':
-            player_wn8_color = self.color_dict.get(player_wn8, self.color_dict[min(
-                self.color_dict.keys(), key=lambda k: (k-player_wn8) < 0)])
+            player_wn8_color = self.get_rating_col(player_wn8)
 
         # Organize Data
         live_stats_random = live_stats_all.get('live_stats_random')
@@ -206,8 +215,7 @@ class Render:
 
         if session_detailed_battles != 0:
             session_wn8 = round(session_total_wn8 / session_detailed_battles)
-            session_wn8_color = self.color_dict.get(session_wn8, self.color_dict[min(
-                self.color_dict.keys(), key=lambda k: (k-session_wn8) < 0)])
+            session_wn8_color = self.get_rating_col(session_wn8)
         else:
             session_wn8 = '-'
             session_wn8_color = self.font_color_none
@@ -376,8 +384,7 @@ class Render:
         # Extra spaces to fit the color bar
         tank_wn8 = f"{tank_wn8_value}"
         if tank_wn8_value != '':
-            tank_wn8_color = self.color_dict.get(
-                tank_wn8_value, self.color_dict[min(self.color_dict.keys(), key=lambda k:(k - tank_wn8_value) <= 0)])
+            tank_wn8_color = self.get_rating_col(tank_wn8_value)
         else:
             tank_wn8_color = (0, 0, 0, 100)
         # Previous session stats
