@@ -290,7 +290,6 @@ class blitz_aftermath_stats(commands.Cog):
         if ctx.author == self.client.user:
             return
 
-        valid_img_formats = ('.jpeg', '.jpg', '.png')
         # Fix url
         try:
             url = url.strip()
@@ -299,7 +298,7 @@ class blitz_aftermath_stats(commands.Cog):
         print(url)
         try:
             # Set image url
-            if url and url.endswith(valid_img_formats):
+            if url:
                 img_url = url
             else:
                 img_url = None
@@ -307,12 +306,11 @@ class blitz_aftermath_stats(commands.Cog):
             attachments = ctx.message.attachments
             # Check attachments for jpeg images
             for att in attachments:
-                if att.url.endswith(valid_img_formats):
+                if att.url:
                     img_url = att.url
                     break
 
             # Image url found
-            print(img_url)
             if img_url:
                 err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
                 if not err:

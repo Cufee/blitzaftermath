@@ -124,7 +124,8 @@ class Render:
             centering_shift_h =  - int(((new_bg_h - self.frame_h) / 2))
             solid_bg.paste(bg_image, box=(
                 centering_shift_w, centering_shift_h))
-        except:
+        except Exception as e:
+            print(e)
             print("Failed to render bg image")
             
         self.frame = solid_bg
