@@ -62,7 +62,7 @@ class Render:
             "./cogs/replays/render/fonts/font_slim.ttf", int(self.font_size * 0.9))
 
         self.font_color_base = (255, 255, 255)
-        self.font_color_card = (60, 60, 60, 150)
+        self.font_color_card = (0, 0, 0, 100)
         self.font_color_none = (255, 255, 255, 0)
         self.font_color_none = (0, 0, 0, 0)
         self.font_color_half = (200, 200, 200, 100)
@@ -110,7 +110,7 @@ class Render:
 
         # Fill background with a non-transparent layer to fix self.frame transparency due to RGBA
         solid_bg = Image.new(
-            'RGB', (self.frame_w, self.frame_h), (255, 255, 255))
+            'RGB', (self.frame_w, self.frame_h), (0, 0, 0))
 
         if bg_url:
             # Get image from URL
@@ -132,12 +132,13 @@ class Render:
             bg_image = bg_image.resize(
                 (int(bg_image_w * bg_image_ratio), int(bg_image_h * bg_image_ratio)))
 
-            new_bg_w, _ = bg_image.size
-            centering_shift =  - int(((new_bg_w - self.frame_w) / 2))
+            new_bg_w, new_bg_h = bg_image.size
+            centering_shift_w =  - int(((new_bg_w - self.frame_w) / 2))
+            centering_shift_h =  - int(((new_bg_h - self.frame_h) / 2))
             solid_bg.paste(bg_image, box=(
-                centering_shift, 0))
+                centering_shift_w, centering_shift_h))
         except:
-            print("Failed to render BG image")
+            print("Failed to render bg image")
             
         self.frame = solid_bg
 
