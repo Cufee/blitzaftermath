@@ -322,7 +322,7 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception(err)
             # No valid url
             else:
-                raise Exception('There is no link to valid image in your message.\nFor example: v-fancy https://i.imgflip.com/1ovalo.jpg')
+                raise Exception('There is no link to a valid image in your message.\nUsage example:\nv-fancy https://i.imgflip.com/1ovalo.jpg')
 
         # Handle exceptions
         except Exception as e:
