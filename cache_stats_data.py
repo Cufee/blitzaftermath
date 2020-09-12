@@ -35,7 +35,7 @@ def run(realm):
         print(f'No players on {realm}')
         return
     else:
-        Api.update_stats(player_ids_long=player_list, hard=False, realm=realm)
+        Api.update_stats(player_ids_long=player_list, hard=True, realm=realm)
         Api.update_players(player_ids_long=player_list, realm=realm)
 
 
