@@ -88,6 +88,8 @@ if __name__ == "__main__":
         '0 1 * * *'), args=['EU'])
     scheduler.add_job(run, CronTrigger.from_crontab(
         '0 23 * * *'), args=['RU'])
+    scheduler.add_job(run, CronTrigger.from_crontab(
+        '0 18 * * *'), args=['ASIA'])
     # Refresh WN8
     scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
         '10 9 * * *'), args=['NA'])
@@ -95,6 +97,8 @@ if __name__ == "__main__":
         '10 1 * * *'), args=['EU'])
     scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
         '10 23 * * *'), args=['RU'])
+    scheduler.add_job(refresh_wn8, CronTrigger.from_crontab(
+        '10 18 * * *'), args=['ASIA'])
 
     print('Press Ctrl+{0} to exit'.format('C'))
 
