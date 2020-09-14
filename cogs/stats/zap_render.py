@@ -367,7 +367,7 @@ class Render:
         tank_dmg = f"DMG: {tank_dmg_value}"
         tank_xp_value = round((tank_stats.get('xp') / tank_battles))
         tank_xp = f"XP: {tank_xp_value}"
-        tank_wn8_value = tank_stats.get('tank_wn8', '')
+        tank_wn8_value = tank_data.get('tank_wn8', '')
         # Extra spaces to fit the color bar
         tank_wn8 = f"{tank_wn8_value}"
         if tank_wn8_value != '':

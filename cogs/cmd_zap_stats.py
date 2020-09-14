@@ -23,18 +23,18 @@ UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 
 def zap_render(player_id: int, realm: str, days: int, bg_url: str):
-    start = time.time()
-    request_dict = {        
-        "player_id": player_id,
-        "realm": realm,
-        "days": days
-    }
-    player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
-    print(f'Zap fetch took {round((time.time() - start), 2)} seconds')
-    if player_data.get('error', None):
-        raise Exception("Zap failed to fetch data.")
+        start = time.time()
+        request_dict = {        
+            "player_id": player_id,
+            "realm": realm,
+            "days": days
+        }
+        player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
+        print(f'Zap fetch took {round((time.time() - start), 2)} seconds')
+        if player_data.get('error', None):
+            raise Exception("Zap failed to fetch data.")
 
-    return Render(player_id=player_id , realm=realm, bg_url=bg_url, data=player_data).render_image()
+        return Render(player_id=player_id , realm=realm, bg_url=bg_url, data=player_data).render_image()
 
 class blitz_aftermath_zap_stats(commands.Cog):
 
@@ -64,15 +64,18 @@ class blitz_aftermath_zap_stats(commands.Cog):
             discord_user_id=(message.author.id))
 
         if player_id:
-            bg_url = UsersApi.get_custom_bg(message.author.id)
-            player_realm = players.find_one(
-                {'_id': player_id}).get("realm")
-            
-            image = zap_render(player_id, player_realm, days, bg_url)
+            try:
+                bg_url = UsersApi.get_custom_bg(message.author.id)
+                player_realm = players.find_one(
+                    {'_id': player_id}).get("realm")
+                
+                image = zap_render(player_id, player_realm, days, bg_url)
 
-            await message.channel.send(f"Zap took {round((time.time() - start), 2)} seconds.", file=image)
-            print(f"Zap took {round((time.time() - start), 2)} seconds.")
-            return None
+                await message.channel.send(f"Zap took {round((time.time() - start), 2)} seconds.", file=image)
+                print(f"Zap took {round((time.time() - start), 2)} seconds.")
+                return None
+            except Exception as e:
+                await message.channel.send(f'```{e}```')
         else:
             await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
             return None
