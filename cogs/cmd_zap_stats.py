@@ -74,6 +74,9 @@ class blitz_aftermath_zap_stats(commands.Cog):
                 await message.channel.send(f"Zap took {round((time.time() - start), 2)} seconds.", file=image)
                 print(f"Zap took {round((time.time() - start), 2)} seconds.")
                 return None
+
+            except requests.exceptions.ConnectionError:
+                await message.channel.send(f':zap:Zap is currently down for maintenance, thanks for giving it a try!')
             except Exception as e:
                 await message.channel.send(f'```{e}```')
         else:
