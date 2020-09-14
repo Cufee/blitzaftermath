@@ -29,6 +29,7 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
         "days": days
     }
     player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
+    print(player_data)
     if player_data.get('error', None):
         raise Exception("Zap failed to fetch data.")
 
