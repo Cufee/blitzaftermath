@@ -23,12 +23,14 @@ UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 
 def zap_render(player_id: int, realm: str, days: int, bg_url: str):
+    start = time.time()
     request_dict = {        
         "player_id": player_id,
         "realm": realm,
         "days": days
     }
     player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
+    print(f'Zap fetch took {round((time.time() - start), 2)} seconds')
     if player_data.get('error', None):
         raise Exception("Zap failed to fetch data.")
 

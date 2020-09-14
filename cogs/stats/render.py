@@ -13,6 +13,7 @@ from cogs.api.stats_api import StatsApi
 
 from datetime import datetime, timedelta
 from pytz import timezone
+import time
 
 Stats = StatsApi()
 
@@ -24,8 +25,10 @@ class Render:
         else:
             session_duration = None
 
+        start = time.time()
         player_details, live_stats_all, session_all, session_detailed = Stats.get_session_stats(
             player_id=player_id, session_duration=session_duration, realm=realm)
+        print(f'Old stats fetch took {round((time.time() - start), 2)} seconds')
 
         self.session_timestamp = session_all.get('timestamp')
         if realm.upper() == 'NA':
