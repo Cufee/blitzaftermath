@@ -12,6 +12,8 @@ from cogs.api.discord_users_api import DiscordUsersApi
 
 from cogs.pay_to_win.stats_module import CustomBackground
 
+import time
+
 client = MongoClient("mongodb://51.222.13.110:27017")
 players = client.stats.players
 
@@ -59,6 +61,7 @@ class blitz_aftermath_stats(commands.Cog):
         if message.author == self.client.user:
             return
 
+        start = time.time()
         # Convert session hours into int
         if args and  len(args[-1]) < 3:
             try:
@@ -86,6 +89,7 @@ class blitz_aftermath_stats(commands.Cog):
                     image = Render(player_id=player_id,
                                    hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
                     await message.channel.send(file=image)
+                    print(f"Old stats took {round((time.time() - start), 2)} seconds.")
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')

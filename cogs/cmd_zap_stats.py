@@ -29,7 +29,6 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
         "days": days
     }
     player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
-    print(player_data)
     if player_data.get('error', None):
         raise Exception("Zap failed to fetch data.")
 
@@ -69,7 +68,8 @@ class blitz_aftermath_zap_stats(commands.Cog):
             
             image = zap_render(player_id, player_realm, days, bg_url)
 
-            await message.channel.send(f"Zap took {round((time.time() - start), 2)} seconds.",file=image)
+            await message.channel.send(f"Zap took {round((time.time() - start), 2)} seconds.", file=image)
+            print(f"Zap took {round((time.time() - start), 2)} seconds.")
             return None
         else:
             await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
