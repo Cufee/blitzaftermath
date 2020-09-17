@@ -34,10 +34,10 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
             "detailed_limit": 0
         }
         res = requests.get("http://localhost:6969/player", json=request_dict)
-        try:
+        if res.status_code == 200:
             image = discord.File(filename="result.png", fp=BytesIO(res.content))
             return image
-        except:
+        else:
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
             return None
