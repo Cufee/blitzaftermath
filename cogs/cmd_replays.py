@@ -121,7 +121,10 @@ class blitz_aftermath_replays(commands.Cog):
                         channel_invite = await message.channel.create_invite(max_age=300)
                         owner_member = self.client.get_user(202905960405139456)
                         dm_channel = await owner_member.create_dm()
-                        await dm_channel.send(f'An error occured in {guild_id} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
+                        try:
+                            await dm_channel.send(f'An error occured in {guild_id} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
+                        except:
+                            pass
             else:
                 return
 
@@ -250,7 +253,10 @@ class blitz_aftermath_replays(commands.Cog):
 
 
         if channel_id in enabled_channels:
-            await ctx.send(f'It looks like you already have me watching #{channel_name}.', delete_after=30)
+            try:
+                await ctx.send(f'It looks like you already have me watching #{channel_name}.', delete_after=30)
+            except:
+                pass
             return
 
         guild_is_premium, _ = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_is_premium")
