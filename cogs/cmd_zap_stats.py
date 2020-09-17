@@ -29,7 +29,9 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
         request_dict = {        
             "player_id": player_id,
             "realm": realm,
-            "days": days
+            "days": days,
+            "sort_key": "",
+            "detailed_limit": 0
         }
         res = requests.get("http://localhost:6969/player", json=request_dict)
         try:
