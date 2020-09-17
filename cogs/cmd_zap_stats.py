@@ -40,7 +40,10 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
         else:
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
-            return None
+            if res_json.get('error') == "mongo: no documents in result":
+                raise Exception("Not enough data to render your session.")
+            else:
+                raise Exception("An error has occured while I was trying to get your session.")
 
 class blitz_aftermath_zap_stats(commands.Cog):
 
