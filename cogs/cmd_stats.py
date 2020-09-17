@@ -10,14 +10,16 @@ from io import BytesIO
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
 from cogs.pay_to_win.stats_module import CustomBackground
+from cogs.api.message_cache_api import MessageCacheAPI
 
 import time
 
-client = MongoClient("mongodb://51.222.13.110:27017")
-players = client.stats.players
+db_client = MongoClient("mongodb://51.222.13.110:27017")
+players = db_client.stats.players
 
 debug = False
 API = StatsApi()
+CacheAPI = MessageCacheAPI()
 UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 
@@ -30,10 +32,13 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             "detailed_limit": 0,
             "bg_url": bg_url
         }
-        res = requests.get("http://localhost:6969/player", json=request_dict)
+        try:
+            res = requests.get("http://localhost:6969/player", json=request_dict)
+        except requests.exceptions.ConnectionError:
+            raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         if res.status_code == 200:
             image = discord.File(filename="result.png", fp=BytesIO(res.content))
-            return image
+            return image, request_dict
         else:
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
@@ -42,10 +47,17 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             else:
                 raise Exception("Zap failed to render your session.")
 
+
 class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.sort_battles = self.client.get_emoji(
+            756207071304876123)
+        self.sort_winrate = self.client.get_emoji(
+            756207071027789886)
+        self.sort_rating = self.client.get_emoji(
+            756207070956748891)
 
     # Events
     # @commands.Cog.listener()
@@ -53,29 +65,85 @@ class blitz_aftermath_stats(commands.Cog):
     async def on_ready(self):
         print(f'[Beta] Aftermath Stats cog is ready.')
 
+
     @commands.Cog.listener()
-    async def on_message(self, ctx):
-        if ctx.author == self.client.user:
+    async def on_raw_reaction_add(self, payload):
+        guild = discord.utils.find(
+            lambda g: g.id == payload.guild_id, self.client.guilds)
+        member = discord.utils.find(
+            lambda m: m.id == payload.user_id, guild.members)
+        if member == self.client.user:
+            return
+
+        channel = discord.utils.find(
+            lambda m: m.id == payload.channel_id, guild.channels)
+
+        message = await channel.fetch_message(payload.message_id)
+        message_details = CacheAPI.get_message_details(payload.message_id, payload.guild_id)
+        if not message_details:
+            return
+
+        if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')):
+            dm_channel = await member.create_dm()
+            await dm_channel.send("You will need to wait 15 seconds before using sort.")
+            return
+        
+        player_id = message_details.get('request').get('player_id')
+        player_realm = message_details.get('request').get('realm')
+        days = message_details.get('request').get('days')
+        bg_url = message_details.get('request').get('bg_url')
+        old_key = message_details.get('request').get('sort_key')
+        
+        if payload.emoji == self.sort_battles:
+            new_key = "-battles"
+            if old_key == "-battles":
+                new_key = "+battles"
+
+        if payload.emoji == self.sort_rating:
+            new_key = "-wn8"
+            if old_key == "-wn8":
+                new_key = "+wn8"
+
+        if payload.emoji == self.sort_winrate:
+            new_key = "-winrate"
+            if old_key == "-winrate":
+                new_key = "+winrate"
+
+        image, request = zap_render(player_id, player_realm, days, bg_url, sort_key=new_key)
+
+        new_message = await message.channel.send(file=image)
+        CacheAPI.cache_message(new_message.id, message.guild.id, request)
+        await new_message.add_reaction(self.sort_battles)
+        await new_message.add_reaction(self.sort_rating)
+        await new_message.add_reaction(self.sort_winrate)
+
+        return
+        
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == self.client.user:
             return
 
         # Blitzbot Member object
         blitzbot = self.client.get_user(173628074846453761)
-        if not blitzbot or not ctx.mentions or ctx.mentions[0] != blitzbot or "wr" not in ctx.content:
+        if not blitzbot or not message.mentions or message.mentions[0] != blitzbot or "wr" not in message.content:
             return
 
         player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(ctx.author.id))
+                    discord_user_id=(message.author.id))
         if player_id:
-            bg_url = UsersApi.get_custom_bg(ctx.author.id)
+            bg_url = UsersApi.get_custom_bg(message.author.id)
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
 
             days = 0
-            image = zap_render(player_id, player_realm, days, bg_url)
+            image, _ = zap_render(player_id, player_realm, days, bg_url)
 
-            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
+            await message.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
-            await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
+            await message.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
     
 
     # Commands
@@ -84,7 +152,6 @@ class blitz_aftermath_stats(commands.Cog):
         if message.author == self.client.user:
             return
 
-        start = time.time()
         # Convert session hours into int
         if args and  len(args[-1]) < 3:
             try:
@@ -114,9 +181,13 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image = zap_render(player_id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, player_realm, days, bg_url)
 
-                    await message.channel.send(file=image)
+                    new_message = await message.channel.send(file=image)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                    await new_message.add_reaction(self.sort_battles)
+                    await new_message.add_reaction(self.sort_rating)
+                    await new_message.add_reaction(self.sort_winrate)
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
@@ -202,9 +273,14 @@ class blitz_aftermath_stats(commands.Cog):
                 if session_days:
                     days = session_days
 
-                image = zap_render(player_id, player_realm, days, bg_url)
 
-                await message.channel.send(file=image)
+                image, request = zap_render(player_id, player_realm, days, bg_url)
+
+                new_message = await message.channel.send(file=image)
+                CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                await new_message.add_reaction(self.sort_battles)
+                await new_message.add_reaction(self.sort_rating)
+                await new_message.add_reaction(self.sort_winrate)
 
                 # Try to set a new default account for new users
                 trydefault = True
@@ -226,9 +302,14 @@ class blitz_aftermath_stats(commands.Cog):
                     days = 0
                     if session_days:
                         days = session_days
-                    image = zap_render(player_id, player_realm, days, bg_url)
 
-                    await message.channel.send(file=image)
+                    image, request = zap_render(player_id, player_realm, days, bg_url)
+
+                    new_message = await message.channel.send(file=image)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                    await new_message.add_reaction(self.sort_battles)
+                    await new_message.add_reaction(self.sort_rating)
+                    await new_message.add_reaction(self.sort_winrate)
                     # Try to set a new default account for new users
                     trydefault = True
 
