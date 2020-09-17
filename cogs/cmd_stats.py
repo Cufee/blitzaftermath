@@ -68,6 +68,9 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        if not payload.guild_id:
+            return
+            
         guild = discord.utils.find(
             lambda g: g.id == payload.guild_id, self.client.guilds)
         member = discord.utils.find(
@@ -123,7 +126,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user:
+        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
 
         # Blitzbot Member object
@@ -149,7 +152,7 @@ class blitz_aftermath_stats(commands.Cog):
     # Commands
     @commands.command(aliases=['wr', 'session', 'Stats', 'Wr'])
     async def stats(self, message, *args):
-        if message.author == self.client.user:
+        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
 
         # Convert session hours into int
@@ -336,8 +339,9 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.command(aliases=['Iam', 'IAM'])
     async def iam(self, message, player_name_str):
-        if message.author == self.client.user:
+        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
+
         try:
             # Split player string, check validity, find player ID
             if '@' in player_name_str:
@@ -408,7 +412,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.command(aliases=['bg'])
     async def fancy(self, ctx, url=None):
-        if ctx.author == self.client.user:
+        if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
             return
 
         # Fix url
@@ -451,7 +455,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.command(aliases=['nobg'])
     async def notfancy(self, ctx):
-        if ctx.author == self.client.user:
+        if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
             return
 
         try:

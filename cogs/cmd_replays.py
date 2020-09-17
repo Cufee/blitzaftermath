@@ -63,7 +63,7 @@ class blitz_aftermath_replays(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user:
+        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
         attachments = message.attachments
         replays = []
@@ -127,6 +127,9 @@ class blitz_aftermath_replays(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        if not payload.guild_id:
+            return
+
         guild = discord.utils.find(
             lambda g: g.id == payload.guild_id, self.client.guilds)
         member = discord.utils.find(
