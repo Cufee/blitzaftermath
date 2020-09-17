@@ -5,11 +5,10 @@ import requests
 import rapidjson
 import traceback
 import re
+from io import BytesIO
 
-from cogs.stats.render import Render
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
-
 from cogs.pay_to_win.stats_module import CustomBackground
 
 import time
@@ -21,6 +20,27 @@ debug = False
 API = StatsApi()
 UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
+
+def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str = ""):
+        request_dict = {        
+            "player_id": player_id,
+            "realm": realm,
+            "days": days,
+            "sort_key": sort_key,
+            "detailed_limit": 0,
+            "bg_url": bg_url
+        }
+        res = requests.get("http://localhost:6969/player", json=request_dict)
+        if res.status_code == 200:
+            image = discord.File(filename="result.png", fp=BytesIO(res.content))
+            return image
+        else:
+            res_json = rapidjson.loads(res.text)
+            print(res_json.get('error'))
+            if res_json.get('error') == "mongo: no documents in result":
+                raise Exception("Not enough data to render your session.")
+            else:
+                raise Exception("Zap failed to render your session.")
 
 class blitz_aftermath_stats(commands.Cog):
 
@@ -49,8 +69,11 @@ class blitz_aftermath_stats(commands.Cog):
             bg_url = UsersApi.get_custom_bg(ctx.author.id)
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
-            image = Render(player_id=player_id, realm=player_realm, bg_url=bg_url).render_image()
-            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*", file=image)
+
+            days = 0
+            image = zap_render(player_id, player_realm, days, bg_url)
+
+            await ctx.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
             await ctx.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
     
@@ -65,12 +88,12 @@ class blitz_aftermath_stats(commands.Cog):
         # Convert session hours into int
         if args and  len(args[-1]) < 3:
             try:
-                session_hours = int(args[-1]) * 24
+                session_days = int(args[-1])
                 args = args[:-1]
             except:
-                session_hours = None
+                session_days = None
         else:
-            session_hours = None
+            session_days = None
 
         player_name_str = "".join(args).strip()
 
@@ -86,10 +109,14 @@ class blitz_aftermath_stats(commands.Cog):
                     bg_url = UsersApi.get_custom_bg(message.author.id)
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
-                    image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
+
+                    days = 0
+                    if session_days:
+                        days = session_days
+
+                    image = zap_render(player_id, player_realm, days, bg_url)
+
                     await message.channel.send(file=image)
-                    print(f"Old stats took {round((time.time() - start), 2)} seconds.")
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
@@ -170,8 +197,13 @@ class blitz_aftermath_stats(commands.Cog):
                     player_realm = player_details.get('realm')
                 
                 bg_url = UsersApi.get_custom_bg(message.author.id)
-                image = Render(player_id=player_id,
-                               hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
+
+                days = 0
+                if session_days:
+                    days = session_days
+
+                image = zap_render(player_id, player_realm, days, bg_url)
+
                 await message.channel.send(file=image)
 
                 # Try to set a new default account for new users
@@ -190,8 +222,12 @@ class blitz_aftermath_stats(commands.Cog):
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
                     bg_url = UsersApi.get_custom_bg(message.author.id)
-                    image = Render(player_id=player_id,
-                                   hours=session_hours, realm=player_realm, bg_url=bg_url).render_image()
+
+                    days = 0
+                    if session_days:
+                        days = session_days
+                    image = zap_render(player_id, player_realm, days, bg_url)
+
                     await message.channel.send(file=image)
                     # Try to set a new default account for new users
                     trydefault = True
