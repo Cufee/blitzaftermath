@@ -33,12 +33,12 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str):
         }
         res = requests.get("http://localhost:6969/player", json=request_dict)
         try:
+            image = discord.File(filename="result.png", fp=BytesIO(res.content))
+            return image
+        except:
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
             return None
-        except:
-            image = discord.File(filename="result.png", fp=BytesIO(res.content))
-            return image
 
 class blitz_aftermath_zap_stats(commands.Cog):
 
