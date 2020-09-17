@@ -1,18 +1,20 @@
 from datetime import datetime, timedelta
 from discord.ext import commands, tasks
 import discord
-import requests
-import rapidjson
-import traceback
-import re
 
-from cogs.stats.zap_render import Render
+import requests
+import traceback
+
+# from cogs.stats.zap_render import Render
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
 
 from cogs.pay_to_win.stats_module import CustomBackground
 
 import time
+
+from PIL import Image
+from io import BytesIO
 
 client = MongoClient("mongodb://51.222.13.110:27017")
 players = client.stats.players
@@ -23,18 +25,14 @@ UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 
 def zap_render(player_id: int, realm: str, days: int, bg_url: str):
-        start = time.time()
         request_dict = {        
             "player_id": player_id,
             "realm": realm,
             "days": days
         }
-        player_data = rapidjson.loads(requests.get("http://localhost:6969/player", json=request_dict).text)
-        print(f'Zap fetch took {round((time.time() - start), 2)} seconds')
-        if player_data.get('error', None):
-            raise Exception("Zap failed to fetch data.")
-
-        return Render(player_id=player_id , realm=realm, bg_url=bg_url, data=player_data).render_image()
+        res = requests.get("http://localhost:6969/player", json=request_dict)
+        image = discord.File(filename="result.png", fp=BytesIO(res.content))
+        return image
 
 class blitz_aftermath_zap_stats(commands.Cog):
 
