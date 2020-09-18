@@ -260,10 +260,15 @@ class blitz_aftermath_replays(commands.Cog):
             return
 
         guild_is_premium, _ = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_is_premium")
+        new_enabled_channels = []
         if enabled_channels:
             new_enabled_channels = enabled_channels.append(channel_id)
         else:
             new_enabled_channels = [channel_id]
+
+        if not new_enabled_channels:
+            await ctx.send("Something did not work while enabling replays in this channel.\nPlease DM Vovko#0851")
+            return
 
         if len(new_enabled_channels) > 2 and not guild_is_premium:
             channel_names = []
@@ -272,7 +277,7 @@ class blitz_aftermath_replays(commands.Cog):
             try:
                 await ctx.send(f"It looks like you already have me watching {channel_names[0]} and {channel_names[1]}. You will need to be a premium member to enable more channels.")
             except:
-                 await ctx.send(f"It looks like you already have me watching multiple channels. You will need to be a premium member to enable more channels.")
+                await ctx.send(f"It looks like you already have me watching multiple channels. You will need to be a premium member to enable more channels.")
 
         else:
             new_settings = {"guild_channels_replays": new_enabled_channels}
