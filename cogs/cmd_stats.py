@@ -58,6 +58,8 @@ class blitz_aftermath_stats(commands.Cog):
             756207071027789886)
         self.sort_rating = self.client.get_emoji(
             756207070956748891)
+        self.learn_more = self.client.get_emoji(
+            756575770381647973)
 
     # Events
     # @commands.Cog.listener()
@@ -80,6 +82,14 @@ class blitz_aftermath_stats(commands.Cog):
 
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
+
+        if payload.emoji == self.learn_more:
+            dm_channel = await member.create_dm()
+            try:
+                await dm_channel.send(f"You can use the reactions below your session to sort the order of tanks!\n{self.sort_battles} - Sort by Battles played.\n{self.sort_rating} - Sort by WN8.\n{self.sort_winrate} - Sort by Winrate.\n*Please keep in mind that there is a 15 second cooldown after you use each reaction.*")
+            except:
+                await channel.send(f"Hey {member.mention}! You need to allow DMs for this reaction to work.", delete_after=15)
+            return
 
         message = await channel.fetch_message(payload.message_id)
         message_details = CacheAPI.get_message_details(payload.message_id, payload.guild_id)
@@ -122,6 +132,7 @@ class blitz_aftermath_stats(commands.Cog):
         await new_message.add_reaction(self.sort_battles)
         await new_message.add_reaction(self.sort_rating)
         await new_message.add_reaction(self.sort_winrate)
+        await new_message.add_reaction(self.learn_more)
 
         return
         
@@ -194,6 +205,7 @@ class blitz_aftermath_stats(commands.Cog):
                     await new_message.add_reaction(self.sort_battles)
                     await new_message.add_reaction(self.sort_rating)
                     await new_message.add_reaction(self.sort_winrate)
+                    await new_message.add_reaction(self.learn_more)
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
@@ -287,6 +299,7 @@ class blitz_aftermath_stats(commands.Cog):
                 await new_message.add_reaction(self.sort_battles)
                 await new_message.add_reaction(self.sort_rating)
                 await new_message.add_reaction(self.sort_winrate)
+                await new_message.add_reaction(self.learn_more)
 
                 # Try to set a new default account for new users
                 trydefault = True
@@ -316,6 +329,7 @@ class blitz_aftermath_stats(commands.Cog):
                     await new_message.add_reaction(self.sort_battles)
                     await new_message.add_reaction(self.sort_rating)
                     await new_message.add_reaction(self.sort_winrate)
+                    await new_message.add_reaction(self.learn_more)
                     # Try to set a new default account for new users
                     trydefault = True
 
