@@ -124,6 +124,8 @@ class blitz_aftermath_stats(commands.Cog):
             new_key = "-winrate"
             if old_key == "-winrate":
                 new_key = "+winrate"
+        else:
+            return
 
         image, request = zap_render(player_id, player_realm, days, bg_url, sort_key=new_key)
 
