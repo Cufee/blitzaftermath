@@ -115,12 +115,12 @@ class blitz_aftermath_stats(commands.Cog):
             if old_key == "-battles":
                 new_key = "+battles"
 
-        if payload.emoji == self.sort_rating:
+        elif payload.emoji == self.sort_rating:
             new_key = "-wn8"
             if old_key == "-wn8":
                 new_key = "+wn8"
 
-        if payload.emoji == self.sort_winrate:
+        elif payload.emoji == self.sort_winrate:
             new_key = "-winrate"
             if old_key == "-winrate":
                 new_key = "+winrate"
