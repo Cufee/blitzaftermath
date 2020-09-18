@@ -91,7 +91,12 @@ class blitz_aftermath_stats(commands.Cog):
                 await channel.send(f"Hey {member.mention}! You need to allow DMs for this reaction to work.", delete_after=15)
             return
 
-        message = await channel.fetch_message(payload.message_id)
+        try:
+            message = await channel.fetch_message(payload.message_id)
+        except:
+            await channel.send("It looks like Aftermath does not have the right permissions in this channel to work properly.")
+            return
+
         message_details = CacheAPI.get_message_details(payload.message_id, payload.guild_id)
         if not message_details:
             return
