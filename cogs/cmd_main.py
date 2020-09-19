@@ -67,8 +67,27 @@ class maintenance(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def perms(self, ctx):
         perms = ctx.channel.permissions_for(ctx.guild.me).value
-        await ctx.send(f"Coming soon :)\n*Your perms code is {perms}*")
-        pass
+        msg_text = """Here is a full list of permissions Aftermath needs to function correctly:
+```
+Basic permissions:
+- Read Messages
+- Read Message History
+- Send Messages
+- Manage Messages
+- Embed Links
+- Attach Files
+- Add Reaction
+- Use External Reactions
+- Connect (voice)
+- Speak   (voice)
+
+Other permissions:
+- Create Instant Invites
+    This is used to invite the developer to the server in case an error has occured and was automatically reported.
+- Change Nickname
+    Just to make sure Aftermath name can be adjusted across all servers.
+```"""
+        await ctx.send(f"{msg_text}*Your perms code is {perms}*")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
