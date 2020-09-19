@@ -11,6 +11,8 @@ from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 from cogs.api.guild_settings_api import API_v2
 
+from random import random
+
 debug = False
 Guilds_API = API_v2()
 
@@ -40,12 +42,14 @@ class maintenance(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         ctx = await self.client.get_context(message)
-        if not ctx.command:
+        if not ctx.command or ctx.prefix not in self.client.command_prefix or message.author == self.client:
             return
+
         perms = message.channel.permissions_for(ctx.guild.me).value
         if perms < 335932497:
-            print(perms)
-            await ctx.send("Aftermath does not have proper permissions on this server, please let the administrator know.")
+            flag = random()
+            if flag > 0.5:
+                await ctx.send(f"*Aftermath does not have proper permissions on this server. Please check `v-perms` if you are an administrator.*")
             return
 
     @commands.Cog.listener()
@@ -58,6 +62,13 @@ class maintenance(commands.Cog):
         owner_member = self.client.get_user(202905960405139456)
         dm_channel = await owner_member.create_dm()
         await dm_channel.send(f"Aftermath was removed from {guild_name}. Edit complete with `{status_code}`.")
+    
+    @commands.command()
+    @commands.has_permissions(manage_messages=True)
+    async def perms(self, ctx):
+        perms = ctx.channel.permissions_for(ctx.guild.me).value
+        await ctx.send(f"Coming soon :)\n*Your perms code is {perms}*")
+        pass
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
