@@ -38,6 +38,17 @@ class maintenance(commands.Cog):
         await dm_channel.send(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
 
     @commands.Cog.listener()
+    async def on_message(self, message):
+        ctx = await self.client.get_context(message)
+        if not ctx.command:
+            return
+        perms = message.channel.permissions_for(ctx.guild.me).value
+        if perms < 335932497:
+            print(perms)
+            await ctx.send("Aftermath does not have proper permissions on this server, please let the administrator know.")
+            return
+
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         guild_id = str(guild.id)
         guild_name = str(guild.name)
