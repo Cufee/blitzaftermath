@@ -112,7 +112,10 @@ Other permissions:
             return
 
         if isinstance(error, commands.DisabledCommand):
-            await ctx.send(f'{ctx.command} has been disabled.')
+            await ctx.send(f'{ctx.command} has been disabled.', delete_after=15)
+
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send(f'It looks like you are not able to use {ctx.command}.', delete_after=15)
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
