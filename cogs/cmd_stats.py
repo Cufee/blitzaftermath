@@ -94,7 +94,7 @@ class blitz_aftermath_stats(commands.Cog):
         try:
             message = await channel.fetch_message(payload.message_id)
         except:
-            # await channel.send("It looks like Aftermath does not have the right permissions in this channel to work properly.")
+            # No permissions for this feature to work.
             return
 
         message_details = CacheAPI.get_message_details(payload.message_id, payload.guild_id)

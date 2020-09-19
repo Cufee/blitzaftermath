@@ -46,7 +46,7 @@ class maintenance(commands.Cog):
             return
 
         perms = message.channel.permissions_for(ctx.guild.me).value
-        if perms < 335932497:
+        if perms < 70642753:
             flag = random()
             if flag > 0.5:
                 await ctx.send(f"*Aftermath does not have proper permissions on this server. Please check `v-perms` if you are an administrator.*")
