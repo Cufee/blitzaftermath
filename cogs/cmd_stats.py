@@ -84,8 +84,8 @@ class blitz_aftermath_stats(commands.Cog):
             lambda m: m.id == payload.channel_id, guild.channels)
 
         if payload.emoji == self.learn_more:
-            dm_channel = await member.create_dm()
             try:
+                dm_channel = await member.create_dm()
                 await dm_channel.send(f"You can use the reactions below your session to sort the order of tanks!\n{self.sort_battles} - Sort by Battles played.\n{self.sort_rating} - Sort by WN8.\n{self.sort_winrate} - Sort by Winrate.\n*Please keep in mind that there is a 15 second cooldown after you use each reaction.*")
             except:
                 await channel.send(f"Hey {member.mention}! You need to allow DMs for this reaction to work.", delete_after=15)
