@@ -245,6 +245,7 @@ class blitz_aftermath_replays(commands.Cog):
         channel_name = str(ctx.channel.name)
 
         enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
+        print(enabled_channels)
         if status_code == 404:
             Guilds_API.add_new_guild(guild_id=guild_id, guild_name=guild_name)
             enabled_channels = []
@@ -261,15 +262,11 @@ class blitz_aftermath_replays(commands.Cog):
             return
 
         guild_is_premium, _ = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_is_premium")
-        new_enabled_channels = []
         if enabled_channels:
-            new_enabled_channels = enabled_channels.append(channel_id)
+            new_enabled_channels = enabled_channels
+            new_enabled_channels.append(channel_id)
         else:
             new_enabled_channels = [channel_id]
-
-        if not new_enabled_channels:
-            await ctx.send("Something did not work while enabling replays in this channel.\nPlease DM Vovko#0851")
-            return
 
         if len(new_enabled_channels) > 2 and not guild_is_premium:
             channel_names = []

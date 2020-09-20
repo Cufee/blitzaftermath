@@ -160,14 +160,7 @@ class Replay:
             stats = players_stats.get(player_id).get('statistics').get('all')
 
             vehicle = vehicles_all_data.get(str(
-                player.get('vehicle_descr')))
-            vehicle_profile = vehicles_all_data.get(str(
-                player.get('vehicle_descr'))).get('default_profile')
-            vehicle_modules = vehicles_all_data.get(str(
-                player.get('vehicle_descr'))).get('modules_tree')
-
-            vehicle_turret_id = player.get('turret_id')
-            vehicle_chassis_id = player.get('chassis_id')
+                player.get('vehicle_descr')), {}) or {}
 
             time_alive = player.get('time_alive') or 1
 
@@ -178,12 +171,6 @@ class Replay:
             damage_made = player.get('damage_made') or 0
             vehicle_alpha_efficiency = damage_made * \
                 (time_alive / self.battle_duration)
-
-            vehicle_best_armor = 0
-            for module in vehicle_profile.get('armor'):
-                if vehicle_profile.get('armor').get(module).get('front') > vehicle_best_armor:
-                    vehicle_best_armor = vehicle_profile.get(
-                        'armor').get(module).get('front')
 
             vehicle_id = player.get('vehicle_descr')
 
@@ -197,9 +184,9 @@ class Replay:
             player_battles = stats.get('battles')
             if player_battles == 0:
                 player_battles = 1
-            player_vehicle = vehicle.get('name')
-            player_vehicle_type = vehicle.get('type')
-            player_vehicle_tier = vehicle.get('tier')
+            player_vehicle = vehicle.get('name', 'Unknown')
+            player_vehicle_type = vehicle.get('type', 'unknown')
+            player_vehicle_tier = vehicle.get('tier', 0)
             hp_left = player.get('hitpoints_left') or 0
             survived = True
             if hp_left <= 0:

@@ -99,6 +99,15 @@ class Rating:
                 'detailed_string_format': '+RATING',
                 'string_format': 'RATING',
                 'multiplier': 100,
+                'unknown': {
+                    'damage_efficiency': 0,
+                    'blocked_efficiency': 0,
+                    'kill_efficiency': 0,
+                    'travel_efficiency': 0,
+                    'shot_efficiency': 0,
+                    'spotting_efficiency': 0,
+                    'track_efficiency': 0,
+                },
                 'lightTank': {
                     'damage_efficiency': 1.5,
                     'blocked_efficiency': 0.25,
