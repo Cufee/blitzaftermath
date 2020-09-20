@@ -102,8 +102,8 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')):
-            dm_channel = await member.create_dm()
             try:
+                dm_channel = await member.create_dm()
                 await dm_channel.send("You will need to wait 15 seconds before using sort.")
             except:
                 pass
