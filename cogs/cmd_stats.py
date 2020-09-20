@@ -172,6 +172,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Commands
     @commands.command(aliases=['wr', 'session', 'Stats', 'Wr'])
+    @commands.guild_only()
     async def stats(self, message, *args):
         if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
@@ -362,6 +363,7 @@ class blitz_aftermath_stats(commands.Cog):
                 await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['Iam', 'IAM'])
+    @commands.guild_only()
     async def iam(self, message, player_name_str):
         if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
             return
@@ -435,6 +437,7 @@ class blitz_aftermath_stats(commands.Cog):
             await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['bg'])
+    @commands.guild_only()
     async def fancy(self, ctx, url=None):
         if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
             return
@@ -478,6 +481,7 @@ class blitz_aftermath_stats(commands.Cog):
             await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['nobg'])
+    @commands.guild_only()
     async def notfancy(self, ctx):
         if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
             return

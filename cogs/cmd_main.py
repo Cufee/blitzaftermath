@@ -40,9 +40,10 @@ class maintenance(commands.Cog):
         await dm_channel.send(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
 
     @commands.Cog.listener()
+    @commands.guild_only()
     async def on_message(self, message):
         ctx = await self.client.get_context(message)
-        if not ctx.command or ctx.prefix not in self.client.command_prefix or message.author == self.client:
+        if not ctx.command or ctx.prefix not in self.client.command_prefix or message.author == self.client or isinstance(ctx.channel, discord.channel.DMChannel):
             return
 
         perms = message.channel.permissions_for(ctx.guild.me).value
@@ -65,6 +66,7 @@ class maintenance(commands.Cog):
     
     @commands.command()
     @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def perms(self, ctx):
         perms = ctx.channel.permissions_for(ctx.guild.me).value
         msg_text = """Here is a full list of permissions Aftermath needs to function correctly:
@@ -111,15 +113,12 @@ Other permissions:
         if isinstance(error, ignored):
             return
 
-        if isinstance(error, commands.DisabledCommand):
+        elif isinstance(error, commands.DisabledCommand):
             await ctx.send(f'{ctx.command} has been disabled.', delete_after=15)
-
-        if isinstance(error, commands.CheckFailure):
-            await ctx.send(f'It looks like you are not able to use {ctx.command}.', delete_after=15)
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
-                await ctx.author.send(f'{ctx.command} can not be used in Private Messages.')
+                await ctx.author.send(f'This command can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
 
@@ -134,6 +133,9 @@ Other permissions:
         elif isinstance(error, commands.BadArgument):
             if ctx.command.qualified_name == 'tag list':  # Check if the command being invoked is 'tag list'
                 await ctx.send('I could not find that member. Please try again.')
+
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.send(f'You do not have the required permissions to use this command.', delete_after=15)
 
         else:
             # All other Errors not returned come here. And we can just print the default TraceBack.

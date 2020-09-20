@@ -229,6 +229,7 @@ class blitz_aftermath_replays(commands.Cog):
 
     @commands.command(aliases=['lh', 'lookhere'])
     @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def LookHere(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
@@ -289,6 +290,7 @@ class blitz_aftermath_replays(commands.Cog):
 
     @commands.command(aliases=['la', 'lookaway'])
     @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def LookAway(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
@@ -323,6 +325,7 @@ class blitz_aftermath_replays(commands.Cog):
 
     @commands.command(aliases=['olh', 'LookOnlyHere', 'onlylookhere', 'lookonlyhere'])
     @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def OnlyLookHere(self, ctx):
         if ctx.author.bot or ctx.author == self.client.user:
             return
