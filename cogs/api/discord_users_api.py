@@ -58,7 +58,9 @@ class DiscordUsersApi():
         '''Links Discord UserID to URL for a custom image bg'''
         user_filter = {'_id': discord_user_id}
         user_data = self.users_collection.find_one(user_filter)
-        url = user_data.get('custom_bg', None)
+        url = None
+        if user_data:
+            url = user_data.get('custom_bg', None)
         return url
 
     def add_custom_bg(self, discord_user_id, url):
