@@ -171,7 +171,7 @@ class blitz_aftermath_stats(commands.Cog):
     
 
     # Commands
-    @commands.command(aliases=['wr', 'session', 'Stats', 'Wr'])
+    @commands.command(aliases=['wr', 'session', 'Stats', 'Wr', 'WR', 'We', 'we'])
     @commands.guild_only()
     async def stats(self, message, *args):
         if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
