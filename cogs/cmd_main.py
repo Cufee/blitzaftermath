@@ -87,8 +87,7 @@ Other permissions:
 - Create Instant Invites
     This is used to invite the developer to the server in case an error has occured and was automatically reported.
 - Change Nickname
-    Just to make sure Aftermath name can be adjusted across all servers.
-```"""
+    Just to make sure Aftermath name can be adjusted across all servers.```"""
         await ctx.send(f"{msg_text}*Your perms code is {perms}*")
 
     @commands.Cog.listener()
@@ -163,17 +162,9 @@ Newly added players will need to play at least one battle before Aftermath start
 You can also check a specific session with `v-stats PlayerName days`.
 *For example:* `v-stats Vovko@na 3`
 
-To change the default account Aftermath looks up for you, use `v-iam NewName`.
-        """)
-
-# **DISABLED**
-# **AfterContest**:
-# Use `v-check TAG@SERVER` to check the current Ace Tanker count of a clan. Individual player contributions are reset every 24 hours.
-# You can also check the current top 5 clans by Ace Tanker medals using `v-top`.
-
-
-
+To change the default account Aftermath looks up for you, use `v-iam NewName`.""")
         await ctx.send(help_str)
+        return
 
 
     @commands.command()
@@ -199,7 +190,6 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.
             channel = self.client.get_channel(int(default_replay_channels[0]))
             if channel:
                 await channel.send(brk_message)
-
 
 
     @commands.command()

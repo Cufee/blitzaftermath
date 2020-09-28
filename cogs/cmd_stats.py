@@ -23,7 +23,7 @@ CacheAPI = MessageCacheAPI()
 UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 
-def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str = ""):
+def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
         request_dict = {        
             "player_id": player_id,
             "realm": realm,
@@ -47,7 +47,6 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             else:
                 raise Exception("Zap failed to render your session.")
 
-
 class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
@@ -58,8 +57,19 @@ class blitz_aftermath_stats(commands.Cog):
             756207071027789886)
         self.sort_rating = self.client.get_emoji(
             756207070956748891)
+        self.sort_timestamp = self.client.get_emoji(
+            760014742294626324)
         self.learn_more = self.client.get_emoji(
             756575770381647973)
+
+    # Add reactions for sorting to a message
+    async def add_reactions(self, message):
+        await message.add_reaction(self.learn_more)
+        await message.add_reaction(self.sort_timestamp)
+        await message.add_reaction(self.sort_battles)
+        await message.add_reaction(self.sort_rating)
+        await message.add_reaction(self.sort_winrate)
+        return
 
     # Events
     # @commands.Cog.listener()
@@ -86,7 +96,7 @@ class blitz_aftermath_stats(commands.Cog):
         if payload.emoji == self.learn_more:
             try:
                 dm_channel = await member.create_dm()
-                await dm_channel.send(f"You can use the reactions below your session to sort the order of tanks!\n{self.sort_battles} - Sort by Battles played.\n{self.sort_rating} - Sort by WN8.\n{self.sort_winrate} - Sort by Winrate.\n*Please keep in mind that there is a 15 second cooldown after you use each reaction.*")
+                await dm_channel.send(f"You can use the reactions below your session to sort the order of tanks!\n{self.sort_timestamp} - Sort by last battle time.\n{self.sort_battles} - Sort by battles played.\n{self.sort_rating} - Sort by WN8.\n{self.sort_winrate} - Sort by Winrate.\n*Please keep in mind that there is a 15 second cooldown after you use each reaction.*")
             except:
                 await channel.send(f"Hey {member.mention}! You need to allow DMs for this reaction to work.", delete_after=15)
             return
@@ -136,11 +146,7 @@ class blitz_aftermath_stats(commands.Cog):
 
         new_message = await message.channel.send(file=image)
         CacheAPI.cache_message(new_message.id, message.guild.id, request)
-        await new_message.add_reaction(self.sort_battles)
-        await new_message.add_reaction(self.sort_rating)
-        await new_message.add_reaction(self.sort_winrate)
-        await new_message.add_reaction(self.learn_more)
-
+        await self.add_reactions(new_message)
         return
         
 
@@ -210,10 +216,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, request)
-                    await new_message.add_reaction(self.sort_battles)
-                    await new_message.add_reaction(self.sort_rating)
-                    await new_message.add_reaction(self.sort_winrate)
-                    await new_message.add_reaction(self.learn_more)
+                    await self.add_reactions(new_message)
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
@@ -304,10 +307,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                 new_message = await message.channel.send(file=image)
                 CacheAPI.cache_message(new_message.id, message.guild.id, request)
-                await new_message.add_reaction(self.sort_battles)
-                await new_message.add_reaction(self.sort_rating)
-                await new_message.add_reaction(self.sort_winrate)
-                await new_message.add_reaction(self.learn_more)
+                await self.add_reactions(new_message)
 
                 # Try to set a new default account for new users
                 trydefault = True
@@ -334,10 +334,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, request)
-                    await new_message.add_reaction(self.sort_battles)
-                    await new_message.add_reaction(self.sort_rating)
-                    await new_message.add_reaction(self.sort_winrate)
-                    await new_message.add_reaction(self.learn_more)
+                    await self.add_reactions(new_message)
                     # Try to set a new default account for new users
                     trydefault = True
 
