@@ -22,7 +22,7 @@ class MessageCacheAPI():
         self.cache_collection.update_one(query, {"$set": {"timestamp": datetime.utcnow()}})
         return cache_data
 
-    def cache_message(self, message_id: int, guild_id: int, request: dict):
+    def cache_message(self, message_id: int, guild_id: int, user_id: int, request: dict):
         check = self.get_message_details(message_id, guild_id)
         if check:
             return
@@ -30,6 +30,7 @@ class MessageCacheAPI():
         cache_entry = {
             "_id": message_id,
             "guild_id": guild_id,
+            "user_id": user_id,
             "timestamp": datetime.utcnow(),
             "request": request
         }

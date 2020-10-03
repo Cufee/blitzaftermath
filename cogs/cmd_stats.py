@@ -154,7 +154,7 @@ class blitz_aftermath_stats(commands.Cog):
         image, request = zap_render(player_id, player_realm, days, bg_url, sort_key=new_key)
 
         new_message = await message.channel.send(file=image)
-        CacheAPI.cache_message(new_message.id, message.guild.id, request)
+        CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
         await self.add_refresh_reaction(new_message)
         return
         
@@ -224,7 +224,7 @@ class blitz_aftermath_stats(commands.Cog):
                     image, request = zap_render(player_id, player_realm, days, bg_url)
 
                     new_message = await message.channel.send(file=image)
-                    CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     return None
                 else:
