@@ -22,6 +22,15 @@ class MessageCacheAPI():
         self.cache_collection.update_one(query, {"$set": {"timestamp": datetime.utcnow()}})
         return cache_data
 
+    def get_messages_by_user(self, user_id: int, seconds: int):
+        query_timestamp = datetime.utcnow() - timedelta(seconds=seconds)
+        query = {
+            "user_id": user_id,
+            "timestamp": {"$gt": query_timestamp} 
+        }
+        cache_data = self.cache_collection.find(query)
+        return cache_data
+
     def cache_message(self, message_id: int, guild_id: int, user_id: int, request: dict):
         check = self.get_message_details(message_id, guild_id)
         if check:

@@ -117,6 +117,25 @@ class blitz_aftermath_stats(commands.Cog):
         if not message_details:
             return
 
+        # How far back to check for user interactions
+        cache_check_seconds = 60
+        last_user_msg = CacheAPI.get_messages_by_user(payload.user_id, cache_check_seconds)
+
+        if last_user_msg and len(list(last_user_msg)) > 2:
+            # messaged = True
+            # try:
+            #     dm_channel = await member.create_dm()
+            #     await dm_channel.send("It looks like you are trying to spam using Aftermath. This may result in a soft ban and was reported.")
+            # except:
+            #     messaged = False
+            #     pass
+            
+            messaged = False
+            owner_member = self.client.get_user(202905960405139456)
+            report_chan = await owner_member.create_dm()
+            await report_chan.send(f"TESTING: User `{payload.user_id}` is trying to spam in guild `{payload.guild_id}`. Messaged `{messaged}`")
+            return
+
         if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')):
             try:
                 dm_channel = await member.create_dm()
