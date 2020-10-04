@@ -128,7 +128,6 @@ class blitz_aftermath_stats(commands.Cog):
                 await dm_channel.send("It looks like you are trying to spam using Aftermath. This may result in a soft ban and was reported automatically.")
             except:
                 messaged = False
-                pass
 
             owner_member = self.client.get_user(202905960405139456)
             report_chan = await owner_member.create_dm()
