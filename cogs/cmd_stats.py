@@ -334,7 +334,7 @@ class blitz_aftermath_stats(commands.Cog):
                 image, request = zap_render(player_id, player_realm, days, bg_url)
 
                 new_message = await message.channel.send(file=image)
-                CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                 await self.add_refresh_reaction(new_message)
 
                 # Try to set a new default account for new users
@@ -361,7 +361,7 @@ class blitz_aftermath_stats(commands.Cog):
                     image, request = zap_render(player_id, player_realm, days, bg_url)
 
                     new_message = await message.channel.send(file=image)
-                    CacheAPI.cache_message(new_message.id, message.guild.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     # Try to set a new default account for new users
                     trydefault = True
