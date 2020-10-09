@@ -54,23 +54,19 @@ def refresh_tank_avg_cache():
     missing = 0
     for tank in res:
         tank.pop('_id')
-        glossary_data = tankaverages.find_one({'tank_id': tank.get('tank_id')})
+        glossary_data = db_tanks.find_one({'tank_id': tank.get('tank_id')})
         if glossary_data:
-            tank_name = glossary_data.get('name')
-            tank_tier = glossary_data.get('tier')
-            tank_nation = glossary_data.get('nation')
-
             tank.update({
-                'name': tank_name,
-                'tier': tank_tier,
-                'nation': tank_nation
+                'name': glossary_data.get('name'),
+                'tier': glossary_data.get('tier'),
+                'nation': glossary_data.get('nation')
             })
             tanks_obj_list.append(
-                UpdateOne(glossary_data, {'$set': tank}, upsert=True))
+                UpdateOne({'tank_id': tank.get('tank_id')}, {'$set': tank}, upsert=True))
         else:
             missing += 1
 
-    print(missing)
+    print(missing + " tanks missing in glossary but averages are available")
     result = tankaverages.bulk_write(
         tanks_obj_list, ordered=False)
     print(result.bulk_api_result)
