@@ -66,7 +66,7 @@ def refresh_tank_avg_cache():
         else:
             missing += 1
 
-    print(missing + " tanks missing in glossary but averages are available")
+    print(f"{missing} tanks missing in glossary but averages are available")
     result = tankaverages.bulk_write(
         tanks_obj_list, ordered=False)
     print(result.bulk_api_result)
