@@ -20,7 +20,7 @@ db_tanks = client.glossary.tanks
 
 def g_update():
     res = requests.get(
-    'https://api.wotblitz.com/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
+    'https://api.wotblitz.eu/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
 
     res_json = rapidjson.loads(res.text)
 
