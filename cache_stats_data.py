@@ -18,7 +18,8 @@ tankaverages = client.glossary.tankaverages
 db_tanks = client.glossary.tanks
 
 
-def g_update():
+def glossary_update():
+    print(f'[{datetime.utcnow()}] Working on glossary')
     res = requests.get(
     'https://api.wotblitz.eu/wotb/encyclopedia/vehicles/?application_id=add73e99679dd4b7d1ed7218fe0be448&fields=nation,is_premium,tier,tank_id,type,name,turrets,guns,suspensions,images')
 
@@ -27,6 +28,7 @@ def g_update():
     for tank in res_json.get('data').values():
         db_tanks.update_one({"tank_id": tank.get('tank_id')},
                         {"$set": tank}, upsert=True)
+    print('Done working on glossary')
 
 def run(realm):
     print(f'[{datetime.utcnow()}] Working on {realm} sessions')
@@ -76,6 +78,9 @@ def refresh_tank_avg_cache():
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
+    # Refresh tank glossary
+    scheduler.add_job(glossary_update, CronTrigger.from_crontab(
+        '20 9 * * *'))
     # Refresh tank averages
     scheduler.add_job(refresh_tank_avg_cache, CronTrigger.from_crontab(
         '15 9 * * *'))
