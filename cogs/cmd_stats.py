@@ -44,7 +44,7 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
             if res_json.get('error') == "mongo: no documents in result":
-                raise Exception("Not enough data to render your session.")
+                raise Exception("It looks like there are no battles for me to show. Try again later.")
             else:
                 raise Exception("Zap failed to render your session.")
 
