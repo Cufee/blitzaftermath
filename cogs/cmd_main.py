@@ -13,6 +13,8 @@ from cogs.api.guild_settings_api import API_v2
 
 from random import random
 
+command_cooldown = 5
+
 debug = False
 Guilds_API = API_v2()
 
@@ -115,6 +117,12 @@ Other permissions:
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send(f'{ctx.command} has been disabled.', delete_after=15)
 
+        elif isinstance(error, commands.errors.CommandOnCooldown):
+            try:
+                await ctx.author.send(error)
+            except discord.HTTPException:
+                pass
+
         elif isinstance(error, commands.NoPrivateMessage):
             try:
                 await ctx.author.send(f'This command can not be used in Private Messages.')
@@ -144,6 +152,7 @@ Other permissions:
                 type(error), error, error.__traceback__, file=sys.stderr)
 
     @commands.command(aliases=['help'])
+    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     async def _help(self, ctx):
         help_str = (f"""
 **AfterMath**:

@@ -13,6 +13,7 @@ from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.message_cache_api import MessageCacheAPI
 
 import time
+command_cooldown = 5
 
 db_client = MongoClient("mongodb://51.222.13.110:27017")
 players = db_client.stats.players
@@ -204,6 +205,7 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Commands
     @commands.command(aliases=['wr', 'session', 'Stats', 'Wr', 'WR', 'We', 'we'])
+    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
     async def stats(self, message, *args):
         if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
@@ -386,6 +388,7 @@ class blitz_aftermath_stats(commands.Cog):
                 await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['Iam', 'IAM'])
+    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
     async def iam(self, message, player_name_str):
         if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
@@ -460,6 +463,7 @@ class blitz_aftermath_stats(commands.Cog):
             await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['bg'])
+    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
     async def fancy(self, ctx, url=None):
         if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
@@ -504,6 +508,7 @@ class blitz_aftermath_stats(commands.Cog):
             await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
     @commands.command(aliases=['nobg'])
+    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
     async def notfancy(self, ctx):
         if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
