@@ -250,6 +250,31 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
                     return None
 
+            # User mentioned another user
+            elif message.message.mentions and player_name_str:
+                user = message.message.mentions[0]
+                player_id = UsersApi.get_default_player_id(
+                    discord_user_id=user.id)
+
+                if player_id:
+                    bg_url = UsersApi.get_custom_bg(message.author.id)
+                    player_realm = players.find_one(
+                        {'_id': player_id}).get("realm")
+
+                    days = 0
+                    if session_days:
+                        days = session_days
+
+                    image, request = zap_render(player_id, player_realm, days, bg_url)
+
+                    new_message = await message.channel.send(file=image)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    await self.add_refresh_reaction(new_message)
+                    return None
+                else:
+                    await message.channel.send(f'{user.name} does not have a default WoT Blitz account set.')
+                    return None
+                
             elif '@' in player_name_str:
                 player_name_str = player_name_str
                 player_name_str_list = player_name_str.split('@')
