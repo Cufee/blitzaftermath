@@ -24,6 +24,12 @@ class login(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def login(self, ctx, realm=None):
+        try:
+            dm_channel = await ctx.author.create_dm()
+        except:
+            ctx.send('Hey {ctx.author.mention}! You need to allow DMs for this command to work.')
+            return
+
         if realm:
             realm = realm.upper()
         else:
@@ -50,7 +56,7 @@ class login(commands.Cog):
             return
 
         intent_id = rapidjson.loads(res.text).get('intent_id')
-        await ctx.send(f"Here is your login link! It will expire in 5 minutes.\nhttp://158.69.62.236/login/{intent_id}\n**Please keep it safe.**")
+        await dm_channel.send(f"Here is your login link! It will expire in 5 minutes.\nhttp://158.69.62.236/login/{intent_id}\n**Please keep it safe.**")
         return
 
 
