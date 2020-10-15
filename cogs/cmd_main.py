@@ -29,7 +29,7 @@ class maintenance(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'[Beta] Aftermath Stats cog is ready.')
+        print(f'[Beta] Aftermath maintenance cog is ready.')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
