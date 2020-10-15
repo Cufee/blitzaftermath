@@ -50,7 +50,7 @@ class login(commands.Cog):
             return
 
         intent_id = rapidjson.loads(res.text).get('intent_id')
-        await ctx.send(f"Here is your login link!\nhttp://158.69.62.236/login/{intent_id}")
+        await ctx.send(f"Here is your login link! It will expire in 5 minutes.\nhttp://158.69.62.236/login/{intent_id}\n**Please keep it safe.**")
         return
 
 
