@@ -22,7 +22,7 @@ class login(commands.Cog):
         print(f'[Beta] Aftermath login cog is ready.')
 
     @commands.command()
-    @commands.cooldown(1, 300, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def login(self, ctx, realm=None):
         if realm:
             realm = realm.upper()
