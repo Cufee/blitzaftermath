@@ -42,8 +42,7 @@ class CustomBackground():
             return "No response from server."
         elif response.get("public_id", None):
             # Upload success
-            new_url = response.get('secure_url')
-            print(new_url)
+            new_url = response.get('url')
             return None, new_url
         else:
             return "Upload failed", None
