@@ -191,7 +191,12 @@ class blitz_aftermath_stats(commands.Cog):
         player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
         if player_id:
-            bg_url = UsersApi.get_custom_bg(message.author.id)
+            bg_url = ""
+            try:
+                res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                bg_url = rapidjson.loads(res.text).get('bg_url', None)
+            except:
+                pass
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
 
@@ -232,7 +237,12 @@ class blitz_aftermath_stats(commands.Cog):
                     discord_user_id=(message.author.id))
 
                 if player_id:
-                    bg_url = UsersApi.get_custom_bg(message.author.id)
+                    bg_url = ""
+                    try:
+                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                    except:
+                        pass
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
 
@@ -257,7 +267,12 @@ class blitz_aftermath_stats(commands.Cog):
                     discord_user_id=user.id)
 
                 if player_id:
-                    bg_url = UsersApi.get_custom_bg(message.author.id)
+                    bg_url = ""
+                    try:
+                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                    except:
+                        pass
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
 
@@ -349,7 +364,12 @@ class blitz_aftermath_stats(commands.Cog):
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
                 
-                bg_url = UsersApi.get_custom_bg(message.author.id)
+                bg_url = ""
+                try:
+                    res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                    bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                except:
+                    pass
 
                 days = 0
                 if session_days:
@@ -377,7 +397,12 @@ class blitz_aftermath_stats(commands.Cog):
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
-                    bg_url = UsersApi.get_custom_bg(message.author.id)
+                    bg_url = ""
+                    try:
+                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                    except:
+                        pass
 
                     days = 0
                     if session_days:
@@ -493,6 +518,21 @@ class blitz_aftermath_stats(commands.Cog):
     async def fancy(self, ctx, url=None):
         if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
             return
+
+        try:
+            res = requests.get(f'http://158.69.62.236/users/{ctx.author.id}')
+            premium = rapidjson.loads(res.text).get('premium', False)
+            verified = rapidjson.loads(res.text).get('verified', False)
+            if not premium:
+                await ctx.send("This feature is coming back soon!")
+                return
+            elif not verified:
+                await ctx.send("You need to verify your account with `v-login` before setting up a background image.")
+                return
+        except:
+            await ctx.send("It looks like Aftermath is partially down for maintenance. Try again later.")
+            return
+
 
         # Fix url
         try:
