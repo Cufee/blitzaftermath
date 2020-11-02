@@ -52,18 +52,6 @@ class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        self.sort_battles = self.client.get_emoji(
-            756207071304876123)
-        self.sort_winrate = self.client.get_emoji(
-            756207071027789886)
-        self.sort_rating = self.client.get_emoji(
-            756207070956748891)
-        self.sort_timestamp = self.client.get_emoji(
-            760014742294626324)
-        self.learn_more = self.client.get_emoji(
-            756575770381647973)
-        self.refresh_reaction = self.client.get_emoji(
-            760907672823398420)
 
     # Add reactions for sorting to a message
     async def add_sorting_reactions(self, message):
@@ -82,6 +70,18 @@ class blitz_aftermath_stats(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
+        self.sort_battles = self.client.get_emoji(
+            756207071304876123)
+        self.sort_winrate = self.client.get_emoji(
+            756207071027789886)
+        self.sort_rating = self.client.get_emoji(
+            756207070956748891)
+        self.sort_timestamp = self.client.get_emoji(
+            760014742294626324)
+        self.learn_more = self.client.get_emoji(
+            756575770381647973)
+        self.refresh_reaction = self.client.get_emoji(
+            760907672823398420)
         print(f'[Beta] Aftermath Stats cog is ready.')
 
 
