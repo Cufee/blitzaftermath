@@ -290,6 +290,10 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(f'{user.name} does not have a default WoT Blitz account set.')
                     return None
                 
+            elif '@' in player_name_str:
+                await message.channel.send("Please use `-` instead of `@` to separate the username and server.")
+                return
+                
             elif '-' in player_name_str:
                 player_name_str = player_name_str
                 player_name_str_list = player_name_str.split('-')

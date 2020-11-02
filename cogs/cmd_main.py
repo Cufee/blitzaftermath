@@ -131,8 +131,26 @@ Other permissions:
 
         # Command not found or is disabled
         elif isinstance(error, commands.CommandNotFound):
+            help_str = (f"""
+**AfterMath**:
+To analyze a WoT Blitz replay, just send a file and I will do the rest.
+
+**AfterStats**:
+Command: `v-stats`
+Aliases: `v-wr`, `v-session`
+
+Use `v-stats PlayerName` to check the last session of a player.
+*For example: `v-stats Vovko`*
+
+*All sessions are reset at 02:00 daily, based on server timezone.
+Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
+
+You can also check a specific session with `v-stats PlayerName days`.
+*For example:* `v-stats Vovko-na 3`
+
+To change the default account Aftermath looks up for you, use `v-iam NewName`.""")
             try:
-                await ctx.author.send(f'This is not a valid command. You can use `v-help` to check all available commands.')
+                await ctx.author.send(help_str)
             except discord.HTTPException:
                 pass
 
