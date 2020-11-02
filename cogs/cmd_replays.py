@@ -57,6 +57,14 @@ class blitz_aftermath_replays(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
+        self.emoji_01 = self.client.get_emoji(
+            733729140611612722)
+        self.emoji_02 = self.client.get_emoji(
+            733730453084700693)
+        self.emoji_03 = self.client.get_emoji(
+            737794899721846804)
+        self.emoji_10 = self.client.get_emoji(
+            733729140234256436)
         print(f'[Beta] Aftermath Replays cog is ready.')
 
     # Events
@@ -98,6 +106,10 @@ class blitz_aftermath_replays(commands.Cog):
 
                         # Send final message
                         image_message = await message.channel.send(embed=embed, file=image_file)
+
+                        if not self.emoji_01:
+                            await message.channel.send("It looks like Discord is having some issues, I am not able to add any reactions to this message, please try again later.")
+                            return
 
                         await image_message.add_reaction(self.emoji_02)
                         await image_message.add_reaction(self.emoji_03)
