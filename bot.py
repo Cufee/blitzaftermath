@@ -12,35 +12,31 @@ logger = Logger()
 with open(f'{os.path.dirname(os.path.realpath(__file__))}/settings.json') as f:
     settings = rapidjson.load(f)
 TOKEN = settings["TOKEN"]
-mode = settings["mode"]
 prefix = settings["prefix"]
 default_game = settings["default_game"]
 client = commands.Bot(command_prefix=prefix, case_insensitive=False, activity=discord.Game(name=default_game))
 
+# Load cogs
+for filename in os.listdir(f'{os.path.dirname(os.path.realpath(__file__))}/cogs'):
+    if filename.endswith('.py'):
+        if filename.startswith('core_'):
+            client.load_extension(f'cogs.{filename[:-3]}')
+            logger.log(f'{filename[:-3]} was loaded')
+            continue
+        # cog_settings = settings.get(filename[:-3])
+        # cog_name = cog_settings.get('name')
+        # is_enabled = cog_settings.get(f'enabled_{mode}')
+        is_enabled = True  # Need to replace once hooked up to db
+        if is_enabled:
+            client.load_extension(f'cogs.{filename[:-3]}')
+            logger.log(f'{filename} was loaded')
+        else:
+            logger.log(f'{filename} is disabled')
 
 # Startup
 @client.event
 async def on_ready():
     logger.log(f'{client.user.name} online!')
-    # settings = await settings_parser()
-    cnt = 0
-    for filename in os.listdir(f'{os.path.dirname(os.path.realpath(__file__))}/cogs'):
-        cnt += 1
-        if filename.endswith('.py'):
-            if filename.startswith('core_'):
-                client.load_extension(f'cogs.{filename[:-3]}')
-                logger.log(f'{filename[:-3]} was loaded')
-                continue
-            # cog_settings = settings.get(filename[:-3])
-            # cog_name = cog_settings.get('name')
-            # is_enabled = cog_settings.get(f'enabled_{mode}')
-            is_enabled = True  # Need to replace once hooked up to db
-            if is_enabled:
-                client.load_extension(f'cogs.{filename[:-3]}')
-                logger.log(f'{filename} was loaded')
-            else:
-                logger.log(f'{filename} is disabled')
-    print(cnt)
 
 # Cog managment
 @client.command(hidden=True)
