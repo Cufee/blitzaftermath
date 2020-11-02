@@ -23,7 +23,9 @@ client = commands.Bot(command_prefix=prefix, case_insensitive=False, activity=di
 async def on_ready():
     logger.log(f'{client.user.name} online!')
     # settings = await settings_parser()
+    cnt = 0
     for filename in os.listdir(f'{os.path.dirname(os.path.realpath(__file__))}/cogs'):
+        cnt += 1
         if filename.endswith('.py'):
             if filename.startswith('core_'):
                 client.load_extension(f'cogs.{filename[:-3]}')
@@ -38,7 +40,7 @@ async def on_ready():
                 logger.log(f'{filename} was loaded')
             else:
                 logger.log(f'{filename} is disabled')
-
+    print(cnt)
 
 # Cog managment
 @client.command(hidden=True)
