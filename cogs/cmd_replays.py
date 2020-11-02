@@ -94,11 +94,14 @@ class blitz_aftermath_replays(commands.Cog):
                         image_file, replay_id, replay_link, room_type_mod = get_image(
                             replays, rating=rating)
 
-                        embed_desc = f'React with {self.emoji_02} for a transparent picture'
-                        embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
-                        if room_type_mod == 0:
-                            embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
-                        embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
+                        if self.emoji_02:
+                            embed_desc = f'React with {self.emoji_02} for a transparent picture'
+                            embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
+                            if room_type_mod == 0:
+                                embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
+                            embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
+                        else:
+                            embed_desc = "It looks like Discord is having some issues, I am not able to add any reactions to this message, please try again later."
 
                         embed = discord.Embed(
                             title='Download replay', url=replay_link, description=embed_desc)
@@ -107,8 +110,7 @@ class blitz_aftermath_replays(commands.Cog):
                         # Send final message
                         image_message = await message.channel.send(embed=embed, file=image_file)
 
-                        if not self.emoji_01:
-                            await message.channel.send("It looks like Discord is having some issues, I am not able to add any reactions to this message, please try again later.")
+                        if not self.emoji_02:
                             return
 
                         await image_message.add_reaction(self.emoji_02)
