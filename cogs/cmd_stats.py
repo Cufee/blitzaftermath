@@ -257,7 +257,7 @@ class blitz_aftermath_stats(commands.Cog):
                     await self.add_refresh_reaction(new_message)
                     return None
                 else:
-                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username@Server` to set a default account for me to look up.')
+                    await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username-Server` to set a default account for me to look up.')
                     return None
 
             # User mentioned another user
@@ -290,9 +290,9 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(f'{user.name} does not have a default WoT Blitz account set.')
                     return None
                 
-            elif '@' in player_name_str:
+            elif '-' in player_name_str:
                 player_name_str = player_name_str
-                player_name_str_list = player_name_str.split('@')
+                player_name_str_list = player_name_str.split('-')
                 player_name = player_name_str_list[0]
                 if len(player_name) < 3:
                     raise Exception(
@@ -336,7 +336,7 @@ class blitz_aftermath_stats(commands.Cog):
                             raise Exception(
                                 f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
                         else:
-                            await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}@{other_realm}` to check it.*")
+                            await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}-{other_realm}` to check it.*")
                             return
 
                     # Get player id and enable tracking
@@ -393,7 +393,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                 if len(players_list) > 1:
                     await message.channel.send(
-                        f'Multiple players found with this username. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
+                        f'Multiple players found with this username. Please specify the server you would like to check.\n*For example: {player_name}-eu*', delete_after=30)
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
@@ -418,7 +418,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                 else:
                     await message.channel.send(
-                        f'Player {player_name} not found. Please specify the server you would like to check.\n*For example: {player_name}@eu*', delete_after=30)
+                        f'Player {player_name} not found. Please specify the server you would like to check.\n*For example: {player_name}-eu*', delete_after=30)
 
             if trydefault and player_id:
                 # Set a default player_id  if it is not set already
@@ -446,9 +446,9 @@ class blitz_aftermath_stats(commands.Cog):
 
         try:
             # Split player string, check validity, find player ID
-            if '@' in player_name_str:
+            if '-' in player_name_str:
                 player_name_str = player_name_str
-                player_name_str_list = player_name_str.split('@')
+                player_name_str_list = player_name_str.split('-')
                 player_name = player_name_str_list[0]
                 if len(player_name) < 3:
                     raise Exception(
@@ -504,7 +504,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             else:
                 await message.channel.send(
-                    f'There is no `@` in your message. Please use this symbol to separate the username and server.\n*For example: {self.client.command_prefix[0]}iam Vovko@na*', delete_after=30)
+                    f'There is no `-` in your message. Please use this symbol to separate the username and server.\n*For example: {self.client.command_prefix[0]}iam Vovko-na*', delete_after=30)
                 return None
 
         # Handle exceptions
