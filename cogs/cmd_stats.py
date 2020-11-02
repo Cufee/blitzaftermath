@@ -52,24 +52,6 @@ class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-
-    # Add reactions for sorting to a message
-    async def add_sorting_reactions(self, message):
-        await message.add_reaction(self.learn_more)
-        await message.add_reaction(self.sort_timestamp)
-        await message.add_reaction(self.sort_battles)
-        await message.add_reaction(self.sort_rating)
-        await message.add_reaction(self.sort_winrate)
-        return
-    # Refresh reaction
-    async def add_refresh_reaction(self, message):
-        await message.add_reaction(self.refresh_reaction)
-        return
-
-    # Events
-    # @commands.Cog.listener()
-    @commands.Cog.listener()
-    async def on_ready(self):
         self.sort_battles = self.client.get_emoji(
             756207071304876123)
         self.sort_winrate = self.client.get_emoji(
@@ -82,6 +64,24 @@ class blitz_aftermath_stats(commands.Cog):
             756575770381647973)
         self.refresh_reaction = self.client.get_emoji(
             760907672823398420)
+
+    # Add reactions for sorting to a message
+    async def add_sorting_reactions(self, message):
+        # await message.add_reaction(self.learn_more)
+        # await message.add_reaction(self.sort_timestamp)
+        # await message.add_reaction(self.sort_battles)
+        # await message.add_reaction(self.sort_rating)
+        # await message.add_reaction(self.sort_winrate)
+        return
+    # Refresh reaction
+    async def add_refresh_reaction(self, message):
+        # await message.add_reaction(self.refresh_reaction)
+        return
+
+    # Events
+    # @commands.Cog.listener()
+    @commands.Cog.listener()
+    async def on_ready(self):
         print(f'[Beta] Aftermath Stats cog is ready.')
 
 
