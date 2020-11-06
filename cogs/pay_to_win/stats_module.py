@@ -5,6 +5,7 @@ from cloudinary.api import delete_resources, resources
 from cloudinary.uploader import upload
 
 import requests
+import rapidjson
 
 class CustomBackground():
     def __init__(self):
@@ -17,7 +18,7 @@ class CustomBackground():
         """Upload a new image or update the existing one"""
         url = self.updateBGAPI + user_id + "?bgurl=" + image_url
         res = requests.get(url)
-        res_data = res.json()
+        res_data = rapidjson.loads(res.text)
 
         if res_data.get("error"):
             return res_data.get("error")
@@ -30,7 +31,7 @@ class CustomBackground():
     def delete(self, user_id: str) -> str:
         url = self.deleteBGAPI + user_id
         res = requests.get(url)
-        res_data = res.json()
+        res_data = rapidjson.loads(res.text)
 
         if res_data.get("error"):
             return res_data.get("error")
