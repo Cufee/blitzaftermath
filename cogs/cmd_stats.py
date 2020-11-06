@@ -34,7 +34,7 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             "bg_url": bg_url
         }
         try:
-            res = requests.get("http://localhost:6969/player", json=request_dict)
+            res = requests.get("http://localhost/player", json=request_dict)
         except requests.exceptions.ConnectionError:
             raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         if res.status_code == 200:
@@ -543,15 +543,16 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         try:
-            res = requests.get(f'http://158.69.62.236/users/{ctx.author.id}')
+            res = requests.get(f'http://localhost/users/{ctx.author.id}')
             premium = rapidjson.loads(res.text).get('premium', False)
             verified = rapidjson.loads(res.text).get('verified', False)
-            if not premium:
-                await ctx.send("This feature is coming back soon!")
-                return
-            elif not verified:
+            if not verified:
                 await ctx.send("You need to verify your account with `v-login` before setting up a background image.")
                 return
+            elif not premium:
+                await ctx.send("You will need to have Aftermath Premium to change the background.")
+                return
+            
         except:
             await ctx.send("It looks like Aftermath is partially down for maintenance. Try again later.")
             return
@@ -562,7 +563,7 @@ class blitz_aftermath_stats(commands.Cog):
             url = url.strip()
         except:
             url = None
-        print(url)
+
         try:
             # Set image url
             if url:
@@ -579,9 +580,8 @@ class blitz_aftermath_stats(commands.Cog):
 
             # Image url found
             if img_url:
-                err, secure_url = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
+                err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
                 if not err:
-                    UsersApi.add_custom_bg(ctx.author.id, secure_url)
                     await ctx.send("Awesome! Your stats will now shine bright :)")
                     return
                 else:
