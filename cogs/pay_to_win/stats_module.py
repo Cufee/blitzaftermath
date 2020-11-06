@@ -18,12 +18,11 @@ class CustomBackground():
         """Upload a new image or update the existing one"""
         url = self.updateBGAPI + user_id + "?bgurl=" + image_url
         res = requests.get(url)
-
-        if not res.text:
+        try:
+            res_data = rapidjson.loads(res.text)
+        except:
             print(res)
             raise Exception("It looks like Aftermath fancy is currently down for maintenance.")
-
-        res_data = rapidjson.loads(res.text)
         
         if res_data.get("error"):
             return res_data.get("error")
@@ -36,8 +35,9 @@ class CustomBackground():
     def delete(self, user_id: str) -> str:
         url = self.deleteBGAPI + user_id
         res = requests.get(url)
-
-        if not res.text:
+        try:
+            res_data = rapidjson.loads(res.text)
+        except:
             print(res)
             raise Exception("It looks like Aftermath fancy is currently down for maintenance.")
 
