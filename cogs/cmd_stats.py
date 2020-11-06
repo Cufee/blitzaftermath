@@ -40,6 +40,9 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
         if res.status_code == 200:
             image = discord.File(filename="result.png", fp=BytesIO(res.content))
             return image, request_dict
+        elif not res.text:
+            print(res)
+            raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         else:
             res_json = rapidjson.loads(res.text)
             print(res_json.get('error'))
