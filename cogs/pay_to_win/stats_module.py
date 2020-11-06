@@ -21,7 +21,7 @@ class CustomBackground():
         try:
             res_data = rapidjson.loads(res.text)
         except:
-            print(res, res.text)
+            print(url, res, res.text)
             raise Exception("It looks like Aftermath fancy is currently down for maintenance.")
         
         if res_data.get("error"):
@@ -38,7 +38,7 @@ class CustomBackground():
         try:
             res_data = rapidjson.loads(res.text)
         except:
-            print(res, res.text)
+            print(url, res, res.text)
             raise Exception("It looks like Aftermath fancy is currently down for maintenance.")
 
         res_data = rapidjson.loads(res.text)
