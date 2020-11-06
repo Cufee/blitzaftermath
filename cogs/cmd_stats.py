@@ -34,7 +34,7 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             "bg_url": bg_url
         }
         try:
-            res = requests.get("http://localhost/player", json=request_dict)
+            res = requests.get("http://localhost:6969/player", json=request_dict)
         except requests.exceptions.ConnectionError:
             raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         if res.status_code == 200:
