@@ -36,7 +36,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             except:
                 pass
             if res_data.get("banned", False) == True:
-                raise Exception("You are currently banned from using Aftermath.")
+                raise Exception(f"You are currently banned from using Aftermath.\nReason: {res_data.get('ban_reason', 'no reason provided.')}")
 
         request_dict = {        
             "player_id": player_id,
