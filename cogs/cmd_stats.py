@@ -32,8 +32,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             try: 
                 res = requests.get(f'http://158.69.62.236/users/{discord_id}')
                 res_data = rapidjson.loads(res.text)
-                print( res_data.get("banned"))
-                if res_data.get("banned", False):
+                if res_data.get("banned", False) == True:
                     raise Exception("You are currently banned from using Aftermath.")
             except:
                 pass
