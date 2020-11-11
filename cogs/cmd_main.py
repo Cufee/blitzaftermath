@@ -10,6 +10,7 @@ from cogs.replays.replay import Replay
 from cogs.replays.rating import Rating
 from cogs.replays.render import Render
 from cogs.api.guild_settings_api import API_v2
+from cogs.api.bans_api import BansAPI
 
 from random import random
 
@@ -17,6 +18,7 @@ command_cooldown = 5
 
 debug = False
 Guilds_API = API_v2()
+Ban_API = BansAPI()
 
 
 class maintenance(commands.Cog):
@@ -229,6 +231,22 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
 
         dm_channel = await ctx.author.create_dm()
         await dm_channel.send("You can invite me to your server by following this link:\nhttps://byvko.dev/")
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def banme(self, ctx):
+        check_url = "http://localhost:4000/users/"
+
+        res = requests.get(f'{check_url}{ctx.author.id}')
+        res_data = rapidjson.loads(res.text)
+
+        if res_data.get("banned", False):
+            await ctx.send(f"You are currently banned: {res_data.get('ban_reason', 'no reason provided.')}")
+            return
+
+        Ban_API.ban_user(ctx.author.id, True, "banme command used", min=5)
+        await ctx.send("You have been banned. Run this command again to test the ban.")
 
 
 def setup(client):

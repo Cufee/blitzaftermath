@@ -11,6 +11,7 @@ from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
 from cogs.api.discord_users_api import DiscordUsersApi
 from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.message_cache_api import MessageCacheAPI
+from cogs.api.bans_api import BansAPI
 
 import time
 command_cooldown = 5
@@ -23,8 +24,17 @@ API = StatsApi()
 CacheAPI = MessageCacheAPI()
 UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
+Ban_API = BansAPI()
 
 def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
+        # Check if user is banned
+        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+        res_data = rapidjson.loads(res.text)
+        if res_data.get("banned", False):
+            if not res_data.get("ban_notified", False):
+                raise Exception("You are currently banned from using Aftermath.")
+            return
+
         request_dict = {        
             "player_id": player_id,
             "realm": realm,
@@ -115,6 +125,12 @@ class blitz_aftermath_stats(commands.Cog):
         if member == self.client.user:
             return
 
+        # Check if user is banned
+        res = requests.get(f'http://158.69.62.236/users/{member.id}')
+        res_data = rapidjson.loads(res.text)
+        if res_data.get("banned", False):
+            return
+
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
 
@@ -144,9 +160,12 @@ class blitz_aftermath_stats(commands.Cog):
             messaged = True
             try:
                 dm_channel = await member.create_dm()
-                await dm_channel.send("It looks like you are trying to spam using Aftermath. This may result in a soft ban and was reported automatically.")
+                await dm_channel.send("It looks like you are trying to spam using Aftermath. You have been banned for 5 minutes.")
             except:
                 messaged = False
+
+            # Add ban to DB
+            Ban_API.ban_user(member.id, messaged, "spam", min=5)
 
             owner_member = self.client.get_user(202905960405139456)
             report_chan = await owner_member.create_dm()
