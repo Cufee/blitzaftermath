@@ -33,8 +33,10 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
                 res = requests.get(f'http://158.69.62.236/users/{discord_id}')
                 res_data = rapidjson.loads(res.text)
                 if res_data.get("banned", False) == True:
+                    print("banned")
                     raise Exception("You are currently banned from using Aftermath.")
-            except:
+            except Exception as e:
+                print(e)
                 pass
 
         request_dict = {        
@@ -132,7 +134,7 @@ class blitz_aftermath_stats(commands.Cog):
         try: 
             res = requests.get(f'http://158.69.62.236/users/{member.id}')
             res_data = rapidjson.loads(res.text)
-            if res_data.get("banned", False):
+            if res_data.get("banned", False) == True:
                 return
         except:
             pass
