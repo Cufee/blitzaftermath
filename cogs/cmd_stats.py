@@ -26,14 +26,18 @@ UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 Ban_API = BansAPI()
 
-def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
-        # Check if user is banned
-        res = requests.get(f'http://158.69.62.236/players/{player_id}')
-        res_data = rapidjson.loads(res.text)
-        if res_data.get("banned", False):
-            if not res_data.get("ban_notified", False):
-                raise Exception("You are currently banned from using Aftermath.")
-            return
+def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
+        if discord_id != "None":
+            # Check if user is banned
+            try: 
+                res = requests.get(f'http://158.69.62.236/users/{discord_id}')
+                res_data = rapidjson.loads(res.text)
+                if res_data.get("banned", False):
+                    if not res_data.get("ban_notified", False):
+                        raise Exception("You are currently banned from using Aftermath.")
+                    return
+            except:
+                pass
 
         request_dict = {        
             "player_id": player_id,
@@ -44,7 +48,7 @@ def zap_render(player_id: int, realm: str, days: int, bg_url: str, sort_key: str
             "bg_url": bg_url
         }
         try:
-            res = requests.get("http://localhost:6969/player", json=request_dict)
+            res = requests.get("http://158.69.62.236:6969/player", json=request_dict)
         except requests.exceptions.ConnectionError:
             raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         if res.status_code == 200:
@@ -80,12 +84,13 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Add reactions for sorting to a message
     async def add_sorting_reactions(self, message):
-        # await message.add_reaction(self.learn_more)
-        # await message.add_reaction(self.sort_timestamp)
-        # await message.add_reaction(self.sort_battles)
-        # await message.add_reaction(self.sort_rating)
-        # await message.add_reaction(self.sort_winrate)
+        await message.add_reaction(self.learn_more)
+        await message.add_reaction(self.sort_timestamp)
+        await message.add_reaction(self.sort_battles)
+        await message.add_reaction(self.sort_rating)
+        await message.add_reaction(self.sort_winrate)
         return
+
     # Refresh reaction
     async def add_refresh_reaction(self, message):
         if not self.refresh_reaction:
@@ -124,12 +129,15 @@ class blitz_aftermath_stats(commands.Cog):
             lambda m: m.id == payload.user_id, guild.members)
         if member == self.client.user:
             return
-
+        
         # Check if user is banned
-        res = requests.get(f'http://158.69.62.236/users/{member.id}')
-        res_data = rapidjson.loads(res.text)
-        if res_data.get("banned", False):
-            return
+        try: 
+            res = requests.get(f'http://158.69.62.236/users/{member.id}')
+            res_data = rapidjson.loads(res.text)
+            if res_data.get("banned", False):
+                return
+        except:
+            pass
 
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
@@ -206,7 +214,7 @@ class blitz_aftermath_stats(commands.Cog):
         else:
             return
 
-        image, request = zap_render(player_id, player_realm, days, bg_url, sort_key=new_key)
+        image, request = zap_render(player_id, "None", player_realm, days, bg_url, sort_key=new_key)
 
         new_message = await message.channel.send(file=image)
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
@@ -238,7 +246,9 @@ class blitz_aftermath_stats(commands.Cog):
                 {'_id': player_id}).get("realm")
 
             days = 0
-            image, _ = zap_render(player_id, player_realm, days, bg_url)
+            try:
+                image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+            except: return
 
             await message.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
@@ -287,7 +297,7 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -317,7 +327,7 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -417,7 +427,7 @@ class blitz_aftermath_stats(commands.Cog):
                     days = session_days
 
 
-                image, request = zap_render(player_id, player_realm, days, bg_url)
+                image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
 
                 new_message = await message.channel.send(file=image)
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -449,7 +459,7 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -565,7 +575,7 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         try:
-            res = requests.get(f'http://localhost/users/{ctx.author.id}')
+            res = requests.get(f'http://158.69.62.236/users/{ctx.author.id}')
             premium = rapidjson.loads(res.text).get('premium', False)
             verified = rapidjson.loads(res.text).get('verified', False)
             if not verified:
