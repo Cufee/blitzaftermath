@@ -29,15 +29,14 @@ Ban_API = BansAPI()
 def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
         if discord_id != "None":
             # Check if user is banned
+            res_data = {}
             try: 
                 res = requests.get(f'http://158.69.62.236/users/{discord_id}')
                 res_data = rapidjson.loads(res.text)
-                if res_data.get("banned", False) == True:
-                    print("banned")
-                    raise Exception("You are currently banned from using Aftermath.")
-            except Exception as e:
-                print(e)
+            except:
                 pass
+            if res_data.get("banned", False) == True:
+                raise Exception("You are currently banned from using Aftermath.")
 
         request_dict = {        
             "player_id": player_id,
@@ -47,6 +46,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             "detailed_limit": 0,
             "bg_url": bg_url
         }
+
         try:
             res = requests.get("http://158.69.62.236:6969/player", json=request_dict)
         except requests.exceptions.ConnectionError:
@@ -131,13 +131,14 @@ class blitz_aftermath_stats(commands.Cog):
             return
         
         # Check if user is banned
+        res_data = {}
         try: 
-            res = requests.get(f'http://158.69.62.236/users/{member.id}')
+            res = requests.get(f'http://158.69.62.236/users/{discord_id}')
             res_data = rapidjson.loads(res.text)
-            if res_data.get("banned", False) == True:
-                return
         except:
             pass
+        if res_data.get("banned", False) == True:
+            return
 
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
