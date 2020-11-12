@@ -136,7 +136,7 @@ class blitz_aftermath_stats(commands.Cog):
         # Check if user is banned
         res_data = {}
         try: 
-            res = requests.get(f'http://158.69.62.236/users/{discord_id}')
+            res = requests.get(f'http://158.69.62.236/users/{member.id}')
             res_data = rapidjson.loads(res.text)
         except:
             pass
@@ -285,6 +285,7 @@ class blitz_aftermath_stats(commands.Cog):
             session_days = None
 
         player_name_str = "".join(args).strip()
+        player_id = None
 
         try:
             # Used later to check if a default account should be set
@@ -510,7 +511,7 @@ class blitz_aftermath_stats(commands.Cog):
                         f'Player {player_name} not found. Please specify the server you would like to check.\n*For example: {player_name}-eu*', delete_after=30)
 
             if trydefault and player_id:
-                # Set a default player_id  if it is not set already
+                # Set a default player_id if it is not set already
                 default_player_id = UsersApi.get_default_player_id(
                     discord_user_id=(message.author.id))
                 if not default_player_id:
