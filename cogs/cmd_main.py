@@ -235,18 +235,28 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
 
     @commands.command()
     @commands.is_owner()
-    async def banme(self, ctx):
-        check_url = "http://localhost:4000/users/"
+    async def ban(self, ctx, _, hours, *args):
+        await ctx.message.delete()
 
-        res = requests.get(f'{check_url}{ctx.author.id}')
-        res_data = rapidjson.loads(res.text)
-
-        if res_data.get("banned", False):
-            await ctx.send(f"You are currently banned: {res_data.get('ban_reason', 'no reason provided.')}")
+        # Check for a mention
+        if not ctx.message.mentions:
+            await ctx.send("You need to mention somebody in this message.", delete_after=15)
             return
 
-        Ban_API.ban_user(ctx.author.id, True, "banme command used", min=5)
-        await ctx.send("You have been banned. Run this command again to test the ban.")
+        # Compile reason and get user
+        reason = " ".join(args)
+        user = ctx.message.mentions[0]
+
+        # Ban
+        try:
+            Ban_API.ban_user(user.id, reason, False, min=1, hrs=int(hours))
+        except Exception as e:
+            print(e)
+            await ctx.send("An error occured. Check logs.", delete_after=15)
+            return
+    
+        await ctx.send(f"{user.name} has been banned for {hours} hours.", delete_after=15)
+        return
 
 
 def setup(client):

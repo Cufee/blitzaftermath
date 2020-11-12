@@ -174,7 +174,7 @@ class blitz_aftermath_stats(commands.Cog):
                 messaged = False
 
             # Add ban to DB
-            Ban_API.ban_user(member.id, messaged, "spam", min=5)
+            Ban_API.ban_user(member.id, "spamming using Aftermath reactions.", messaged, min=5)
 
             owner_member = self.client.get_user(202905960405139456)
             report_chan = await owner_member.create_dm()
