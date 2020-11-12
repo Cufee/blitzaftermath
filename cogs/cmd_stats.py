@@ -26,7 +26,7 @@ UsersApi = DiscordUsersApi()
 bgAPI = CustomBackground()
 Ban_API = BansAPI()
 
-def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: str, sort_key: str = "relevance"):
+def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: str, premium: bool, verified: bool, sort_key: str = "relevance"):
         if discord_id != "None":
             # Check if user is banned
             res_data = {}
@@ -44,7 +44,10 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             "days": days,
             "sort_key": sort_key,
             "detailed_limit": 0,
-            "bg_url": bg_url
+
+            "premium": premium,
+            "verified": verified,
+            "bg_url":bg_url
         }
 
         try:
@@ -194,6 +197,8 @@ class blitz_aftermath_stats(commands.Cog):
         days = message_details.get('request').get('days')
         bg_url = message_details.get('request').get('bg_url')
         old_key = message_details.get('request').get('sort_key')
+        premium = message_details.get('request').get('premium', False)
+        verified = message_details.get('request').get('verified', False)
         
         if payload.emoji == self.refresh_reaction:
             new_key = old_key
@@ -215,7 +220,7 @@ class blitz_aftermath_stats(commands.Cog):
         else:
             return
 
-        image, request = zap_render(player_id, "None", player_realm, days, bg_url, sort_key=new_key)
+        image, request = zap_render(player_id, "None", player_realm, days, bg_url, premium, verified, sort_key=new_key)
 
         new_message = await message.channel.send(file=image)
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
@@ -238,9 +243,14 @@ class blitz_aftermath_stats(commands.Cog):
                     discord_user_id=(message.author.id))
         if player_id:
             bg_url = ""
+            premium = False
+            verified = False
             try:
                 res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                res_data = rapidjson.loads(res.text)
+                bg_url = res_data.get('bg_url', None)
+                premium = res_data.get('premium', False)
+                verified = res_data.get('verified', False)
             except:
                 pass
             player_realm = players.find_one(
@@ -248,7 +258,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             days = 0
             try:
-                image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+                image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
             except: return
 
             await message.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
@@ -286,9 +296,14 @@ class blitz_aftermath_stats(commands.Cog):
 
                 if player_id:
                     bg_url = ""
+                    premium = False
+                    verified = False
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                        res_data = rapidjson.loads(res.text)
+                        bg_url = res_data.get('bg_url', None)
+                        premium = res_data.get('premium', False)
+                        verified = res_data.get('verified', False)
                     except:
                         pass
                     player_realm = players.find_one(
@@ -298,7 +313,7 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -316,9 +331,14 @@ class blitz_aftermath_stats(commands.Cog):
 
                 if player_id:
                     bg_url = ""
+                    premium = False
+                    verified = False
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                        res_data = rapidjson.loads(res.text)
+                        bg_url = res_data.get('bg_url', None)
+                        premium = res_data.get('premium', False)
+                        verified = res_data.get('verified', False)
                     except:
                         pass
                     player_realm = players.find_one(
@@ -328,7 +348,7 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -417,18 +437,24 @@ class blitz_aftermath_stats(commands.Cog):
                     player_realm = player_details.get('realm')
                 
                 bg_url = ""
+                premium = False
+                verified = False
                 try:
                     res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                    bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                    res_data = rapidjson.loads(res.text)
+                    bg_url = res_data.get('bg_url', None)
+                    premium = res_data.get('premium', False)
+                    verified = res_data.get('verified', False)
                 except:
                     pass
+                player_realm = players.find_one(
+                    {'_id': player_id}).get("realm")
 
                 days = 0
                 if session_days:
                     days = session_days
 
-
-                image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+                image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
 
                 new_message = await message.channel.send(file=image)
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -449,10 +475,16 @@ class blitz_aftermath_stats(commands.Cog):
                 elif len(players_list) == 1:
                     player_id = players_list[0].get("_id")
                     player_realm = players_list[0].get("realm")
+
                     bg_url = ""
+                    premium = False
+                    verified = False
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                        bg_url = rapidjson.loads(res.text).get('bg_url', None)
+                        res_data = rapidjson.loads(res.text)
+                        bg_url = res_data.get('bg_url', None)
+                        premium = res_data.get('premium', False)
+                        verified = res_data.get('verified', False)
                     except:
                         pass
 
@@ -460,7 +492,12 @@ class blitz_aftermath_stats(commands.Cog):
                     if session_days:
                         days = session_days
 
-                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url)
+
+                    days = 0
+                    if session_days:
+                        days = session_days
+
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
 
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
