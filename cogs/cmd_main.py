@@ -52,6 +52,7 @@ Sets a new background for your stats.
 
 - You can also just attach an image to this message instead of using a link.
 ```
+**Other**:
 `v-login`
 ```
 Use this command to verify your account and get a checkmark next to your name.
