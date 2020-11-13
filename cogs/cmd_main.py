@@ -52,7 +52,14 @@ Sets a new background for your stats.
 - For example: v-fancy https://link-to-an-image.jpg
 
 - You can also just attach an image to this message instead of using a link.
-```""")
+```
+`v-login`
+```
+Use this command to verify your account and get a checkmark next to your name.
+
+- This is a required step for setting up a background image or buying Aftermath Premium for the first time.
+```
+""")
 # Permissions
 perms_text = """Here is a full list of permissions Aftermath needs to function correctly:
 ```
