@@ -156,10 +156,9 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
             except discord.HTTPException:
                 pass
 
-        # For this error example we check to see where it came from...
-        elif isinstance(error, commands.BadArgument):
-            if ctx.command.qualified_name == 'tag list':  # Check if the command being invoked is 'tag list'
-                await ctx.send('I could not find that member. Please try again.')
+        # Check if command missing arguments
+        elif isinstance(error, commands.commands.errors.MissingRequiredArgument):
+            await ctx.send(f'You will need to give me more context to use this command. Check v-help if you are not sure what information a command needs.', delete_after=15)
 
         elif isinstance(error, commands.CheckFailure):
             await ctx.send(f'You do not have the required permissions to use this command.', delete_after=15)
