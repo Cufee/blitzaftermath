@@ -20,6 +20,60 @@ debug = False
 Guilds_API = API_v2()
 Ban_API = BansAPI()
 
+# Strings
+# Help
+help_str = (f"""
+**Replays**:
+```To analyze a WoT Blitz replay, just send a file and I will do the rest.```
+
+**Stats**:
+- *All sessions are reset at 02:00 daily, based on server timezone.*
+- *Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
+
+`v-stats`
+```
+Aliases: v-wr, v-session
+
+Use v-stats PlayerName to check the last session of a player.
+- For example: v-stats Vovko
+
+You can also check a specific session with v-stats PlayerName days.
+- For example: v-stats Vovko-na 3
+```
+`v-iam`
+```
+To change the default account Aftermath looks up for you, use v-iam NewName.
+```
+`v-fancy`
+```
+Aliases: v-bg
+
+Sets a new background for your stats.
+- For example: v-fancy https://link-to-an-image.jpg
+
+- You can also just attach an image to this message instead of using a link.
+```""")
+# Permissions
+perms_text = """Here is a full list of permissions Aftermath needs to function correctly:
+```
+Basic permissions:
+- Read Messages
+- Read Message History
+- Send Messages
+- Manage Messages
+- Embed Links
+- Attach Files
+- Add Reaction
+- Use External Reactions
+- Connect (voice)
+- Speak   (voice)
+
+Other permissions:
+- Create Instant Invites
+    This is used to invite the developer to the server in case an error has occured and was automatically reported.
+- Change Nickname
+    Just to make sure Aftermath name can be adjusted across all servers.```"""
+
 
 class maintenance(commands.Cog):
 
@@ -73,26 +127,7 @@ class maintenance(commands.Cog):
     @commands.guild_only()
     async def perms(self, ctx):
         perms = ctx.channel.permissions_for(ctx.guild.me).value
-        msg_text = """Here is a full list of permissions Aftermath needs to function correctly:
-```
-Basic permissions:
-- Read Messages
-- Read Message History
-- Send Messages
-- Manage Messages
-- Embed Links
-- Attach Files
-- Add Reaction
-- Use External Reactions
-- Connect (voice)
-- Speak   (voice)
-
-Other permissions:
-- Create Instant Invites
-    This is used to invite the developer to the server in case an error has occured and was automatically reported.
-- Change Nickname
-    Just to make sure Aftermath name can be adjusted across all servers.```"""
-        await ctx.send(f"{msg_text}*Your perms code is {perms}*")
+        await ctx.send(f"{perms_text}*Your perms code is {perms}*")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -133,24 +168,6 @@ Other permissions:
 
         # Command not found or is disabled
         elif isinstance(error, commands.CommandNotFound):
-            help_str = (f"""
-**AfterMath**:
-To analyze a WoT Blitz replay, just send a file and I will do the rest.
-
-**AfterStats**:
-Command: `v-stats`
-Aliases: `v-wr`, `v-session`
-
-Use `v-stats PlayerName` to check the last session of a player.
-*For example: `v-stats Vovko`*
-
-*All sessions are reset at 02:00 daily, based on server timezone.
-Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
-
-You can also check a specific session with `v-stats PlayerName days`.
-*For example:* `v-stats Vovko-na 3`
-
-To change the default account Aftermath looks up for you, use `v-iam NewName`.""")
             try:
                 await ctx.author.send(help_str)
             except discord.HTTPException:
@@ -173,24 +190,6 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
     @commands.command(aliases=['help'])
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     async def _help(self, ctx):
-        help_str = (f"""
-**AfterMath**:
-To analyze a WoT Blitz replay, just send a file and I will do the rest.
-
-**AfterStats**:
-Command: `v-stats`
-Aliases: `v-wr`, `v-session`
-
-Use `v-stats PlayerName` to check the last session of a player.
-*For example: `v-stats Vovko`*
-
-*All sessions are reset at 02:00 daily, based on server timezone.
-Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
-
-You can also check a specific session with `v-stats PlayerName days`.
-*For example:* `v-stats Vovko-na 3`
-
-To change the default account Aftermath looks up for you, use `v-iam NewName`.""")
         await ctx.send(help_str)
         return
 
