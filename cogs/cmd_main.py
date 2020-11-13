@@ -158,7 +158,7 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
 
         # Check if command missing arguments
         elif isinstance(error, commands.errors.MissingRequiredArgument):
-            await ctx.send(f'You will need to give me more context to use this command. Check v-help if you are not sure what information a command needs.', delete_after=15)
+            await ctx.send(f'You will need to give me more context to use this command. Check v-help if you are not sure what arguments a given command requires.', delete_after=15)
 
         elif isinstance(error, commands.CheckFailure):
             await ctx.send(f'You do not have the required permissions to use this command.', delete_after=15)
