@@ -157,7 +157,7 @@ To change the default account Aftermath looks up for you, use `v-iam NewName`.""
                 pass
 
         # Check if command missing arguments
-        elif isinstance(error, commands.commands.errors.MissingRequiredArgument):
+        elif isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send(f'You will need to give me more context to use this command. Check v-help if you are not sure what information a command needs.', delete_after=15)
 
         elif isinstance(error, commands.CheckFailure):
