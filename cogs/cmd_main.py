@@ -25,7 +25,6 @@ Ban_API = BansAPI()
 help_str = (f"""
 **Replays**:
 ```To analyze a WoT Blitz replay, just send a file and I will do the rest.```
-
 **Stats**:
 - *All sessions are reset at 02:00 daily, based on server timezone.*
 - *Newly added players will need to play at least one battle before Aftermath starts tracking their session.*
