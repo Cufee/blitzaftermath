@@ -87,6 +87,8 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Add reactions for sorting to a message
     async def add_sorting_reactions(self, message):
+        if not self.learn_more:
+            return
         await message.add_reaction(self.learn_more)
         await message.add_reaction(self.sort_timestamp)
         await message.add_reaction(self.sort_battles)
@@ -98,7 +100,6 @@ class blitz_aftermath_stats(commands.Cog):
     async def add_refresh_reaction(self, message):
         if not self.refresh_reaction:
             return
-            
         await message.add_reaction(self.refresh_reaction)
         return
 
@@ -184,7 +185,7 @@ class blitz_aftermath_stats(commands.Cog):
             await report_chan.send(f"User `{payload.user_id}` is trying to spam in guild `{guild.name} ({payload.guild_id})`. Messaged `{messaged}`")
             return
 
-        if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')):
+        if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')) and res_data.get("premium", False):
             try:
                 dm_channel = await member.create_dm()
                 await dm_channel.send("You will need to wait 15 seconds before using reactions.")
@@ -200,20 +201,20 @@ class blitz_aftermath_stats(commands.Cog):
         premium = message_details.get('request').get('premium', False)
         verified = message_details.get('request').get('verified', False)
         
-        if payload.emoji == self.refresh_reaction:
+        if payload.emoji == self.refresh_reaction and res_data.get("premium", False):
             new_key = old_key
         
-        elif payload.emoji == self.sort_battles:
+        elif payload.emoji == self.sort_battles and res_data.get("premium", False):
             new_key = "-battles"
             if old_key == "-battles":
                 new_key = "+battles"
 
-        elif payload.emoji == self.sort_rating:
+        elif payload.emoji == self.sort_rating and res_data.get("premium", False):
             new_key = "-wn8"
             if old_key == "-wn8":
                 new_key = "+wn8"
 
-        elif payload.emoji == self.sort_winrate:
+        elif payload.emoji == self.sort_winrate and res_data.get("premium", False):
             new_key = "-winrate"
             if old_key == "-winrate":
                 new_key = "+winrate"
@@ -225,6 +226,8 @@ class blitz_aftermath_stats(commands.Cog):
         new_message = await message.channel.send(file=image)
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
         await self.add_refresh_reaction(new_message)
+        if premium:
+            await self.add_sorting_reactions(new_message)
         return
         
 
@@ -319,6 +322,8 @@ class blitz_aftermath_stats(commands.Cog):
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
+                    if premium:
+                        await self.add_sorting_reactions(new_message)
                     return None
                 else:
                     await message.channel.send(f'You do not have a default WoT Blitz account set.\nUse `{self.client.command_prefix[0]}iam Username-Server` to set a default account for me to look up.')
@@ -354,6 +359,8 @@ class blitz_aftermath_stats(commands.Cog):
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
+                    if premium:
+                        await self.add_sorting_reactions(new_message)
                     return None
                 else:
                     await message.channel.send(f'{user.name} does not have a default WoT Blitz account set.')
@@ -460,6 +467,8 @@ class blitz_aftermath_stats(commands.Cog):
                 new_message = await message.channel.send(file=image)
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                 await self.add_refresh_reaction(new_message)
+                if premium:
+                    await self.add_sorting_reactions(new_message)
 
                 # Try to set a new default account for new users
                 trydefault = True
@@ -503,6 +512,8 @@ class blitz_aftermath_stats(commands.Cog):
                     new_message = await message.channel.send(file=image)
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
+                    if premium:
+                        await self.add_sorting_reactions(new_message)
                     # Try to set a new default account for new users
                     trydefault = True
 
