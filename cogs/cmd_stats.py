@@ -105,18 +105,26 @@ class blitz_aftermath_stats(commands.Cog):
     async def add_sorting_reactions(self, message):
         if not self.learn_more:
             return
-        await message.add_reaction(self.learn_more)
-        await message.add_reaction(self.sort_timestamp)
-        await message.add_reaction(self.sort_battles)
-        await message.add_reaction(self.sort_rating)
-        await message.add_reaction(self.sort_winrate)
+        try:
+            await message.add_reaction(self.learn_more)
+            await message.add_reaction(self.sort_timestamp)
+            await message.add_reaction(self.sort_battles)
+            await message.add_reaction(self.sort_rating)
+            await message.add_reaction(self.sort_winrate)
+        except:
+            # In case some perms are missing
+            pass
         return
 
     # Refresh reaction
     async def add_refresh_reaction(self, message):
         if not self.refresh_reaction:
             return
-        await message.add_reaction(self.refresh_reaction)
+        try:
+            await message.add_reaction(self.refresh_reaction)
+        except:
+            # In case some perms are missing
+            pass
         return
 
     # Events
