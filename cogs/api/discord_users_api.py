@@ -103,7 +103,7 @@ class DiscordUsersApiV2():
             res = requests.get(f"{self.API_URL}users/{discord_user_id}")
             res_data = rapidjson.loads(res.text)
         except:
-            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+            raise Exception("It looks like Aftermath stats is partially down for maintenance.")
 
         if res_data.get("error"):
             raise Exception(res_data.get("error"))
@@ -117,7 +117,7 @@ class DiscordUsersApiV2():
             res = requests.get(f"{self.API_URL}players/{player_id}")
             res_data = rapidjson.loads(res.text)
         except:
-            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+            raise Exception("It looks like Aftermath stats is partially down for maintenance.")
 
         if res_data.get("error"):
             raise Exception(res_data.get("error"))
@@ -131,7 +131,7 @@ class DiscordUsersApiV2():
             res = requests.patch(f"{self.API_URL}users/{discord_user_id}/newdef/{player_id}")
             res_data = rapidjson.loads(res.text)
         except:
-            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+            raise Exception("It looks like Aftermath stats is partially down for maintenance.")
 
         if res_data.get("error"):
             raise Exception(res_data.get("error"))
