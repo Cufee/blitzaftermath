@@ -72,6 +72,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
 class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
+        self.ready = False
         self.client = client
         self.all_reactions = []
 
@@ -122,6 +123,8 @@ class blitz_aftermath_stats(commands.Cog):
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
+        self.ready = True
+
         self.sort_battles = self.client.get_emoji(
             756207071304876123)
         self.all_reactions.append(self.sort_battles)
@@ -161,7 +164,9 @@ class blitz_aftermath_stats(commands.Cog):
             lambda m: m.id == payload.channel_id, guild.channels)
 
         if not member:
-            # await channel.send("It looks like Discord is having some temporary issues or Aftermath is missing permissions on this server to work properly.", delete_after=15)
+            print(f"Member is None, ready: {self.ready}")
+            if self.ready:
+                await channel.send("It looks like Aftermath is missing permissions on this server to work properly.", delete_after=15)
             return
         elif member == self.client.user:
             return
