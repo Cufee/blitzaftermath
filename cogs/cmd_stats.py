@@ -103,20 +103,20 @@ class blitz_aftermath_stats(commands.Cog):
 
     # Add reactions for sorting to a message
     async def add_sorting_reactions(self, message):
-        # if not self.learn_more:
-        #     return
-        # await message.add_reaction(self.learn_more)
-        # await message.add_reaction(self.sort_timestamp)
-        # await message.add_reaction(self.sort_battles)
-        # await message.add_reaction(self.sort_rating)
-        # await message.add_reaction(self.sort_winrate)
+        if not self.learn_more:
+            return
+        await message.add_reaction(self.learn_more)
+        await message.add_reaction(self.sort_timestamp)
+        await message.add_reaction(self.sort_battles)
+        await message.add_reaction(self.sort_rating)
+        await message.add_reaction(self.sort_winrate)
         return
 
     # Refresh reaction
     async def add_refresh_reaction(self, message):
-        # if not self.refresh_reaction:
-        #     return
-        # await message.add_reaction(self.refresh_reaction)
+        if not self.refresh_reaction:
+            return
+        await message.add_reaction(self.refresh_reaction)
         return
 
     # Events
@@ -156,10 +156,9 @@ class blitz_aftermath_stats(commands.Cog):
         if not payload.guild_id:
             return
             
+        member = payload.member
         guild = discord.utils.find(
             lambda g: g.id == payload.guild_id, self.client.guilds)
-        member = discord.utils.find(
-            lambda m: m.id == payload.user_id, guild.members)
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
 
@@ -174,7 +173,7 @@ class blitz_aftermath_stats(commands.Cog):
         # Check if user is banned
         res_data = {}
         try: 
-            res = requests.get(f'http://158.69.62.236/users/{member.id}')
+            res = requests.get(f'http://158.69.62.236/users/{payload.user_id}')
             res_data = rapidjson.loads(res.text)
         except:
             pass
@@ -212,7 +211,7 @@ class blitz_aftermath_stats(commands.Cog):
                 messaged = False
 
             # Add ban to DB
-            Ban_API.ban_user(member.id, "spamming using Aftermath reactions.", messaged, min=5)
+            Ban_API.ban_user(payload.user_id, "spamming using Aftermath reactions.", messaged, min=5)
 
             owner_member = self.client.get_user(202905960405139456)
             report_chan = await owner_member.create_dm()
