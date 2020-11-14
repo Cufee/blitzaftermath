@@ -107,7 +107,7 @@ class DiscordUsersApiV2():
 
         if res_data.get("error"):
             if res_data.get("error") == "mongo: no documents in result":
-                raise Exception("This user has no default account set.")
+                raise Exception("This user does not have a default WoT Blitz account set.")
             raise Exception(res_data.get("error"))
 
         return res_data
