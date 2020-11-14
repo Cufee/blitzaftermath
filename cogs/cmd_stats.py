@@ -163,7 +163,7 @@ class blitz_aftermath_stats(commands.Cog):
         channel = discord.utils.find(
             lambda m: m.id == payload.channel_id, guild.channels)
 
-        if not member:
+        if not member and payload.emoji in self.all_reactions:
             print(f"Member is None, ready: {self.ready}")
             if self.ready:
                 await channel.send("It looks like Aftermath is missing permissions on this server to work properly.", delete_after=15)
