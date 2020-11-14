@@ -9,8 +9,8 @@ import rapidjson
 
 class CustomBackground():
     def __init__(self):
-        self.updateBGAPI = "http://localhost/setnewbg/"
-        self.deleteBGAPI = "http://localhost/removebg/"
+        self.updateBGAPI = "http://158.69.62.236/setnewbg/"
+        self.deleteBGAPI = "http://158.69.62.236/removebg/"
 
 
     def put(self, user_id: str, image_url: str) -> (str):

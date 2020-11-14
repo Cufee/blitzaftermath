@@ -112,8 +112,8 @@ class StatsApi():
                     str(player_id)) or {}
 
                 if not player_data:
-                    print(player_data)
-                    print(f'No data, skipping {player_id}')
+                    # print(player_data)
+                    # print(f'No data, skipping {player_id}')
                     p_skip_cnt += 1
                     continue
 
@@ -155,12 +155,12 @@ class StatsApi():
                 # Add session to DB
                 result = self.players.update_one({'_id': player_id}, {"$set": new_player}, upsert=True)
                 if not result.acknowledged:
-                    print(f"Failed to add a session for {player_id}")
+                    # print(f"Failed to add a session for {player_id}")
                     p_fail_cnt += 1
                 else:
                     p_upd_cnt += 1
 
-        print(f"Player updates:\nSuccess: {p_upd_cnt}\nFailed: {p_fail_cnt}\nSkipped: {p_skip_cnt}")
+        # print(f"Player updates:\nSuccess: {p_upd_cnt}\nFailed: {p_fail_cnt}\nSkipped: {p_skip_cnt}")
 
     def update_stats(self, player_ids_long: list, realm: str, hard=False):
         """Takes in a list of player ids and realm (optional). Updates stats for each player"""
@@ -216,7 +216,7 @@ class StatsApi():
 
                 player_data = res_stats_all_data.get(str(player_id))
                 if not player_data:
-                    print(f'No data for {player_id}')
+                    # print(f'No data for {player_id}')
                     s_skip_cnt += 1
                     continue
                 stats_random = player_data.get('statistics', {}).get('all', {})
@@ -253,7 +253,7 @@ class StatsApi():
                     'data').get(str(player_id))
 
                 if not vehicles_stats_data:
-                    print("Player has no battles")
+                    # print("Player has no battles")
                     # raise Exception(f"It looks like {player_details.get('nickname')} did not play any battles on {realm} yet.")
                     s_skip_cnt += 1
                     continue
@@ -277,7 +277,7 @@ class StatsApi():
                 # Add session to DB
                 result = self.sessions.insert_one(player_stats)
                 if not result.acknowledged:
-                    print(f"Failed to add a session for {player_id}")
+                    # print(f"Failed to add a session for {player_id}")
                     s_fail_cnt += 1
                 else:
                     s_upd_cnt += 1
@@ -285,7 +285,7 @@ class StatsApi():
                 if requests_ctn % 100 == 0:
                     sleep(5)
 
-        print(f"Session Updates:\nSuccess: {s_upd_cnt}\nFailed: {s_fail_cnt}\nSkipped: {s_skip_cnt}")
+        # print(f"Session Updates:\nSuccess: {s_upd_cnt}\nFailed: {s_fail_cnt}\nSkipped: {s_skip_cnt}")
 
     def add_premium_time(self, player_id: int, days_to_add=None):
         player_details = self.players.find_one({'_id': player_id})
@@ -380,7 +380,7 @@ class StatsApi():
             }
         else:
             result = self.update_stats(player_ids_long=[player_id], realm=realm)
-            print(result)
+            # print(result)
             if result:
                 raise Exception(
                     'I just refreshed your session, please try again.')
@@ -400,8 +400,8 @@ class StatsApi():
         stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
 
         if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw:
-            print(
-                f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+            # print(
+            #     f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
             session_detailed = {}
         else:
             # Get current detailed stats
@@ -468,7 +468,7 @@ class StatsApi():
     def add_vehicle_wn8(self, tank_data: dict):
         tank_battles = tank_data.get("battles", 0)
         if tank_battles == 0 or not tank_battles:
-            print('Tank has 0 battles')
+            # print('Tank has 0 battles')
             return tank_data
         tank_id = int(tank_data.get('tank_id', 0))
         tank_averages = self.glossary_averages.find_one(
@@ -526,8 +526,8 @@ class StatsApi():
             stats_detailed_res_raw = rapidjson.loads(stats_detailed_res.text)
 
             if stats_detailed_res.status_code != 200 or not stats_detailed_res_raw.get('data', {}).get(str(player_id)):
-                print(
-                    f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
+                # print(
+                #     f'Failed to get detailed player stats, WG responded with {stats_detailed_res.status_code}')
                 if len(player_ids) == 1:
                     raise Exception("There is no data associated with this account.")
                 

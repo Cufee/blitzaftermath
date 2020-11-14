@@ -8,7 +8,7 @@ import re
 from io import BytesIO
 
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
-from cogs.api.discord_users_api import DiscordUsersApi
+from cogs.api.discord_users_api import DiscordUsersApi, DiscordUsersApiV2
 from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.message_cache_api import MessageCacheAPI
 from cogs.api.bans_api import BansAPI
@@ -23,6 +23,7 @@ debug = False
 API = StatsApi()
 CacheAPI = MessageCacheAPI()
 UsersApi = DiscordUsersApi()
+UsersApiV2 = DiscordUsersApiV2()
 bgAPI = CustomBackground()
 Ban_API = BansAPI()
 
@@ -72,18 +73,32 @@ class blitz_aftermath_stats(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.all_reactions = []
+
         self.sort_battles = self.client.get_emoji(
             756207071304876123)
+        self.all_reactions.append(self.sort_battles)
+
         self.sort_winrate = self.client.get_emoji(
             756207071027789886)
+        self.all_reactions.append(self.sort_winrate)
+
         self.sort_rating = self.client.get_emoji(
             756207070956748891)
+        self.all_reactions.append(self.sort_rating)
+
         self.sort_timestamp = self.client.get_emoji(
             760014742294626324)
+        self.all_reactions.append(self.sort_timestamp)
+
         self.learn_more = self.client.get_emoji(
             756575770381647973)
+        self.all_reactions.append(self.learn_more)
+
         self.refresh_reaction = self.client.get_emoji(
             760907672823398420)
+        self.all_reactions.append(self.refresh_reaction)
+
 
     # Add reactions for sorting to a message
     async def add_sorting_reactions(self, message):
@@ -109,16 +124,27 @@ class blitz_aftermath_stats(commands.Cog):
     async def on_ready(self):
         self.sort_battles = self.client.get_emoji(
             756207071304876123)
+        self.all_reactions.append(self.sort_battles)
+
         self.sort_winrate = self.client.get_emoji(
             756207071027789886)
+        self.all_reactions.append(self.sort_winrate)
+
         self.sort_rating = self.client.get_emoji(
             756207070956748891)
+        self.all_reactions.append(self.sort_rating)
+
         self.sort_timestamp = self.client.get_emoji(
             760014742294626324)
+        self.all_reactions.append(self.sort_timestamp)
+
         self.learn_more = self.client.get_emoji(
             756575770381647973)
+        self.all_reactions.append(self.learn_more)
+
         self.refresh_reaction = self.client.get_emoji(
             760907672823398420)
+        self.all_reactions.append(self.refresh_reaction)
         print(f'[Beta] Aftermath Stats cog is ready.')
 
 
@@ -131,7 +157,13 @@ class blitz_aftermath_stats(commands.Cog):
             lambda g: g.id == payload.guild_id, self.client.guilds)
         member = discord.utils.find(
             lambda m: m.id == payload.user_id, guild.members)
-        if member == self.client.user:
+        channel = discord.utils.find(
+            lambda m: m.id == payload.channel_id, guild.channels)
+
+        if not member:
+            await channel.send("It looks like Aftermath is missing permissions on this server to work properly.", delete_after=15)
+            return
+        elif member == self.client.user:
             return
         
         # Check if user is banned
@@ -143,9 +175,6 @@ class blitz_aftermath_stats(commands.Cog):
             pass
         if res_data.get("banned", False) == True:
             return
-
-        channel = discord.utils.find(
-            lambda m: m.id == payload.channel_id, guild.channels)
 
         if payload.emoji == self.learn_more:
             try:
@@ -192,6 +221,10 @@ class blitz_aftermath_stats(commands.Cog):
             except:
                 pass
             return
+
+        if payload.emoji in self.all_reactions and not res_data.get("premium", False):
+            await channel.send(f"Hey {member.mention}! Advanced sorting is only available to Aftermath Premium members.", delete_after=15)
+            return
         
         player_id = message_details.get('request').get('player_id')
         player_realm = message_details.get('request').get('realm')
@@ -199,22 +232,22 @@ class blitz_aftermath_stats(commands.Cog):
         bg_url = message_details.get('request').get('bg_url')
         old_key = message_details.get('request').get('sort_key')
         premium = message_details.get('request').get('premium', False)
-        verified = message_details.get('request').get('verified', False)
+        verified = res_data.get('verified', False)
         
-        if payload.emoji == self.refresh_reaction and res_data.get("premium", False):
+        if payload.emoji == self.refresh_reaction:
             new_key = old_key
         
-        elif payload.emoji == self.sort_battles and res_data.get("premium", False):
+        elif payload.emoji == self.sort_battles:
             new_key = "-battles"
             if old_key == "-battles":
                 new_key = "+battles"
 
-        elif payload.emoji == self.sort_rating and res_data.get("premium", False):
+        elif payload.emoji == self.sort_rating:
             new_key = "-wn8"
             if old_key == "-wn8":
                 new_key = "+wn8"
 
-        elif payload.emoji == self.sort_winrate and res_data.get("premium", False):
+        elif payload.emoji == self.sort_winrate:
             new_key = "-winrate"
             if old_key == "-winrate":
                 new_key = "+winrate"
@@ -242,18 +275,23 @@ class blitz_aftermath_stats(commands.Cog):
         if not blitzbot or not message.mentions or message.mentions[0] != blitzbot or "wr" not in message.content:
             return
 
-        player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(message.author.id))
+        try:
+            user_data = UsersApiV2.get_user_data(message.author.id)
+        except Exception as e:
+            print(traceback.format_exc())
+            await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+            return
+        player_id = user_data.get("player_id")
+        verified = user_data.get("verified")
+
         if player_id:
             bg_url = ""
             premium = False
-            verified = False
             try:
                 res = requests.get(f'http://158.69.62.236/players/{player_id}')
                 res_data = rapidjson.loads(res.text)
                 bg_url = res_data.get('bg_url', None)
                 premium = res_data.get('premium', False)
-                verified = res_data.get('verified', False)
             except:
                 pass
             player_realm = players.find_one(
@@ -295,19 +333,18 @@ class blitz_aftermath_stats(commands.Cog):
             trydefault = False
 
             if not player_name_str:
-                player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(message.author.id))
+                user_data = UsersApiV2.get_user_data(message.author.id)
+                player_id = user_data.get("player_id")
+                verified = user_data.get("verified")
 
                 if player_id:
                     bg_url = ""
                     premium = False
-                    verified = False
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
-                        verified = res_data.get('verified', False)
                     except:
                         pass
                     player_realm = players.find_one(
@@ -332,19 +369,19 @@ class blitz_aftermath_stats(commands.Cog):
             # User mentioned another user
             elif message.message.mentions and player_name_str:
                 user = message.message.mentions[0]
-                player_id = UsersApi.get_default_player_id(
-                    discord_user_id=user.id)
+
+                user_data = UsersApiV2.get_user_data(user.id)
+                player_id = user_data.get("player_id")
+                verified = user_data.get("verified")
 
                 if player_id:
                     bg_url = ""
                     premium = False
-                    verified = False
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
-                        verified = res_data.get('verified', False)
                     except:
                         pass
                     player_realm = players.find_one(
@@ -421,7 +458,6 @@ class blitz_aftermath_stats(commands.Cog):
 
                     # Get player id and enable tracking
                     player_data_1 = res_data[0]
-                    print(player_data_1)
                     player_id = player_data_1.get('account_id')
                     player_name_fixed = player_data_1.get('nickname')
 
@@ -430,10 +466,16 @@ class blitz_aftermath_stats(commands.Cog):
                     await message.channel.send(msg_str)
                     
                     # Set a default player_id  if it is not set already
-                    default_player_id = UsersApi.get_default_player_id(
-                        discord_user_id=(message.author.id))
+                    user_data = {}
+                    try:
+                        user_data = UsersApiV2.get_user_data(message.author.id)
+                    except:
+                        pass
+
+                    default_player_id = user_data.get("player_id", None)
+
                     if not default_player_id:
-                        UsersApi.link_to_player(
+                        UsersApiV2.set_user_player_id(
                             discord_user_id=(message.author.id), player_id=player_id)
                     
                     API.update_stats([player_id], realm=player_realm)
@@ -443,16 +485,24 @@ class blitz_aftermath_stats(commands.Cog):
                 else:
                     player_id = player_details.get('_id')
                     player_realm = player_details.get('realm')
-                
+
                 bg_url = ""
                 premium = False
+                
+                user_data = {}
+                try:
+                    user_data = UsersApiV2.get_user_data(message.author.id)
+                except:
+                    pass
                 verified = False
+                if user_data.get("player_id") == player_id:
+                    verified = user_data.get("verified")
+
                 try:
                     res = requests.get(f'http://158.69.62.236/players/{player_id}')
                     res_data = rapidjson.loads(res.text)
                     bg_url = res_data.get('bg_url', None)
                     premium = res_data.get('premium', False)
-                    verified = res_data.get('verified', False)
                 except:
                     pass
                 player_realm = players.find_one(
@@ -488,13 +538,24 @@ class blitz_aftermath_stats(commands.Cog):
 
                     bg_url = ""
                     premium = False
+
+                    bg_url = ""
+                    premium = False
+                
+                    user_data = {}
+                    try:
+                        user_data = UsersApiV2.get_user_data(message.author.id)
+                    except:
+                        pass
                     verified = False
+                    if user_data.get("player_id") == player_id:
+                        verified = user_data.get("verified")
+                
                     try:
                         res = requests.get(f'http://158.69.62.236/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
-                        verified = res_data.get('verified', False)
                     except:
                         pass
 
@@ -523,12 +584,18 @@ class blitz_aftermath_stats(commands.Cog):
 
             if trydefault and player_id:
                 # Set a default player_id if it is not set already
-                default_player_id = UsersApi.get_default_player_id(
-                    discord_user_id=(message.author.id))
+                user_data = {}
+                try:
+                    user_data = UsersApiV2.get_user_data(
+                        discord_user_id=(message.author.id))
+                except:
+                    pass
+
+                default_player_id = user_data.get("player_id")
+
                 if not default_player_id:
-                    UsersApi.link_to_player(
+                    UsersApiV2.set_user_player_id(
                         discord_user_id=(message.author.id), player_id=player_id)
-                    print(f"Set a new default for {message.author.nick}")
 
 
         except Exception as e:
@@ -592,8 +659,14 @@ class blitz_aftermath_stats(commands.Cog):
 
                 # Get Discord user ID
                 user_id = message.author.id
-                UsersApi.link_to_player(
-                    discord_user_id=user_id, player_id=player_id)
+                try:
+                    UsersApiV2.set_user_player_id(
+                        discord_user_id=user_id, player_id=player_id)
+                except:
+                    print(traceback.format_exc())
+                    await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+                    return
+
                 if late_update:
                     message_text = f'Awesome! You will be able to check your stats with `{self.client.command_prefix[0]}stats` **once you play one more regular battle**.'
                 else:

@@ -91,3 +91,48 @@ class DiscordUsersApi():
             return user_data.get('default_player_id', None)
         else:
             return None
+
+class DiscordUsersApiV2():
+    def __init__(self):
+        self.API_URL = "http://158.69.62.236/"
+
+    def get_user_data(self, discord_user_id):
+        '''Get user data from discord_id'''
+        res_data = {}
+        try:
+            res = requests.get(f"{self.API_URL}users/{discord_user_id}")
+            print(res.url)
+            res_data = rapidjson.loads(res.text)
+        except:
+            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+
+        if res_data.get("error"):
+            raise Exception(res_data.get("error"))
+
+        return res_data
+
+    def get_player_data(self, player_id):
+        '''Get user data from player_id'''
+        res_data = {}
+        try:
+            res = requests.get(f"{self.API_URL}players/{player_id}")
+            res_data = rapidjson.loads(res.text)
+        except:
+            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+
+        if res_data.get("error"):
+            raise Exception(res_data.get("error"))
+
+        return res_data
+
+    def set_user_player_id(self, discord_user_id, player_id):
+        '''Update default player_id for user'''
+        res_data = {}
+        try:
+            res = requests.patch(f"{self.API_URL}{discord_user_id}/newdef/{player_id}")
+            res_data = rapidjson.loads(res.text)
+        except:
+            raise Exception("It looks like Aftermath stats partially down for maintenance.")
+
+        if res_data.get("error"):
+            raise Exception(res_data.get("error"))
