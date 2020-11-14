@@ -386,7 +386,9 @@ class blitz_aftermath_stats(commands.Cog):
 
                 user_data = UsersApiV2.get_user_data(user.id)
                 player_id = user_data.get("player_id")
-                verified = user_data.get("verified")
+                verified = False
+                if user.id == message.author.id:
+                    verified = user_data.get("verified")
 
                 if player_id:
                     bg_url = ""

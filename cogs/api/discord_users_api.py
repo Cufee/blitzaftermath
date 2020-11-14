@@ -106,6 +106,8 @@ class DiscordUsersApiV2():
             raise Exception("It looks like Aftermath stats is partially down for maintenance.")
 
         if res_data.get("error"):
+            if res_data.get("error") == "mongo: no documents in result":
+                raise Exception("This user has no default account set.")
             raise Exception(res_data.get("error"))
 
         return res_data
@@ -120,6 +122,8 @@ class DiscordUsersApiV2():
             raise Exception("It looks like Aftermath stats is partially down for maintenance.")
 
         if res_data.get("error"):
+            if res_data.get("error") == "mongo: no documents in result":
+                raise Exception("Player not found.")
             raise Exception(res_data.get("error"))
 
         return res_data
