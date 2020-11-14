@@ -128,7 +128,7 @@ class DiscordUsersApiV2():
         '''Update default player_id for user'''
         res_data = {}
         try:
-            res = requests.patch(f"{self.API_URL}{discord_user_id}/newdef/{player_id}")
+            res = requests.patch(f"{self.API_URL}users/{discord_user_id}/newdef/{player_id}")
             res_data = rapidjson.loads(res.text)
         except:
             raise Exception("It looks like Aftermath stats partially down for maintenance.")
