@@ -161,7 +161,7 @@ class blitz_aftermath_stats(commands.Cog):
             lambda m: m.id == payload.channel_id, guild.channels)
 
         if not member:
-            await channel.send("It looks like Aftermath is missing permissions on this server to work properly.", delete_after=15)
+            await channel.send("It looks like Discord is having some temporary issues or Aftermath is missing permissions on this server to work properly.", delete_after=15)
             return
         elif member == self.client.user:
             return
