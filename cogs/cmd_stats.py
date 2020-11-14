@@ -333,7 +333,11 @@ class blitz_aftermath_stats(commands.Cog):
             trydefault = False
 
             if not player_name_str:
-                user_data = UsersApiV2.get_user_data(message.author.id)
+                user_data = {}
+                try:
+                    user_data = UsersApiV2.get_user_data(message.author.id)
+                except:
+                    pass
                 player_id = user_data.get("player_id")
                 verified = user_data.get("verified")
 

@@ -121,6 +121,9 @@ class DiscordUsersApiV2():
             raise Exception("It looks like Aftermath stats partially down for maintenance.")
 
         if res_data.get("error"):
+            if res_data.get("error") == "mongo: no documents in result":
+                raise Exception("You do not have a default account set. Use v-iam Username to set it up.")
+            
             raise Exception(res_data.get("error"))
 
         return res_data
