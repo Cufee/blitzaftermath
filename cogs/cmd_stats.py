@@ -347,6 +347,7 @@ class blitz_aftermath_stats(commands.Cog):
                 verified = user_data.get("verified")
 
                 if player_id:
+                    res_data = {}
                     bg_url = ""
                     premium = False
                     try:
@@ -356,8 +357,13 @@ class blitz_aftermath_stats(commands.Cog):
                         premium = res_data.get('premium', False)
                     except:
                         pass
-                    player_realm = players.find_one(
-                        {'_id': player_id}).get("realm")
+
+                    player_data =  players.find_one(
+                        {'_id': player_id})
+                    if not player_data:
+                        await message.channel.send(f'An error has occured while getting some inforamtion for your account. Please reset your default account using `v-iam Username-Server`.')
+                        return
+                    player_realm = player_data.get("realm")
 
                     days = 0
                     if session_days:
