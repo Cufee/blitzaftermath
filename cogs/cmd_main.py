@@ -9,6 +9,9 @@ from cogs.api.bans_api import BansAPI
 
 from random import random
 
+import requests
+import rapidjson
+
 command_cooldown = 5
 
 debug = False
@@ -261,6 +264,61 @@ class maintenance(commands.Cog):
             return
     
         await ctx.send(f"{user.name} has been banned for {hours} hours.", delete_after=15)
+        return
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def padd(self, ctx, _, days):
+        await ctx.message.delete()
+
+        # Check for a mention
+        if not ctx.message.mentions:
+            await ctx.send("You need to mention somebody in this message.", delete_after=15)
+            return
+
+        try:
+            days = int(days)
+        except:
+            await ctx.send("Unable to parse days(int) from passed argument.", delete_after=15)
+            return
+
+        # Create intent
+        res_data = {}
+        try:
+            req = {
+                "user_id": ctx.message.mentions[0].id,
+                "premium_days": int(days)
+            }
+            res = requests.get("http://158.69.62.236/premium/add", json=req)
+            res_data = rapidjson.loads(res.text)
+        except:
+            await ctx.send(f"Failed to reach the API.", delete_after=15)
+            return
+        
+        if res_data.get("error"):
+            await ctx.send(res_data.get("error"), delete_after=30)
+            return
+
+        # Commit intent
+        intent_id = res_data.get("intent_id")
+        if not intent_id:
+            await ctx.send("Got bad intent_id", delete_after=15)
+            return
+
+        com_res_data = {}
+        try:
+            res = requests.get("http://158.69.62.236/premium/redirect/" + intent_id)
+            com_res_data = rapidjson.loads(res.text)
+        except:
+            await ctx.send(f"Failed to reach the API while commiting.", delete_after=15)
+            return
+        
+        if com_res_data.get("error"):
+            await ctx.send(com_res_data.get("error"), delete_after=30)
+            return
+
+        await ctx.send(f"Added {days} days of Aftermath Premium for {ctx.message.mentions[0].name} - {com_res_data.get('status')}", delete_after=30)
         return
 
 
