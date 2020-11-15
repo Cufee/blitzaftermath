@@ -220,10 +220,11 @@ class blitz_aftermath_stats(commands.Cog):
 
         # How far back to check for user interactions
         cache_check_seconds = 75
+        message_limit = 3
         last_user_msg = CacheAPI.get_messages_by_user(payload.user_id, payload.guild_id, cache_check_seconds)
 
         # Check if user has been spamming
-        if last_user_msg and len(list(last_user_msg)) > 3:
+        if last_user_msg and len(list(last_user_msg)) > message_limit:
             messaged = True
             try:
                 dm_channel = await member.create_dm()
