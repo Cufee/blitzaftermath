@@ -704,7 +704,7 @@ class blitz_aftermath_stats(commands.Cog):
                 try:
                     UsersApiV2.set_user_player_id(
                         discord_user_id=user_id, player_id=player_id)
-                except:
+                except Exception as e:
                     print(traceback.format_exc())
                     await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
                     return
