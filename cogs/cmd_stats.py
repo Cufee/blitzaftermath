@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from discord.ext import commands, tasks
+from discord.ext import commands
 import discord
 import requests
 import rapidjson
@@ -288,7 +288,13 @@ class blitz_aftermath_stats(commands.Cog):
         image, request = zap_render(player_id, "None", player_realm, days, bg_url, premium, verified, sort_key=new_key)
 
         # Send message and add reactions
-        new_message = await message.channel.send(file=image)
+        if not image:
+            raise Exception("An error occured while generating your stats, please try again.")
+        
+        try: 
+            new_message = await message.channel.send(file=image)
+        except:
+            raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
         await self.add_refresh_reaction(new_message)
         await self.add_sorting_reactions(new_message)
@@ -388,7 +394,7 @@ class blitz_aftermath_stats(commands.Cog):
                     player_data =  players.find_one(
                         {'_id': player_id})
                     if not player_data:
-                        await message.channel.send(f'An error has occured while getting some inforamtion for your account. Please reset your default account using `v-iam Username-Server`.')
+                        await message.channel.send(f'An error occured while getting some inforamtion for your account. Please reset your default account using `v-iam Username-Server`.')
                         return
                     player_realm = player_data.get("realm")
 
@@ -397,8 +403,13 @@ class blitz_aftermath_stats(commands.Cog):
                         days = session_days
 
                     image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
-
-                    new_message = await message.channel.send(file=image)
+                    if not image:
+                        raise Exception("An error occured while generating your stats, please try again.")
+                    
+                    try: 
+                        new_message = await message.channel.send(file=image)
+                    except:
+                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
@@ -435,8 +446,13 @@ class blitz_aftermath_stats(commands.Cog):
                         days = session_days
 
                     image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
-
-                    new_message = await message.channel.send(file=image)
+                    if not image:
+                        raise Exception("An error occured while generating your stats, please try again.")
+                    
+                    try: 
+                        new_message = await message.channel.send(file=image)
+                    except:
+                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
@@ -557,8 +573,13 @@ class blitz_aftermath_stats(commands.Cog):
                     days = session_days
 
                 image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
-
-                new_message = await message.channel.send(file=image)
+                if not image:
+                    raise Exception("An error occured while generating your stats, please try again.")
+                
+                try: 
+                    new_message = await message.channel.send(file=image)
+                except:
+                    raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                 await self.add_refresh_reaction(new_message)
                 await self.add_sorting_reactions(new_message)
@@ -612,8 +633,13 @@ class blitz_aftermath_stats(commands.Cog):
                         days = session_days
 
                     image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
-
-                    new_message = await message.channel.send(file=image)
+                    if not image:
+                        raise Exception("An error occured while generating your stats, please try again.")
+                    
+                    try: 
+                        new_message = await message.channel.send(file=image)
+                    except:
+                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
