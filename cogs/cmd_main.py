@@ -1,14 +1,9 @@
-from discord.ext import commands, tasks
+from discord.ext import commands
 import discord
-import requests
-import rapidjson
 import sys
 import traceback
 from datetime import datetime
 
-from cogs.replays.replay import Replay
-from cogs.replays.rating import Rating
-from cogs.replays.render import Render
 from cogs.api.guild_settings_api import API_v2
 from cogs.api.bans_api import BansAPI
 
@@ -83,16 +78,17 @@ Other permissions:
 
 
 class maintenance(commands.Cog):
-
     def __init__(self, client):
         self.client = client
         self.client.remove_command("help")
+
 
     # Events
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'[Beta] Aftermath maintenance cog is ready.')
+
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -103,6 +99,7 @@ class maintenance(commands.Cog):
         owner_member = self.client.get_user(202905960405139456)
         dm_channel = await owner_member.create_dm()
         await dm_channel.send(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
+
 
     @commands.Cog.listener()
     @commands.guild_only()
@@ -118,6 +115,7 @@ class maintenance(commands.Cog):
                 await ctx.send(f"*Aftermath does not have proper permissions on this server. Please check `v-perms` if you are an administrator.*")
             return
 
+
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         guild_id = str(guild.id)
@@ -129,12 +127,14 @@ class maintenance(commands.Cog):
         dm_channel = await owner_member.create_dm()
         await dm_channel.send(f"Aftermath was removed from {guild_name}. Edit complete with `{status_code}`.")
     
+
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def perms(self, ctx):
         perms = ctx.channel.permissions_for(ctx.guild.me).value
         await ctx.send(f"{perms_text}*Your perms code is {perms}*")
+
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

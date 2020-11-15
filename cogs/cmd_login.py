@@ -1,5 +1,4 @@
-from discord.ext import commands, tasks
-import discord
+from discord.ext import commands
 import requests
 import rapidjson
 
@@ -10,16 +9,17 @@ users_api = DiscordUsersApi()
 stats_api = StatsApi()
 
 class login(commands.Cog):
-
     def __init__(self, client):
         self.client = client
         self.client.remove_command("help")
+
 
     # Events
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'[Beta] Aftermath login cog is ready.')
+
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -71,8 +71,6 @@ class login(commands.Cog):
         else:
             await dm_channel.send(f"Something did not work.")
         return
-
-
 
 
 def setup(client):

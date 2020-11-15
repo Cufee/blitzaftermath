@@ -27,6 +27,7 @@ UsersApiV2 = DiscordUsersApiV2()
 bgAPI = CustomBackground()
 Ban_API = BansAPI()
 
+
 def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: str, premium: bool, verified: bool, sort_key: str = "relevance"):
         if discord_id != "None":
             # Check if user is banned
@@ -69,8 +70,8 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             else:
                 raise Exception("Zap failed to render your session.")
 
-class blitz_aftermath_stats(commands.Cog):
 
+class blitz_aftermath_stats(commands.Cog):
     def __init__(self, client):
         self.ready = False
         self.client = client
@@ -116,6 +117,7 @@ class blitz_aftermath_stats(commands.Cog):
             pass
         return
 
+
     # Refresh reaction
     async def add_refresh_reaction(self, message):
         if not self.refresh_reaction:
@@ -126,6 +128,7 @@ class blitz_aftermath_stats(commands.Cog):
             # In case some perms are missing
             pass
         return
+
 
     # Events
     # @commands.Cog.listener()
@@ -329,8 +332,7 @@ class blitz_aftermath_stats(commands.Cog):
                 res_data = rapidjson.loads(res.text)
                 bg_url = res_data.get('bg_url', None)
                 premium = res_data.get('premium', False)
-            except:
-                pass
+            except: return
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
 
@@ -665,13 +667,13 @@ class blitz_aftermath_stats(commands.Cog):
                     UsersApiV2.set_user_player_id(
                         discord_user_id=(message.author.id), player_id=player_id)
 
-
         except Exception as e:
             print(traceback.format_exc())
             if e == ConnectionError:
                 await message.channel.send(f'Something did not work as planned :confused:\n```Failed to establish a connection to Wargaming API. Please try again in a few seconds.```')
             else:
                 await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
 
     @commands.command(aliases=['Iam', 'IAM'])
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
@@ -758,6 +760,7 @@ class blitz_aftermath_stats(commands.Cog):
             print(traceback.format_exc())
             await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
 
+
     @commands.command(aliases=['bg'])
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
@@ -779,7 +782,6 @@ class blitz_aftermath_stats(commands.Cog):
         except:
             await ctx.send("It looks like Aftermath is partially down for maintenance. Try again later.")
             return
-
 
         # Fix url
         try:
@@ -817,6 +819,7 @@ class blitz_aftermath_stats(commands.Cog):
         except Exception as e:
             print(traceback.format_exc())
             await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+
 
     @commands.command(aliases=['nobg'])
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
