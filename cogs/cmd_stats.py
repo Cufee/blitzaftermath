@@ -393,9 +393,9 @@ class blitz_aftermath_stats(commands.Cog):
                     except:
                         pass
 
-                    message = None
+                    message_text = None
                     if not premium and session_days and session_days > 7:
-                        message = "Sessions longer than 7 days are only available to Aftermath Premium members."
+                        message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
                     player_data =  players.find_one(
@@ -414,7 +414,7 @@ class blitz_aftermath_stats(commands.Cog):
                         raise Exception("An error occured while generating your stats, please try again.")
                     
                     try: 
-                        new_message = await message.channel.send(message, file=image)
+                        new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -448,9 +448,9 @@ class blitz_aftermath_stats(commands.Cog):
                     player_realm = players.find_one(
                         {'_id': player_id}).get("realm")
 
-                    message = None
+                    message_text = None
                     if not premium and session_days and session_days > 7:
-                        message = "Sessions longer than 7 days are only available to Aftermath Premium members."
+                        message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
                     days = 0
@@ -462,7 +462,7 @@ class blitz_aftermath_stats(commands.Cog):
                         raise Exception("An error occured while generating your stats, please try again.")
                     
                     try: 
-                        new_message = await message.channel.send(message, file=image)
+                        new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -580,9 +580,9 @@ class blitz_aftermath_stats(commands.Cog):
                 player_realm = players.find_one(
                     {'_id': player_id}).get("realm")
 
-                message = None
+                message_text = None
                 if not premium and session_days and session_days > 7:
-                    message = "Sessions longer than 7 days are only available to Aftermath Premium members."
+                    message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                     session_days = 7
 
                 days = 0
@@ -594,7 +594,7 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception("An error occured while generating your stats, please try again.")
                 
                 try: 
-                    new_message = await message.channel.send(message, file=image)
+                    new_message = await message.channel.send(message_text, file=image)
                 except:
                     raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
@@ -640,9 +640,9 @@ class blitz_aftermath_stats(commands.Cog):
                     except:
                         pass
 
-                    message = None
+                    message_text = None
                     if not premium and session_days and session_days > 7:
-                        message = "Sessions longer than 7 days are only available to Aftermath Premium members."
+                        message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
                     days = 0
@@ -659,7 +659,7 @@ class blitz_aftermath_stats(commands.Cog):
                         raise Exception("An error occured while generating your stats, please try again.")
                     
                     try: 
-                        new_message = await message.channel.send(message, file=image)
+                        new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
