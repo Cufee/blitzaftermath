@@ -161,12 +161,15 @@ class blitz_aftermath_stats(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        # Feature is guild only
         if not payload.guild_id:
             return
 
+        # Check if reaction was added by the bot
         if payload.member == self.client.user:
             return
 
+        # Check if reaction is valid
         if payload.emoji not in self.all_reactions:
             return
             
@@ -191,12 +194,18 @@ class blitz_aftermath_stats(commands.Cog):
         if res_data.get("banned", False) == True:
             return
 
+        # Learn more reaction - no need for premium account
         if payload.emoji == self.learn_more:
             try:
                 dm_channel = await member.create_dm()
                 await dm_channel.send(f"You can use the reactions below your session to sort the order of tanks!\n{self.sort_timestamp} - Sort by last battle time.\n{self.sort_battles} - Sort by battles played.\n{self.sort_rating} - Sort by WN8.\n{self.sort_winrate} - Sort by Winrate.\n*Please keep in mind that there is a 15 second cooldown after you use each reaction.*")
             except:
                 await channel.send(f"Hey {member.mention}! You need to allow DMs for this reaction to work.", delete_after=15)
+            return
+
+        # Check if user is premium
+        if not res_data.get("premium", False):
+            await channel.send(f"Hey {member.mention}! Reactions are only available to Aftermath Premium members.", delete_after=15)
             return
         
         try:
@@ -213,6 +222,7 @@ class blitz_aftermath_stats(commands.Cog):
         cache_check_seconds = 75
         last_user_msg = CacheAPI.get_messages_by_user(payload.user_id, payload.guild_id, cache_check_seconds)
 
+        # Check if user has been spamming
         if last_user_msg and len(list(last_user_msg)) > 3:
             messaged = True
             try:
@@ -229,6 +239,7 @@ class blitz_aftermath_stats(commands.Cog):
             await report_chan.send(f"User `{payload.user_id}` is trying to spam in guild `{guild.name} ({payload.guild_id})`. Messaged `{messaged}`")
             return
 
+        # Check if enough time passed since the last use
         if ((datetime.utcnow() - timedelta(seconds=15)) < message_details.get('timestamp')):
             try:
                 dm_channel = await member.create_dm()
@@ -236,32 +247,35 @@ class blitz_aftermath_stats(commands.Cog):
             except:
                 pass
             return
-
-        if not res_data.get("premium", False):
-            await channel.send(f"Hey {member.mention}! Advanced sorting is only available to Aftermath Premium members.", delete_after=15)
-            return
         
+        # Make new request
         player_id = message_details.get('request').get('player_id')
         player_realm = message_details.get('request').get('realm')
         days = message_details.get('request').get('days')
         bg_url = message_details.get('request').get('bg_url')
         old_key = message_details.get('request').get('sort_key')
         premium = message_details.get('request').get('premium', False)
-        verified = res_data.get('verified', False)
+        verified = False
+        if player_id == res_data.get("player_id"):
+            verified = res_data.get('verified', False)
         
+        # Refresh
         if payload.emoji == self.refresh_reaction:
             new_key = old_key
         
+        # Sort by battles
         elif payload.emoji == self.sort_battles:
             new_key = "-battles"
             if old_key == "-battles":
                 new_key = "+battles"
 
+        # Sort by rating
         elif payload.emoji == self.sort_rating:
             new_key = "-wn8"
             if old_key == "-wn8":
                 new_key = "+wn8"
 
+        # Sort by winrate
         elif payload.emoji == self.sort_winrate:
             new_key = "-winrate"
             if old_key == "-winrate":
@@ -269,8 +283,10 @@ class blitz_aftermath_stats(commands.Cog):
         else:
             return
 
+        # Get new image
         image, request = zap_render(player_id, "None", player_realm, days, bg_url, premium, verified, sort_key=new_key)
 
+        # Send message and add reactions
         new_message = await message.channel.send(file=image)
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
         await self.add_refresh_reaction(new_message)
@@ -292,9 +308,9 @@ class blitz_aftermath_stats(commands.Cog):
         try:
             user_data = UsersApiV2.get_user_data(message.author.id)
         except Exception as e:
-            print(traceback.format_exc())
-            await message.channel.send(f'Something did not work as planned :confused:\n```{e}```')
+            # No user data to hijack request
             return
+
         player_id = user_data.get("player_id")
         verified = user_data.get("verified")
 
@@ -318,7 +334,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             await message.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
         else:
-            await message.channel.send("Pssst, you can get the same information with Aftermath, it will just look *a lot* better :)\n\n*Use v-help to learn more about Aftermath.*")
+            await message.channel.send("Pssst, you can get the same information with Aftermath and will look **a lot** better :)\n\n*Use v-help to learn more about Aftermath.*")
     
 
     # Commands
@@ -346,6 +362,7 @@ class blitz_aftermath_stats(commands.Cog):
             # Used later to check if a default account should be set
             trydefault = False
 
+            # Lookup default account
             if not player_name_str:
                 user_data = {}
                 try:
@@ -426,11 +443,13 @@ class blitz_aftermath_stats(commands.Cog):
                 else:
                     await message.channel.send(f'{user.name} does not have a default WoT Blitz account set.')
                     return None
-                
+            
+            # Old format
             elif '@' in player_name_str:
                 await message.channel.send("Please use `-` instead of `@` to separate the username and server.")
                 return
-                
+            
+            # Username and realm provided
             elif '-' in player_name_str:
                 player_name_str = player_name_str
                 player_name_str_list = player_name_str.split('-')
