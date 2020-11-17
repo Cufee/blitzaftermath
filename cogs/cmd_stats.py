@@ -297,7 +297,7 @@ class blitz_aftermath_stats(commands.Cog):
         try: 
             new_message = await message.channel.send(file=image)
         except:
-            raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
+            raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
         CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
         await self.add_refresh_reaction(new_message)
         await self.add_sorting_reactions(new_message)
@@ -416,7 +416,7 @@ class blitz_aftermath_stats(commands.Cog):
                     try: 
                         new_message = await message.channel.send(message_text, file=image)
                     except:
-                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
+                        raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
@@ -464,7 +464,7 @@ class blitz_aftermath_stats(commands.Cog):
                     try: 
                         new_message = await message.channel.send(message_text, file=image)
                     except:
-                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
+                        raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
@@ -596,7 +596,7 @@ class blitz_aftermath_stats(commands.Cog):
                 try: 
                     new_message = await message.channel.send(message_text, file=image)
                 except:
-                    raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
+                    raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
                 CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                 await self.add_refresh_reaction(new_message)
                 await self.add_sorting_reactions(new_message)
@@ -661,7 +661,7 @@ class blitz_aftermath_stats(commands.Cog):
                     try: 
                         new_message = await message.channel.send(message_text, file=image)
                     except:
-                        raise Exception("It looks like Discord is having some issues, I was not able to send an image to this channel. Please try again.")
+                        raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
                     CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
