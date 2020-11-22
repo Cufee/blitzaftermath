@@ -67,6 +67,8 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             print(res_json.get('error'))
             if res_json.get('error') == "mongo: no documents in result":
                 raise Exception("It looks like there are no battles for me to show. Try again later.")
+            elif res_json.get('error') == "stats: new player, started tracking":
+                raise Exception("It looks like there are no battles for me to show. Try again later.")
             else:
                 raise Exception("Zap failed to render your session.")
 
