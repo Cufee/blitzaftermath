@@ -336,7 +336,7 @@ class blitz_aftermath_stats(commands.Cog):
             player_realm = players.find_one(
                 {'_id': player_id}).get("realm")
 
-            days = 0
+            days = 7
             try:
                 image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
             except: return
@@ -366,6 +366,13 @@ class blitz_aftermath_stats(commands.Cog):
 
         player_name_str = "".join(args).strip()
         player_id = None
+   
+        # Get user data
+        user_data = {}
+        try:
+            user_data = UsersApiV2.get_user_data(message.author.id)
+        except:
+            pass
 
         try:
             # Used later to check if a default account should be set
@@ -373,11 +380,6 @@ class blitz_aftermath_stats(commands.Cog):
 
             # Lookup default account
             if not player_name_str:
-                user_data = {}
-                try:
-                    user_data = UsersApiV2.get_user_data(message.author.id)
-                except:
-                    pass
                 player_id = user_data.get("player_id")
                 verified = user_data.get("verified")
 
@@ -487,122 +489,103 @@ class blitz_aftermath_stats(commands.Cog):
                     raise Exception(
                         'Player name needs to be at least 3 characters long')
                 player_realm = player_name_str_list[1].upper()
-                player_details = players.find_one(
-                    {'nickname': re.compile(player_name, re.IGNORECASE), 'realm': player_realm})
-                if not player_details:
-                    # Check if username is valid
-                    api_domain, _ = get_wg_api_domain(realm=player_realm)
-                    api_url = api_domain + \
-                        '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
-                    res = requests.get(api_url)
-                    res_data_raw = rapidjson.loads(res.text)
-                    if res.status_code != 200 or not res_data_raw:
-                        raise Exception(
-                            f'WG API responded with {res.status_code}')
 
-                    res_data = res_data_raw.get('data')
+                # Check if username is valid
+                api_domain, _ = get_wg_api_domain(realm=player_realm)
+                api_url = api_domain + \
+                    '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
+                res = requests.get(api_url)
+                res_data_raw = rapidjson.loads(res.text)
+                if res.status_code != 200 or not res_data_raw:
+                    raise Exception(
+                        f'WG API responded with {res.status_code}')
 
-                    # Check other servers
+                res_data = res_data_raw.get('data')
+
+                # Check other servers
+                if not res_data:
+                    other_domains = ["NA", "EU", "ASIA", "RU"]
+                    other_domains.remove(player_realm)
+                    res_data = None
+                    other_realm = None
+                    for r in other_domains:
+                        api_domain, _ = get_wg_api_domain(realm=r)
+                        api_url = api_domain + \
+                            '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
+                        res = requests.get(api_url)
+                        res_data_raw = rapidjson.loads(res.text)
+                        if res.status_code != 200 or not res_data_raw:
+                            print(f"WG API responded with {res.status_code}")
+                            continue
+                        res_data = res_data_raw.get('data')
+                        if res_data:
+                            other_realm = r
+                            break
                     if not res_data:
-                        other_domains = ["NA", "EU", "ASIA", "RU"]
-                        other_domains.remove(player_realm)
-                        res_data = None
-                        other_realm = None
-                        for r in other_domains:
-                            api_domain, _ = get_wg_api_domain(realm=r)
-                            api_url = api_domain + \
-                                '/wotb/account/list/?application_id=add73e99679dd4b7d1ed7218fe0be448&search=' + player_name
-                            res = requests.get(api_url)
-                            res_data_raw = rapidjson.loads(res.text)
-                            if res.status_code != 200 or not res_data_raw:
-                                print(f"WG API responded with {res.status_code}")
-                                continue
-                            res_data = res_data_raw.get('data')
-                            if res_data:
-                                other_realm = r
-                                break
-                        if not res_data:
-                            raise Exception(
-                                f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
-                        else:
-                            await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}-{other_realm}` to check it.*")
-                            return
+                        raise Exception(
+                            f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
+                    else:
+                        await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}-{other_realm}` to check it.*")
+                        return
 
-                    # Get player id and enable tracking
-                    player_data_1 = res_data[0]
-                    player_id = player_data_1.get('account_id')
-                    player_name_fixed = player_data_1.get('nickname')
+                # Get player id
+                player_data_1 = res_data[0]
+                player_id = player_data_1.get('account_id')
+                player_name_fixed = player_data_1.get('nickname')
 
-                    API.update_players([player_id], realm=player_realm)
-                    msg_str = f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.'
-                    await message.channel.send(msg_str)
-                    
-                    # Set a default player_id  if it is not set already
-                    user_data = {}
+                # Try to render session
+                try:
+                    bg_url = ""
+                    premium = False
+                    verified = False
+                    if user_data.get("player_id") == player_id:
+                        verified = user_data.get("verified")
+
                     try:
-                        user_data = UsersApiV2.get_user_data(message.author.id)
+                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        res_data = rapidjson.loads(res.text)
+                        bg_url = res_data.get('bg_url', None)
+                        premium = res_data.get('premium', False)
                     except:
                         pass
+                    player_realm = players.find_one(
+                        {'_id': player_id}).get("realm")
 
-                    default_player_id = user_data.get("player_id", None)
+                    message_text = None
+                    if not premium and session_days and session_days > 7:
+                        message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
+                        session_days = 7
 
-                    if not default_player_id:
-                        UsersApiV2.set_user_player_id(
-                            discord_user_id=(message.author.id), player_id=player_id)
+                    days = 0
+                    if session_days:
+                        days = session_days
+
+                    image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
+                    if not image:
+                        raise Exception("An error occured while generating your stats, please try again.")
                     
-                    API.update_stats([player_id], realm=player_realm)
-                    API.add_career_wn8([player_id], realm=player_realm)
-                    return
+                    try: 
+                        new_message = await message.channel.send(message_text, file=image)
+                    except:
+                        raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    await self.add_refresh_reaction(new_message)
+                    await self.add_sorting_reactions(new_message)
+                    
+                except Exception as e:
+                    if e == "new player: started tracking":
+                        # Try to set a new default account for new users
+                        trydefault = True
 
-                else:
-                    player_id = player_details.get('_id')
-                    player_realm = player_details.get('realm')
-
-                bg_url = ""
-                premium = False
-                
-                user_data = {}
-                try:
-                    user_data = UsersApiV2.get_user_data(message.author.id)
-                except:
-                    pass
-                verified = False
-                if user_data.get("player_id") == player_id:
-                    verified = user_data.get("verified")
-
-                try:
-                    res = requests.get(f'http://158.69.62.236/players/{player_id}')
-                    res_data = rapidjson.loads(res.text)
-                    bg_url = res_data.get('bg_url', None)
-                    premium = res_data.get('premium', False)
-                except:
-                    pass
-                player_realm = players.find_one(
-                    {'_id': player_id}).get("realm")
-
-                message_text = None
-                if not premium and session_days and session_days > 7:
-                    message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
-                    session_days = 7
-
-                days = 0
-                if session_days:
-                    days = session_days
-
-                image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
-                if not image:
-                    raise Exception("An error occured while generating your stats, please try again.")
-                
-                try: 
-                    new_message = await message.channel.send(message_text, file=image)
-                except:
-                    raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-                CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
-                await self.add_refresh_reaction(new_message)
-                await self.add_sorting_reactions(new_message)
-
-                # Try to set a new default account for new users
-                trydefault = True
+                        API.update_players([player_id], realm=player_realm)
+                        msg_str = f'Enabling for {player_name_fixed} on {player_realm}. You will need to **play at least one regular battle** to start tracking.'
+                        await message.channel.send(msg_str)
+                        
+                        API.update_stats([player_id], realm=player_realm)
+                        API.add_career_wn8([player_id], realm=player_realm)
+                        return
+                    else:
+                        raise Exception(e)
 
             else:
                 player_name = player_name_str
@@ -622,12 +605,6 @@ class blitz_aftermath_stats(commands.Cog):
 
                     bg_url = ""
                     premium = False
-                
-                    user_data = {}
-                    try:
-                        user_data = UsersApiV2.get_user_data(message.author.id)
-                    except:
-                        pass
                     verified = False
                     if user_data.get("player_id") == player_id:
                         verified = user_data.get("verified")
@@ -674,14 +651,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             if trydefault and player_id:
                 # Set a default player_id if it is not set already
-                user_data = {}
-                try:
-                    user_data = UsersApiV2.get_user_data(
-                        discord_user_id=(message.author.id))
-                except:
-                    pass
-
-                default_player_id = user_data.get("player_id")
+                default_player_id = user_data.get("default_player_id")
 
                 if not default_player_id:
                     UsersApiV2.set_user_player_id(
