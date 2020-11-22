@@ -338,7 +338,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             days = 7
             try:
-                image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
+                image, _ = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified, sort_key="-battles")
             except: return
 
             await message.channel.send("Don't worry, I got your back! This even looks **a lot** better :)\n*Use v-help to learn more about Aftermath.*", file=image)
