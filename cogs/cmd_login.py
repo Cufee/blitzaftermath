@@ -2,10 +2,10 @@ from discord.ext import commands
 import requests
 import rapidjson
 
-from cogs.api.discord_users_api import DiscordUsersApi
+from cogs.api.discord_users_api import DiscordUsersApiV2
 from cogs.api.stats_api import StatsApi
 
-users_api = DiscordUsersApi()
+users_api = DiscordUsersApiV2()
 stats_api = StatsApi()
 
 class login(commands.Cog):
@@ -27,13 +27,22 @@ class login(commands.Cog):
         try:
             dm_channel = await ctx.author.create_dm()
         except:
-            ctx.send('Hey {ctx.author.mention}! You need to allow DMs for this command to work.')
+            await ctx.send('Hey {ctx.author.mention}! You need to allow DMs for this command to work.')
             return
 
         if realm:
             realm = realm.upper()
+            player_id = None
         else:
-            player_id = users_api.get_default_player_id(ctx.author.id)
+            try:
+                player_id = users_api.get_user_default_pid(ctx.author.id)
+            except Exception as e:
+                if e == "This user does not have a default WoT Blitz account set.":
+                    await ctx.send("Please specify the server you would like to login at.\n*For example: `v-login EU`*")
+                    return
+                await ctx.send("It looks like Aftermath login service is under maintenance, please try again later.")
+                return
+
             player_details = stats_api.players.find_one({'_id': player_id})
             if player_details:
                 realm = player_details.get("realm")
@@ -67,7 +76,7 @@ class login(commands.Cog):
             await dm_channel.send(f"{message}Here is your new login link for {realm}! It will expire in 5 minutes.\nhttp://aftermath.link/login/{intent_id}\n**Please keep it safe.**")
         elif res.status_code == 409:
             username = rapidjson.loads(res.text).get('nickname')
-            await dm_channel.send(f"It lookd like you are logged in as {username} already.")
+            await dm_channel.send(f"It looks like you are logged in as {username} already.")
         else:
             await dm_channel.send(f"Something did not work.")
         return

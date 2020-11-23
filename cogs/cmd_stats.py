@@ -8,7 +8,7 @@ import re
 from io import BytesIO
 
 from cogs.api.stats_api import StatsApi, MongoClient, get_wg_api_domain
-from cogs.api.discord_users_api import DiscordUsersApi, DiscordUsersApiV2
+from cogs.api.discord_users_api import DiscordUsersApiV2
 from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.message_cache_api import MessageCacheAPI
 from cogs.api.bans_api import BansAPI
@@ -22,7 +22,6 @@ players = db_client.stats.players
 debug = False
 API = StatsApi()
 CacheAPI = MessageCacheAPI()
-UsersApi = DiscordUsersApi()
 UsersApiV2 = DiscordUsersApiV2()
 bgAPI = CustomBackground()
 Ban_API = BansAPI()
@@ -525,7 +524,7 @@ class blitz_aftermath_stats(commands.Cog):
                             break
                     if not res_data:
                         raise Exception(
-                            f'WG: Player not found. I also checked {",".join(other_domains)} servers. Is the username spelled correctly?')
+                            f'WG: Player not found. I also checked {", ".join(other_domains)} servers. Is the username spelled correctly?')
                     else:
                         await message.channel.send(f"I was not able to find {player_name} on {player_realm}. But there is an account with this name on {other_realm}.\n*Use `{self.client.command_prefix[0]}stats {player_name_str_list[0]}-{other_realm}` to check it.*")
                         return
@@ -821,7 +820,6 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         try:
-            UsersApi.remove_custom_bg(ctx.author.id)
             err = bgAPI.delete(str(ctx.author.id))
             if err:
                 raise Exception(err)
