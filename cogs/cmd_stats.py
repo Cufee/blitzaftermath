@@ -549,8 +549,6 @@ class blitz_aftermath_stats(commands.Cog):
                         premium = res_data.get('premium', False)
                     except:
                         pass
-                    player_realm = players.find_one(
-                        {'_id': player_id}).get("realm")
 
                     message_text = None
                     if not premium and session_days and session_days > 7:
@@ -563,7 +561,7 @@ class blitz_aftermath_stats(commands.Cog):
 
                     image, request = zap_render(player_id, message.author.id, player_realm, days, bg_url, premium, verified)
                     if not image:
-                        raise Exception("An error occured while generating your stats, please try again.")
+                        raise Exception("An error occured while generating your stats.")
                     
                     try: 
                         new_message = await message.channel.send(message_text, file=image)
