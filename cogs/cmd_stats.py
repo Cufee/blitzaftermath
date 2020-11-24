@@ -652,7 +652,7 @@ class blitz_aftermath_stats(commands.Cog):
 
             if trydefault and player_id:
                 # Set a default player_id if it is not set already
-                default_player_id = user_data.get("default_player_id")
+                default_player_id = user_data.get("player_id")
 
                 if not default_player_id:
                     UsersApiV2.set_user_player_id(
