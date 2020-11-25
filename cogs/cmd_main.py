@@ -236,7 +236,7 @@ class maintenance(commands.Cog):
                 print(f"failed to message in {guild_data.get('guild_name')} ({e})")
                 continue
 
-        await ctx.send(f"This message reached {reached} servers.")
+        await ctx.send(f"This message reached {reached} servers out of {len(all_guilds)}.")
 
 
     @commands.command()
@@ -256,9 +256,11 @@ class maintenance(commands.Cog):
         embed.set_author(name="Sponsored Message")
         
         reached = 0
+        failed = 0
         for guild_data in all_guilds:
             default_replay_channels = guild_data.get("guild_channels_replays")
             if not default_replay_channels:
+                failed += 1
                 continue
             
             try:
@@ -268,9 +270,10 @@ class maintenance(commands.Cog):
                         reached += 1
             except Exception as e:
                 print(f"failed to message in {guild_data.get('guild_name')} ({e})")
+                failed += 1
                 continue
         
-        await ctx.send(f"This message reached {reached} servers.")
+        await ctx.send(f"This message reached {reached} servers, {failed} servers failed.")
 
 
     @commands.command()
