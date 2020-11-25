@@ -212,21 +212,65 @@ class maintenance(commands.Cog):
             ctx.send(f"Error `{status_code}`")
             return
 
-        brk_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
-        if not brk_message:
+        brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
+        if not brc_message:
+            await ctx.send("Message is empty")
             return
+
+        embed=discord.Embed(title=brc_message, color=0xff0000)
+        embed.set_author(name="Service Annoucement", icon_url="https://i.ibb.co/yYvr5z4/icons8-support-200.png")
+        embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
         
-        message_failed_guilds = []
+        reached = 0
         for guild_data in all_guilds:
             default_replay_channels = guild_data.get("guild_channels_replays")
             if not default_replay_channels:
-                guild_name = guild_data.get("guild_name")
-                message_failed_guilds.append(guild_name)
                 continue
             
-            channel = self.client.get_channel(int(default_replay_channels[0]))
-            if channel:
-                await channel.send(brk_message)
+            try:
+                channel = self.client.get_channel(int(default_replay_channels[0]))
+                if channel:
+                        await channel.send(embed=embed)
+                        reached += 1
+            except Exception as e:
+                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
+                continue
+
+        await ctx.send(f"This message reached {reached} servers.")
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def spoms(self, ctx):
+        all_guilds, status_code = Guilds_API.get_all_guilds()
+        if status_code != 200:
+            ctx.send(f"Error `{status_code}`")
+            return
+
+        brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
+        if not brc_message:
+            await ctx.send("Message is empty")
+            return
+
+        embed=discord.Embed(title=brc_message, color=0x0aff00)
+        embed.set_author(name="Sponsored Message")
+        
+        reached = 0
+        for guild_data in all_guilds:
+            default_replay_channels = guild_data.get("guild_channels_replays")
+            if not default_replay_channels:
+                continue
+            
+            try:
+                channel = self.client.get_channel(int(default_replay_channels[0]))
+                if channel:
+                        await channel.send(embed=embed)
+                        reached += 1
+            except Exception as e:
+                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
+                continue
+        
+        await ctx.send(f"This message reached {reached} servers.")
 
 
     @commands.command()
