@@ -44,6 +44,7 @@ class blitz_aftermath_replays(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.api_domain = "http://api.aftermath.link"
         self.emoji_01 = self.client.get_emoji(
             733729140611612722)
         self.emoji_02 = self.client.get_emoji(
@@ -92,7 +93,7 @@ class blitz_aftermath_replays(commands.Cog):
                     rating = 'mBRT1_1A'
                     try:
                         # Check if user is banned
-                        res = requests.get(f'http://api.aftermath.link/users/{message.author.id}')
+                        res = requests.get(f'{self.api_domain}/users/{message.author.id}')
                         res_data = rapidjson.loads(res.text)
                         if res_data.get("banned", False):
                             if not res_data.get("ban_notified", False):

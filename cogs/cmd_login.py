@@ -12,6 +12,7 @@ class login(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.client.remove_command("help")
+        self.api_domain = "http://api.aftermath.link"
 
 
     # Events
@@ -59,7 +60,7 @@ class login(commands.Cog):
         }
 
         try:
-            res = requests.get("http://api.aftermath.link/newlogin", json=new_login)
+            res = requests.get(f"{self.api_domain}/newlogin", json=new_login)
         except:
             await ctx.send("It looks like Aftermath login service is under maintenance, please try again later.")
             return
@@ -73,7 +74,7 @@ class login(commands.Cog):
                 player_name = stats_api.players.find_one({'_id': player_id}).get("nickname")
                 message = f"It looks like you are currently logged in as {player_name}.\n\n"
 
-            await dm_channel.send(f"{message}Here is your new login link for {realm}! It will expire in 5 minutes.\nhttp://api.aftermath.link/login/{intent_id}\n**Please keep it safe.**")
+            await dm_channel.send(f"{message}Here is your new login link for {realm}! It will expire in 5 minutes.\n{self.api_domain}/login/{intent_id}\n**Please keep it safe.**")
         elif res.status_code == 409:
             username = rapidjson.loads(res.text).get('nickname')
             await dm_channel.send(f"It looks like you are logged in as {username} already.")
