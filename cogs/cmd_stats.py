@@ -32,7 +32,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
             # Check if user is banned
             res_data = {}
             try: 
-                res = requests.get(f'http://158.69.62.236/users/{discord_id}')
+                res = requests.get(f'http://api.aftermath.link/users/{discord_id}')
                 res_data = rapidjson.loads(res.text)
             except:
                 pass
@@ -52,7 +52,7 @@ def zap_render(player_id: int, discord_id: str, realm: str, days: int, bg_url: s
         }
 
         try:
-            res = requests.get("http://158.69.62.236:6969/player", json=request_dict)
+            res = requests.get("http://stats.aftermath.link/player", json=request_dict)
         except requests.exceptions.ConnectionError:
             raise Exception("It looks like Aftermath stats is currently down for maintenance.")
         if res.status_code == 200:
@@ -191,7 +191,7 @@ class blitz_aftermath_stats(commands.Cog):
         # Check if user is banned
         res_data = {}
         try: 
-            res = requests.get(f'http://158.69.62.236/users/{payload.user_id}')
+            res = requests.get(f'http://api.aftermath.link/users/{payload.user_id}')
             res_data = rapidjson.loads(res.text)
         except:
             pass
@@ -329,7 +329,7 @@ class blitz_aftermath_stats(commands.Cog):
             bg_url = ""
             premium = False
             try:
-                res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                res = requests.get(f'http://api.aftermath.link/players/{player_id}')
                 res_data = rapidjson.loads(res.text)
                 bg_url = res_data.get('bg_url', None)
                 premium = res_data.get('premium', False)
@@ -389,7 +389,7 @@ class blitz_aftermath_stats(commands.Cog):
                     bg_url = ""
                     premium = False
                     try:
-                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        res = requests.get(f'http://api.aftermath.link/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
@@ -442,7 +442,7 @@ class blitz_aftermath_stats(commands.Cog):
                     bg_url = ""
                     premium = False
                     try:
-                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        res = requests.get(f'http://api.aftermath.link/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
@@ -543,7 +543,7 @@ class blitz_aftermath_stats(commands.Cog):
                         verified = user_data.get("verified")
 
                     try:
-                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        res = requests.get(f'http://api.aftermath.link/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
@@ -609,7 +609,7 @@ class blitz_aftermath_stats(commands.Cog):
                         verified = user_data.get("verified")
                 
                     try:
-                        res = requests.get(f'http://158.69.62.236/players/{player_id}')
+                        res = requests.get(f'http://api.aftermath.link/players/{player_id}')
                         res_data = rapidjson.loads(res.text)
                         bg_url = res_data.get('bg_url', None)
                         premium = res_data.get('premium', False)
@@ -758,7 +758,7 @@ class blitz_aftermath_stats(commands.Cog):
             return
 
         try:
-            res = requests.get(f'http://158.69.62.236/users/{ctx.author.id}')
+            res = requests.get(f'http://api.aftermath.link/users/{ctx.author.id}')
             premium = rapidjson.loads(res.text).get('premium', False)
             verified = rapidjson.loads(res.text).get('verified', False)
             if not verified:

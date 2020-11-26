@@ -92,7 +92,7 @@ class blitz_aftermath_replays(commands.Cog):
                     rating = 'mBRT1_1A'
                     try:
                         # Check if user is banned
-                        res = requests.get(f'http://158.69.62.236/users/{message.author.id}')
+                        res = requests.get(f'http://api.aftermath.link/users/{message.author.id}')
                         res_data = rapidjson.loads(res.text)
                         if res_data.get("banned", False):
                             if not res_data.get("ban_notified", False):

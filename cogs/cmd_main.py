@@ -337,7 +337,7 @@ class maintenance(commands.Cog):
                 "user_id": ctx.message.mentions[0].id,
                 "premium_days": int(days)
             }
-            res = requests.get("http://158.69.62.236/premium/add", json=req)
+            res = requests.get("http://api.aftermath.link/premium/add", json=req)
             res_data = rapidjson.loads(res.text)
         except:
             await ctx.send(f"Failed to reach the API.", delete_after=15)
@@ -355,7 +355,7 @@ class maintenance(commands.Cog):
 
         com_res_data = {}
         try:
-            res = requests.get("http://158.69.62.236/premium/redirect/" + intent_id)
+            res = requests.get("http://api.aftermath.link/premium/redirect/" + intent_id)
             com_res_data = rapidjson.loads(res.text)
         except:
             await ctx.send(f"Failed to reach the API while commiting.", delete_after=15)
