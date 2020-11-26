@@ -44,7 +44,7 @@ class blitz_aftermath_replays(commands.Cog):
 
     def __init__(self, client):
         self.client = client
-        self.api_domain = "http://api.aftermath.link"
+        self.api_domain = "https://api.aftermath.link"
         self.emoji_01 = self.client.get_emoji(
             733729140611612722)
         self.emoji_02 = self.client.get_emoji(

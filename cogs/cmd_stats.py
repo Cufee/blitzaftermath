@@ -21,8 +21,8 @@ command_cooldown = 5
 db_client = MongoClient("mongodb://51.222.13.110:27017")
 players = db_client.stats.players
 
-api_domain = "http://api.aftermath.link"
-stats_domain = "http://stats.aftermath.link"
+api_domain = "https://api.aftermath.link"
+stats_domain = "https://stats.aftermath.link"
 
 debug = False
 API = StatsApi()

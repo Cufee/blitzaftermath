@@ -3,7 +3,7 @@ import requests
 
 class DiscordUsersApiV2():
     def __init__(self):
-        self.API_URL = "http://api.aftermath.link/"
+        self.API_URL = "https://api.aftermath.link/"
 
     def get_user_data(self, discord_user_id):
         '''Get user data from discord_id'''

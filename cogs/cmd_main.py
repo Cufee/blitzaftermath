@@ -84,7 +84,7 @@ class maintenance(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.client.remove_command("help")
-        self.api_domain = "http://api.aftermath.link"
+        self.api_domain = "https://api.aftermath.link"
 
 
     # Events
