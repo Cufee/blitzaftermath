@@ -333,7 +333,7 @@ class maintenance(commands.Cog):
         
         res_raw = requests.get(f"{self.api_domain}/payments/new/{ctx.author.id}")
         if not res_raw:
-            await ctx.send("It looks like Aftermath is partially down for maintenance, please try again later.")
+            await ctx.send("It looks like Aftermath is partially down for maintenance, please try again later.", delete_after=30)
             return
 
         res_data = rapidjson.loads(res_raw.text)
