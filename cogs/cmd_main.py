@@ -347,7 +347,7 @@ class maintenance(commands.Cog):
         if payment_link and not error:
             try:
                 dm_channel = await ctx.author.create_dm()
-                dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use v-report __message__ to report this issue.*")
+                await dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use v-report __message__ to report this issue.*")
                 return
             except:
                 await ctx.send(f"Hey {ctx.author.mention}! I am not able to DM you, please make sure you have DMs open.", delete_after=30)
