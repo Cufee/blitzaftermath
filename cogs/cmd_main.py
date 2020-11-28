@@ -365,7 +365,7 @@ class maintenance(commands.Cog):
     async def report(self, ctx, *args):
         await ctx.message.delete()
 
-        if len(args) < 3 and "message" in args:
+        if len(args) < 5:
             await ctx.send('Please describe the issue you are having in more detail.\n*For example: v-report Does not show my stats, giving me error "Zap render failed"*.')
             return
 
