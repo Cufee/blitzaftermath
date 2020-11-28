@@ -257,8 +257,8 @@ class maintenance(commands.Cog):
             await ctx.send("Message is empty")
             return
 
-        embed=discord.Embed(title=brc_message, color=0xff0000)
-        embed.set_author(name="Service Annoucement", icon_url="https://i.ibb.co/yYvr5z4/icons8-support-200.png")
+        embed=discord.Embed(color=0xff0000)
+        embed.add_field(name="Service Annoucement", value=brc_message, inline=False)
         embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
         
         result = await self.global_message(None, embed)
@@ -273,8 +273,8 @@ class maintenance(commands.Cog):
             await ctx.send("Message is empty")
             return
 
-        embed=discord.Embed(title=brc_message, color=0x0aff00)
-        embed.set_author(name="Sponsored Message")
+        embed=discord.Embed(color=0x0aff00)
+        embed.add_field(name="Sponsored Message", value=brc_message, inline=False)
         
         result = await self.global_message(None, embed)
         await ctx.send(result)
