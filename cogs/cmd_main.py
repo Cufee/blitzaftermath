@@ -347,7 +347,7 @@ class maintenance(commands.Cog):
         if payment_link and not error:
             try:
                 dm_channel = await ctx.author.create_dm()
-                await dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use v-report __message__ to report this issue.*")
+                await dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use `v-report message` to report this issue.*")
                 return
             except:
                 await ctx.send(f"Hey {ctx.author.mention}! I am not able to DM you, please make sure you have DMs open.", delete_after=30)
@@ -360,6 +360,10 @@ class maintenance(commands.Cog):
     @commands.command()
     async def report(self, ctx, *args):
         await ctx.message.delete()
+
+        if len(args) < 3 and "message" in args:
+            await ctx.send('Please describe the issue you are having in more detail.\n*For example: v-report Does not show my stats, giving me error "Zap render failed"*.')
+            return
 
         try:
             user_data = UsersApiV2.get_user_data(ctx.author.id)
