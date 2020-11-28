@@ -5,6 +5,7 @@ import traceback
 from datetime import datetime
 
 from cogs.api.guild_settings_api import API_v2
+from cogs.api.discord_users_api import DiscordUsersApiV2
 from cogs.api.bans_api import BansAPI
 
 from random import random
@@ -17,6 +18,7 @@ command_cooldown = 5
 debug = False
 Guilds_API = API_v2()
 Ban_API = BansAPI()
+UsersApiV2 = DiscordUsersApiV2()
 
 # Strings
 # Help
@@ -86,6 +88,12 @@ class maintenance(commands.Cog):
         self.client.remove_command("help")
         self.api_domain = "https://api.aftermath.link"
 
+    async def report_to_owner(self, message):
+        owner_member = self.client.get_user(202905960405139456)
+        dm_channel = await owner_member.create_dm()
+        await dm_channel.send(message)
+        return
+
 
     # Events
     # @commands.Cog.listener()
@@ -100,9 +108,8 @@ class maintenance(commands.Cog):
         guild_name = str(guild.name)
         _, status_code = Guilds_API.add_new_guild(guild_id, guild_name)
 
-        owner_member = self.client.get_user(202905960405139456)
-        dm_channel = await owner_member.create_dm()
-        await dm_channel.send(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
+        await self.report_to_owner(f"Aftermath joined {guild_name}. Setup complete with `{status_code}`.")
+        return
 
 
     @commands.Cog.listener()
@@ -127,9 +134,7 @@ class maintenance(commands.Cog):
         new_settings = {"kicked_on": datetime.utcnow()}
         _, status_code = Guilds_API.update_guild(guild_id, new_settings, safe=False)
 
-        owner_member = self.client.get_user(202905960405139456)
-        dm_channel = await owner_member.create_dm()
-        await dm_channel.send(f"Aftermath was removed from {guild_name}. Edit complete with `{status_code}`.")
+        await self.report_to_owner(f"Aftermath was removed from {guild_name}. Edit complete with `{status_code}`.")
     
 
     @commands.command()
@@ -317,6 +322,58 @@ class maintenance(commands.Cog):
         await ctx.send(f"{user.name} has been banned for {hours} hours.", delete_after=15)
         return
 
+    @commands.command()
+    async def premium(self, ctx):
+        # Get user data
+        try:
+            _ = UsersApiV2.get_user_data(ctx.author.id)
+        except:
+            await ctx.send("Something did not work as planned. Try using v-login first.")
+            return
+        
+        res_raw = requests.get(f"{self.api_domain}/payments/new/{ctx.author.id}")
+        if not res_raw:
+            await ctx.send("It looks like Aftermath is partially down for maintenance, please try again later.")
+            return
+
+        res_data = rapidjson.loads(res_raw.text)
+        error = res_data.get("error")
+        payment_link = res_data.get("payment_link")
+
+        if error == "already subscribed":
+            await ctx.send("You already have a subscription to Aftermath Premium, thanks!", delete_after=30)
+            return
+
+        if payment_link and not error:
+            try:
+                dm_channel = await ctx.author.create_dm()
+                dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use v-report __message__ to report this issue.*")
+                return
+            except:
+                await ctx.send(f"Hey {ctx.author.mention}! I am not able to DM you, please make sure you have DMs open.", delete_after=30)
+                return
+
+        await ctx.send(f"Something went wrong :confused:\n```{error}```")
+        await self.report_to_owner(f"Failed to get a payment link in {ctx.guild.name} ({ctx.guild.name})\nUserID: {ctx.author.id}\nError: {error}")
+        return
+
+    @commands.command()
+    async def report(self, ctx, *args):
+        await ctx.message.delete()
+
+        try:
+            user_data = UsersApiV2.get_user_data(ctx.author.id)
+        except:
+            await ctx.send(f"Hey {ctx.author.mention}! Please use v-login to enable error reporting for your account.", delete_after=30)
+            return
+
+        if user_data.get("banned", False):
+            return
+    
+        message = " ".join(args)
+        await self.report_to_owner(f"Error report from {ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id})\nGuild: {ctx.guild.id}\n```{message}```")
+        await ctx.send("Thank you for reporting an issue! Please make sure your DMs are open in case we need to contact you through Discord.", delete_after=30)
+        return
 
     @commands.command()
     @commands.is_owner()
