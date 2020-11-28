@@ -108,29 +108,29 @@ class maintenance(commands.Cog):
         reached = 0
         failed = 0
         for guild_data in all_guilds:
-            default_replay_channels = guild_data.get("guild_channels_replays")
-            if not default_replay_channels:
+            try:
+                last_chan_id = CacheAPI.get_last_used_channel(int(guild_data.get("guild_id")))
+                channel = self.client.get_channel(int(last_chan_id))
+                if channel:
+                        await channel.send(message, embed=embed)
+                        reached += 1
+                        continue
+            except:
+                default_replay_channels = guild_data.get("guild_channels_replays")
+                if not default_replay_channels:
+                    failed += 1
+                    continue
                 try:
-                    last_chan_id = CacheAPI.get_last_used_channel(guild_data.get("guild_id"))
-                    channel = self.client.get_channel(int(last_chan_id))
+                    channel = self.client.get_channel(int(default_replay_channels[0]))
                     if channel:
                             await channel.send(message, embed=embed)
                             reached += 1
                             continue
-                except:
+
+                except Exception as e:
                     failed += 1
+                    print(f"failed to message in {guild_data.get('guild_name')} ({e})")
                     continue
-                
-            
-            try:
-                channel = self.client.get_channel(int(default_replay_channels[0]))
-                if channel:
-                        await channel.send(message, embed=embed)
-                        reached += 1
-            except Exception as e:
-                failed += 1
-                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
-                continue
         
         return f"Reached {reached} servers, {failed} servers failed"
 
@@ -252,11 +252,6 @@ class maintenance(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def broadcast(self, ctx):
-        all_guilds, status_code = Guilds_API.get_all_guilds()
-        if status_code != 200:
-            ctx.send(f"Error `{status_code}`")
-            return
-
         brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
         if not brc_message:
             await ctx.send("Message is empty")
@@ -266,35 +261,13 @@ class maintenance(commands.Cog):
         embed.set_author(name="Service Annoucement", icon_url="https://i.ibb.co/yYvr5z4/icons8-support-200.png")
         embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
         
-        reached = 0
-        failed = 0
-        for guild_data in all_guilds:
-            default_replay_channels = guild_data.get("guild_channels_replays")
-            if not default_replay_channels:
-                failed += 1
-                continue
-            
-            try:
-                channel = self.client.get_channel(int(default_replay_channels[0]))
-                if channel:
-                        await channel.send(embed=embed)
-                        reached += 1
-            except Exception as e:
-                failed += 1
-                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
-                continue
-
-        await ctx.send(f"This message reached {reached} servers, {failed} servers failed.")
+        result = await self.global_message(None, embed)
+        await ctx.send(result)
 
 
     @commands.command()
     @commands.is_owner()
     async def spoms(self, ctx):
-        all_guilds, status_code = Guilds_API.get_all_guilds()
-        if status_code != 200:
-            ctx.send(f"Error `{status_code}`")
-            return
-
         brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
         if not brc_message:
             await ctx.send("Message is empty")
@@ -303,25 +276,8 @@ class maintenance(commands.Cog):
         embed=discord.Embed(title=brc_message, color=0x0aff00)
         embed.set_author(name="Sponsored Message")
         
-        reached = 0
-        failed = 0
-        for guild_data in all_guilds:
-            default_replay_channels = guild_data.get("guild_channels_replays")
-            if not default_replay_channels:
-                failed += 1
-                continue
-            
-            try:
-                channel = self.client.get_channel(int(default_replay_channels[0]))
-                if channel:
-                        await channel.send(embed=embed)
-                        reached += 1
-            except Exception as e:
-                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
-                failed += 1
-                continue
-        
-        await ctx.send(f"This message reached {reached} servers, {failed} servers failed.")
+        result = await self.global_message(None, embed)
+        await ctx.send(result)
 
 
     @commands.command()

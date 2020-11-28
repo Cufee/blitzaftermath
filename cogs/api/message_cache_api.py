@@ -32,7 +32,7 @@ class MessageCacheAPI():
         return cache_data
 
     def get_last_used_channel(self, guild_id: int):
-        cache_data = self.cache_collection.find({"guild_id": guild_id})
+        cache_data = self.cache_collection.find_one({"guild_id": guild_id})
         return cache_data.get('channel_id', None)
 
     def cache_message(self, message_id: int, guild_id: int, user_id: int, channel_id: int, request: dict):
