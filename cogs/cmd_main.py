@@ -59,6 +59,10 @@ Use this command to verify your account and get a checkmark next to your name.
 
 - This is a required step for setting up a background image or buying Aftermath Premium for the first time.
 ```
+`v-premium`
+```
+Use this command to get your Aftermath Premium membership.
+```
 """)
 # Permissions
 perms_text = """Here is a full list of permissions Aftermath needs to function correctly:
