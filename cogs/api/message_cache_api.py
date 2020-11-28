@@ -31,7 +31,11 @@ class MessageCacheAPI():
         cache_data = self.cache_collection.find(query)
         return cache_data
 
-    def cache_message(self, message_id: int, guild_id: int, user_id: int, request: dict):
+    def get_last_used_channel(self, guild_id: int):
+        cache_data = self.cache_collection.find({"guild_id": guild_id})
+        return cache_data.get('channel_id', None)
+
+    def cache_message(self, message_id: int, guild_id: int, user_id: int, channel_id: int, request: dict):
         check = self.get_message_details(message_id, guild_id)
         if check:
             return
@@ -39,6 +43,7 @@ class MessageCacheAPI():
         cache_entry = {
             "_id": message_id,
             "guild_id": guild_id,
+            "channel_id": channel_id,
             "user_id": user_id,
             "timestamp": datetime.utcnow(),
             "request": request

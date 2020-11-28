@@ -304,7 +304,7 @@ class blitz_aftermath_stats(commands.Cog):
             new_message = await message.channel.send(file=image)
         except:
             raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-        CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, request)
+        CacheAPI.cache_message(new_message.id, message.guild.id, payload.user_id, new_message.channel.id, request)
         await self.add_refresh_reaction(new_message)
         await self.add_sorting_reactions(new_message)
         return
@@ -425,7 +425,7 @@ class blitz_aftermath_stats(commands.Cog):
                         new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, new_message.channel.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
                     return None
@@ -473,7 +473,7 @@ class blitz_aftermath_stats(commands.Cog):
                         new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, new_message.channel.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
                     return None
@@ -572,7 +572,7 @@ class blitz_aftermath_stats(commands.Cog):
                         new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, new_message.channel.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
                     
@@ -643,7 +643,7 @@ class blitz_aftermath_stats(commands.Cog):
                         new_message = await message.channel.send(message_text, file=image)
                     except:
                         raise Exception("It looks Aftermath is missing permissions to send images to this channel.")
-                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, request)
+                    CacheAPI.cache_message(new_message.id, message.guild.id, message.author.id, new_message.channel.id, request)
                     await self.add_refresh_reaction(new_message)
                     await self.add_sorting_reactions(new_message)
                     # Try to set a new default account for new users

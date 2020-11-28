@@ -6,6 +6,7 @@ from datetime import datetime
 
 from cogs.api.guild_settings_api import API_v2
 from cogs.api.discord_users_api import DiscordUsersApiV2
+from cogs.api.message_cache_api import MessageCacheAPI
 from cogs.api.bans_api import BansAPI
 
 from random import random
@@ -19,6 +20,7 @@ debug = False
 Guilds_API = API_v2()
 Ban_API = BansAPI()
 UsersApiV2 = DiscordUsersApiV2()
+CacheAPI = MessageCacheAPI()
 
 # Strings
 # Help
@@ -98,6 +100,39 @@ class maintenance(commands.Cog):
         await dm_channel.send(message)
         return
 
+    async def global_message(self, message, embed):
+        all_guilds, status_code = Guilds_API.get_all_guilds()
+        if status_code != 200:
+            return f"Faield to get guild settings: {status_code}"
+
+        reached = 0
+        failed = 0
+        for guild_data in all_guilds:
+            default_replay_channels = guild_data.get("guild_channels_replays")
+            if not default_replay_channels:
+                try:
+                    last_chan_id = CacheAPI.get_last_used_channel(guild_data.get("guild_id"))
+                    channel = self.client.get_channel(int(last_chan_id))
+                    if channel:
+                            await channel.send(message, embed=embed)
+                            reached += 1
+                            continue
+                except:
+                    failed += 1
+                    continue
+                
+            
+            try:
+                channel = self.client.get_channel(int(default_replay_channels[0]))
+                if channel:
+                        await channel.send(message, embed=embed)
+                        reached += 1
+            except Exception as e:
+                failed += 1
+                print(f"failed to message in {guild_data.get('guild_name')} ({e})")
+                continue
+        
+        return f"Reached {reached} servers, {failed} servers failed"
 
     # Events
     # @commands.Cog.listener()
