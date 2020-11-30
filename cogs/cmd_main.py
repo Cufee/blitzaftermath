@@ -101,38 +101,25 @@ class maintenance(commands.Cog):
         return
 
     async def global_message(self, message, embed):
-        all_guilds, status_code = Guilds_API.get_all_guilds()
-        if status_code != 200:
-            return f"Faield to get guild settings: {status_code}"
-
         reached = 0
+        channels = 0
         failed = 0
-        for guild_data in all_guilds:
+        for guild in self.client.guilds:
+            # Try to message last used channels
             try:
-                last_chan_id = CacheAPI.get_last_used_channel(int(guild_data.get("guild_id")))
-                channel = self.client.get_channel(int(last_chan_id))
-                if channel:
-                        await channel.send(message, embed=embed)
-                        reached += 1
-                        continue
-            except:
-                default_replay_channels = guild_data.get("guild_channels_replays")
-                if not default_replay_channels:
-                    failed += 1
-                    continue
-                try:
-                    channel = self.client.get_channel(int(default_replay_channels[0]))
-                    if channel:
-                            await channel.send(message, embed=embed)
-                            reached += 1
-                            continue
+                last_chan_ids = CacheAPI.get_last_used_channels(guild.id)
+                for id in last_chan_ids:
+                    channel = self.client.get_channel(int(id))
+                    await channel.send(message, embed=embed)
+                    channels += 1
+                reached += 1
 
-                except Exception as e:
-                    failed += 1
-                    print(f"failed to message in {guild_data.get('guild_name')} ({e})")
-                    continue
+            # Try messaging replays channel
+            except Exception as e:
+                failed += 1
+                continue
         
-        return f"Reached {reached} servers, {failed} servers failed"
+        return f"Reached {channels} channels on {reached} servers, {failed} servers failed"
 
     # Events
     # @commands.Cog.listener()
