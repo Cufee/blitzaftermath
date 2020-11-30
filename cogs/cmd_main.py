@@ -319,6 +319,8 @@ class maintenance(commands.Cog):
 
     @commands.command()
     async def premium(self, ctx):
+        premium_message = "Aftermath Premium is a monthly subscription that supports bot development and pays for server costs.\n\nHere are some perks you will get:\n- Advanced sorting using the reactions below your session stats.\n- Custom background for stats.\n- 30 day sessions."
+
         # Get user data
         try:
             _ = UsersApiV2.get_user_data(ctx.author.id)
@@ -342,7 +344,7 @@ class maintenance(commands.Cog):
         if payment_link and not error:
             try:
                 dm_channel = await ctx.author.create_dm()
-                await dm_channel.send(f"Here is your payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use `v-report message` to report this issue.*")
+                await dm_channel.send(f"{premium_message}\n\nYour PayPal payment link:\n{payment_link}\n\n*It may take up to an hour to process your payment, if you do not see your membership after that hour has passed, please use `v-report message` to report this issue.*")
                 return
             except:
                 await ctx.send(f"Hey {ctx.author.mention}! I am not able to DM you, please make sure you have DMs open.", delete_after=30)
