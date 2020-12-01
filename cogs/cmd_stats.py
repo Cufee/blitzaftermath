@@ -380,6 +380,9 @@ class blitz_aftermath_stats(commands.Cog):
         except:
             pass
 
+        user_premium = user_data.get("premium", False)
+
+
         try:
             # Used later to check if a default account should be set
             trydefault = False
@@ -402,7 +405,7 @@ class blitz_aftermath_stats(commands.Cog):
                         pass
 
                     message_text = None
-                    if not premium and session_days and session_days > 7:
+                    if not user_premium and session_days and session_days > 7:
                         message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
@@ -457,7 +460,7 @@ class blitz_aftermath_stats(commands.Cog):
                         {'_id': player_id}).get("realm")
 
                     message_text = None
-                    if not premium and session_days and session_days > 7:
+                    if not user_premium and session_days and session_days > 7:
                         message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
@@ -556,7 +559,7 @@ class blitz_aftermath_stats(commands.Cog):
                         pass
 
                     message_text = None
-                    if not premium and session_days and session_days > 7:
+                    if not user_premium and session_days and session_days > 7:
                         message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
@@ -622,7 +625,7 @@ class blitz_aftermath_stats(commands.Cog):
                         pass
 
                     message_text = None
-                    if not premium and session_days and session_days > 7:
+                    if not user_premium and session_days and session_days > 7:
                         message_text = "Sessions longer than 7 days are only available to Aftermath Premium members."
                         session_days = 7
 
