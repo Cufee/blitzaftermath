@@ -208,12 +208,12 @@ class maintenance(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        # Command not found or is disabled
-        elif isinstance(error, commands.CommandNotFound):
-            try:
-                await ctx.author.send(help_str)
-            except discord.HTTPException:
-                pass
+        # # Command not found or is disabled
+        # elif isinstance(error, commands.CommandNotFound):
+        #     try:
+        #         await ctx.author.send(help_str)
+        #     except discord.HTTPException:
+        #         pass
 
         # Check if command missing arguments
         elif isinstance(error, commands.errors.MissingRequiredArgument):
