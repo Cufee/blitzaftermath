@@ -50,7 +50,7 @@ class login(commands.Cog):
 
         valid_realms = ["NA", "EU", "RU", "ASIA"]
         if realm not in valid_realms:
-            await ctx.send("{realm} is not a valid server.\n*Example: `v-login EU`*")
+            await ctx.send(f"{realm} is not a valid server.\n*Example: `v-login EU`*")
             return
 
         user_id = ctx.author.id
