@@ -41,7 +41,7 @@ class login(commands.Cog):
                 if e == "This user does not have a default WoT Blitz account set.":
                     await ctx.send("Please specify the server you would like to login at.\n*For example: `v-login EU`*")
                     return
-                await ctx.send("It looks like Aftermath login service is under maintenance, please try again later.")
+                await ctx.send(f"Something did not work as planned.\n```{e}```")
                 return
 
             player_details = stats_api.players.find_one({'_id': player_id})
