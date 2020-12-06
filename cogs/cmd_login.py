@@ -50,6 +50,7 @@ class login(commands.Cog):
 
         if not realm:
             await ctx.send("Please specify the server you would like to login at.\n*For example: `v-login EU`*")
+            return
         
 
         valid_realms = ["NA", "EU", "RU", "ASIA"]
