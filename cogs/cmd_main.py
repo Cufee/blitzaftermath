@@ -9,6 +9,8 @@ from cogs.api.discord_users_api import DiscordUsersApiV2
 from cogs.api.message_cache_api import MessageCacheAPI
 from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.bans_api import BansAPI
+from cogs.api.stats_api import MongoClient, StatsApi, get_wg_api_domain
+import re
 
 from random import random
 
@@ -17,12 +19,19 @@ import rapidjson
 
 command_cooldown = 5
 
+db_client = MongoClient("mongodb://51.222.13.110:27017")
+players = db_client.stats.players
+
 debug = False
 Guilds_API = API_v2()
 Ban_API = BansAPI()
 UsersApiV2 = DiscordUsersApiV2()
 CacheAPI = MessageCacheAPI()
 bgAPI = CustomBackground()
+API = StatsApi()
+
+api_domain = "https://api.aftermath.link"
+stats_domain = "https://stats.aftermath.link"
 
 # Strings
 # Help
@@ -117,7 +126,7 @@ class maintenance(commands.Cog):
                 reached += 1
 
             # Try messaging replays channel
-            except Exception as e:
+            except:
                 failed += 1
                 continue
         
