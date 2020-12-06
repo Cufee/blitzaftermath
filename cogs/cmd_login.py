@@ -48,6 +48,10 @@ class login(commands.Cog):
             if player_details:
                 realm = player_details.get("realm")
 
+        if not realm:
+            await ctx.send("Please specify the server you would like to login at.\n*For example: `v-login EU`*")
+        
+
         valid_realms = ["NA", "EU", "RU", "ASIA"]
         if realm not in valid_realms:
             await ctx.send(f"{realm} is not a valid server.\n*Example: `v-login EU`*")
