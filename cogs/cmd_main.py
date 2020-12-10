@@ -347,7 +347,7 @@ class maintenance(commands.Cog):
         return
 
     @commands.command()
-    async def report(self, ctx, *args):
+    async def oldreport(self, ctx, *args):
         await ctx.message.delete()
 
         if len(args) < 5:
