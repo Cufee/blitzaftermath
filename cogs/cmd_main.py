@@ -506,9 +506,6 @@ class maintenance(commands.Cog):
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
     @commands.guild_only()
     async def iam(self, message, player_name_str):
-        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
-            return
-
         try:
             # Split player string, check validity, find player ID
             if '@' in player_name_str:
