@@ -119,10 +119,14 @@ class maintenance(commands.Cog):
             # Try to message last used channels
             try:
                 last_chan_ids = CacheAPI.get_last_used_channels(guild.id)
+                sent = 0
                 for id in last_chan_ids:
                     channel = self.client.get_channel(int(id))
                     await channel.send(message, embed=embed)
                     channels += 1
+                    sent += 1
+                if sent == 0:
+                    raise Exception("did no reach any channels")
                 reached += 1
 
             # Try messaging replays channel
