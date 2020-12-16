@@ -298,7 +298,7 @@ class maintenance(commands.Cog):
             value = part.replace(f"{name}\n", "")
             if name == part.replace(f"{name}\n", ""):
                 value = "⠀"
-            embed.add_field(name=name, value=value, inline=False)
+            embed.add_field(name=("⠀\n" + name), value=value, inline=False)
         
         result = await self.global_message(None, embed)
         await ctx.send(result)
