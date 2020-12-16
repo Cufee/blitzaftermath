@@ -126,14 +126,16 @@ class maintenance(commands.Cog):
                 reached += 1
 
             # Try messaging replays channel
-            except:
+            except Exception as e:
+                print(e)
                 try:
-                    channl_id = Guilds_API.get_one_guild_setting(str(guild.id), "guild_channels_replays")[0]
-                    channel = self.client.get_channel(int(channl_id))
+                    channl_id = Guilds_API.get_one_guild_setting(str(guild.id), "guild_channels_replays")
+                    channel = self.client.get_channel(int(channl_id[0]))
                     await channel.send(message, embed=embed)
                     channels += 1
                     reached += 1
-                except:
+                except Exception as e:
+                    print(e)
                     failed += 1
                 continue
         
@@ -272,8 +274,27 @@ class maintenance(commands.Cog):
             await ctx.send("Message is empty")
             return
 
+        brc_list = brc_message.split("\n\n")
         embed=discord.Embed(color=0x0aff00)
-        embed.add_field(name="Sponsored Message", value=brc_message, inline=False)
+        embed.add_field(name="Sponsored Message", value="⠀", inline=False)
+
+        # check for images
+        if ctx.message.attachments:
+            attachment_url = ""
+            for a in ctx.message.attachments:
+                if a.url.endswith(".png") or a.url.endswith(".jpg") or a.url.endswith(".jpeg"):
+                    attachment_url = a.url
+                    break
+
+            if attachment_url:
+                embed.set_image(url=attachment_url)
+
+        for part in brc_list:
+            name = part.split("\n")[0]
+            value = part.replace(f"{name}\n", "")
+            if name == part.replace(f"{name}\n", ""):
+                value = "⠀"
+            embed.add_field(name=name, value=value, inline=False)
         
         result = await self.global_message(None, embed)
         await ctx.send(result)
