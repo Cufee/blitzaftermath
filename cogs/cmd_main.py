@@ -127,7 +127,14 @@ class maintenance(commands.Cog):
 
             # Try messaging replays channel
             except:
-                failed += 1
+                try:
+                    channl_id = Guilds_API.get_one_guild_setting(str(guild.id), "guild_channels_replays")[0]
+                    channel = self.client.get_channel(int(channl_id))
+                    await channel.send(message, embed=embed)
+                    channels += 1
+                    reached += 1
+                except:
+                    failed += 1
                 continue
         
         return f"Reached {channels} channels on {reached} servers, {failed} servers failed"
