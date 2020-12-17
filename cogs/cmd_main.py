@@ -118,7 +118,7 @@ class maintenance(commands.Cog):
         for guild in self.client.guilds:
             # Try to message last used channels
             try:
-                last_chan_ids = CacheAPI.get_last_used_channels(guild.id)
+                last_chan_ids = CacheAPI.get_last_used_channels(guild.id) or []
                 sent = 0
                 for id in last_chan_ids:
                     channel = self.client.get_channel(int(id))
@@ -133,7 +133,7 @@ class maintenance(commands.Cog):
             except Exception as e:
                 print(e)
                 try:
-                    channl_id = Guilds_API.get_one_guild_setting(str(guild.id), "guild_channels_replays")
+                    channl_id, _ = Guilds_API.get_one_guild_setting(str(guild.id), "guild_channels_replays")
                     channel = self.client.get_channel(int(channl_id[0]))
                     await channel.send(message, embed=embed)
                     channels += 1
@@ -279,8 +279,8 @@ class maintenance(commands.Cog):
             return
 
         brc_list = brc_message.split("\n\n")
-        embed=discord.Embed(color=0x0aff00)
-        embed.add_field(name="Sponsored Message", value="⠀", inline=False)
+        embed=discord.Embed(color=0x0aff00, title="Sponsored Message")
+        # embed.add_field(name="Sponsored Message", value="⠀", inline=False)
 
         # check for images
         if ctx.message.attachments:
