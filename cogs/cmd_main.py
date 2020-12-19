@@ -121,10 +121,14 @@ class maintenance(commands.Cog):
                 last_chan_ids = CacheAPI.get_last_used_channels(guild.id) or []
                 sent = 0
                 for id in last_chan_ids:
-                    channel = self.client.get_channel(int(id))
-                    await channel.send(message, embed=embed)
-                    channels += 1
-                    sent += 1
+                    try:
+                        channel = self.client.get_channel(int(id))
+                        await channel.send(message, embed=embed)
+                        channels += 1
+                        sent += 1
+                    except:
+                        continue
+
                 if sent == 0:
                     raise Exception("did no reach any channels")
                 reached += 1
@@ -254,54 +258,54 @@ class maintenance(commands.Cog):
                 type(error), error, error.__traceback__, file=sys.stderr)
 
 
-    @commands.command()
-    @commands.is_owner()
-    async def broadcast(self, ctx):
-        brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
-        if not brc_message:
-            await ctx.send("Message is empty")
-            return
+    # @commands.command()
+    # @commands.is_owner()
+    # async def broadcast(self, ctx):
+    #     brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
+    #     if not brc_message:
+    #         await ctx.send("Message is empty")
+    #         return
 
-        embed=discord.Embed(color=0xff0000)
-        embed.add_field(name="Service Annoucement", value=brc_message, inline=False)
-        embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
+    #     embed=discord.Embed(color=0xff0000)
+    #     embed.add_field(name="Service Annoucement", value=brc_message, inline=False)
+    #     embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
         
-        result = await self.global_message(None, embed)
-        await ctx.send(result)
+    #     result = await self.global_message(None, embed)
+    #     await ctx.send(result)
 
 
-    @commands.command()
-    @commands.is_owner()
-    async def spoms(self, ctx):
-        brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
-        if not brc_message:
-            await ctx.send("Message is empty")
-            return
+    # @commands.command()
+    # @commands.is_owner()
+    # async def spoms(self, ctx):
+    #     brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
+    #     if not brc_message:
+    #         await ctx.send("Message is empty")
+    #         return
 
-        brc_list = brc_message.split("\n\n")
-        embed=discord.Embed(color=0x0aff00, title="Sponsored Message")
-        # embed.add_field(name="Sponsored Message", value="⠀", inline=False)
+    #     brc_list = brc_message.split("\n\n")
+    #     embed=discord.Embed(color=0x0aff00, title="Sponsored Message")
+    #     # embed.add_field(name="Sponsored Message", value="⠀", inline=False)
 
-        # check for images
-        if ctx.message.attachments:
-            attachment_url = ""
-            for a in ctx.message.attachments:
-                if a.url.endswith(".png") or a.url.endswith(".jpg") or a.url.endswith(".jpeg"):
-                    attachment_url = a.url
-                    break
+    #     # check for images
+    #     if ctx.message.attachments:
+    #         attachment_url = ""
+    #         for a in ctx.message.attachments:
+    #             if a.url.endswith(".png") or a.url.endswith(".jpg") or a.url.endswith(".jpeg"):
+    #                 attachment_url = a.url
+    #                 break
 
-            if attachment_url:
-                embed.set_image(url=attachment_url)
+    #         if attachment_url:
+    #             embed.set_image(url=attachment_url)
 
-        for part in brc_list:
-            name = part.split("\n")[0]
-            value = part.replace(f"{name}\n", "")
-            if name == part.replace(f"{name}\n", ""):
-                value = "⠀"
-            embed.add_field(name=("⠀\n" + name), value=value, inline=False)
+    #     for part in brc_list:
+    #         name = part.split("\n")[0]
+    #         value = part.replace(f"{name}\n", "")
+    #         if name == part.replace(f"{name}\n", ""):
+    #             value = "⠀"
+    #         embed.add_field(name=("⠀\n" + name), value=value, inline=False)
         
-        result = await self.global_message(None, embed)
-        await ctx.send(result)
+    #     result = await self.global_message(None, embed)
+    #     await ctx.send(result)
 
 
     @commands.command()
