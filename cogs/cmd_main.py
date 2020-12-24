@@ -7,7 +7,6 @@ from datetime import datetime
 from cogs.api.guild_settings_api import API_v2
 from cogs.api.discord_users_api import DiscordUsersApiV2
 from cogs.api.message_cache_api import MessageCacheAPI
-from cogs.pay_to_win.stats_module import CustomBackground
 from cogs.api.bans_api import BansAPI
 from cogs.api.stats_api import MongoClient, StatsApi, get_wg_api_domain
 import re
@@ -27,7 +26,6 @@ Guilds_API = API_v2()
 Ban_API = BansAPI()
 UsersApiV2 = DiscordUsersApiV2()
 CacheAPI = MessageCacheAPI()
-bgAPI = CustomBackground()
 API = StatsApi()
 
 api_domain = "https://api.aftermath.link"
@@ -398,86 +396,6 @@ class maintenance(commands.Cog):
 
         await ctx.send(f"Added {days} days of Aftermath Premium for {ctx.message.mentions[0].name} - {com_res_data.get('status')}", delete_after=30)
         return
-
-
-    @commands.command(aliases=['bg'])
-    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
-    @commands.guild_only()
-    async def fancy(self, ctx, url=None):
-        if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
-            return
-
-        try:
-            res = requests.get(f'{api_domain}/users/{ctx.author.id}')
-            premium = rapidjson.loads(res.text).get('premium', False)
-            verified = rapidjson.loads(res.text).get('verified', False)
-            if not verified:
-                await ctx.send("You need to verify your account with `v-login` before setting up a background image.")
-                return
-            elif not premium:
-                await ctx.send("You will need to have Aftermath Premium to change the background.")
-                return
-            
-        except:
-            await ctx.send("It looks like Aftermath is partially down for maintenance. Try again later.")
-            return
-
-        # Fix url
-        try:
-            url = url.strip()
-        except:
-            url = None
-
-        try:
-            # Set image url
-            if url:
-                img_url = url
-            else:
-                img_url = None
-
-            attachments = ctx.message.attachments
-            # Check attachments for jpeg images
-            for att in attachments:
-                if att.url:
-                    img_url = att.url
-                    break
-
-            # Image url found
-            if img_url:
-                err = bgAPI.put(user_id=str(ctx.author.id), image_url=img_url)
-                if not err:
-                    await ctx.send("Awesome! Your stats will now shine bright :)")
-                    return
-                else:
-                    raise Exception(err)
-            # No valid url
-            else:
-                raise Exception('There is no link to a valid image in your message.\nUsage example:\nv-fancy https://i.imgflip.com/1ovalo.jpg')
-
-        # Handle exceptions
-        except Exception as e:
-            print(traceback.format_exc())
-            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
-
-
-    @commands.command(aliases=['nobg'])
-    @commands.cooldown(1, command_cooldown, commands.BucketType.user)
-    @commands.guild_only()
-    async def notfancy(self, ctx):
-        if ctx.author == self.client.user or isinstance(ctx.channel, discord.channel.DMChannel):
-            return
-
-        try:
-            err = bgAPI.delete(str(ctx.author.id))
-            if err:
-                raise Exception(err)
-            await ctx.send("Removed your custom background for stats.")
-
-        # Handle exceptions
-        except Exception as e:
-            print(traceback.format_exc())
-            await ctx.channel.send(f'Something did not work as planned :confused:\n```{e}```')
-
 
     @commands.command(aliases=['Iam', 'IAM'])
     @commands.cooldown(1, command_cooldown, commands.BucketType.user)
