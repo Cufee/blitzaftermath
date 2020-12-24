@@ -37,7 +37,12 @@ class Replay:
 
     def process_replays(self):
         for url in self.api_urls:
-            replay_data = rapidjson.loads(requests.get(url).text)
+            res = requests.get(url)
+
+            if not res:
+                raise Exception('Unable to reach WoTInspector. Please try again later.')
+
+            replay_data = rapidjson.loads(res.text)
 
             if not replay_data:
                 raise Exception('Unable to reach WoTInspector API')
@@ -127,8 +132,12 @@ class Replay:
                                        for player in player_ids_all))
         wg_api_domain, player_realm = self.get_wg_api_domain(protagonist_id)
 
-        players_stats = rapidjson.loads(requests.get(
-            wg_api_domain + self.wg_api_url_end + player_ids_all_str).text).get('data')
+        res = requests.get(wg_api_domain + self.wg_api_url_end + player_ids_all_str)
+
+        if not res:
+            raise Exception('Unable to reach Wargaming servers. Please try again later.')
+
+        players_stats = rapidjson.loads(res.text).get('data')
 
         if not players_stats:
             raise Exception('Unable to reach WG API (Fetching player data)')
@@ -141,8 +150,14 @@ class Replay:
                 vehicles_all.append(vehicle)
         vehicles_all_str = ','.join((str(vehicle)
                                      for vehicle in vehicles_all))
-        vehicles_all_data = rapidjson.loads(requests.get(
-            wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str).text).get('data')
+
+        res = requests.get(
+            wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str)
+
+        if not res:
+            raise Exception('Unable to reach Wargaming servers. Please try again later.')
+
+        vehicles_all_data = rapidjson.loads(res.text).get('data')
 
         if not vehicles_all_data:
             raise Exception('Unable to reach WG API (Fetching vehicle data)')
@@ -175,8 +190,13 @@ class Replay:
             vehicle_id = player.get('vehicle_descr')
 
             try:
-                vehicle_stats = rapidjson.loads(requests.get(
-                    wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}').text).get('data').get(player_id)[0].get('all')
+                res = requests.get(
+                    wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}')
+
+                if not res:
+                    raise Exception('Unable to reach Wargaming servers. Please try again later.')
+
+                vehicle_stats = rapidjson.loads(res.text).get('data').get(player_id)[0].get('all')
             except:
                 vehicle_stats = None
 

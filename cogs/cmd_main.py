@@ -210,8 +210,7 @@ class maintenance(commands.Cog):
             if cog._get_overridden_method(cog.cog_command_error) is not None:
                 return
 
-        ignored = ()
-        # ignored = (commands.CommandNotFound, )
+        ignored = (commands.CommandNotFound, )
 
         # Allows us to check for original exceptions raised and sent to CommandInvokeError.
         # If nothing is found. We keep the exception passed to on_command_error.
@@ -236,13 +235,6 @@ class maintenance(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        # # Command not found or is disabled
-        # elif isinstance(error, commands.CommandNotFound):
-        #     try:
-        #         await ctx.author.send(help_str)
-        #     except discord.HTTPException:
-        #         pass
-
         # Check if command missing arguments
         elif isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send(f'You will need to give me more context to use this command. Check v-help if you are not sure what arguments a given command requires.', delete_after=15)
@@ -256,57 +248,6 @@ class maintenance(commands.Cog):
                 ctx.command), file=sys.stderr)
             traceback.print_exception(
                 type(error), error, error.__traceback__, file=sys.stderr)
-
-
-    # @commands.command()
-    # @commands.is_owner()
-    # async def broadcast(self, ctx):
-    #     brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
-    #     if not brc_message:
-    #         await ctx.send("Message is empty")
-    #         return
-
-    #     embed=discord.Embed(color=0xff0000)
-    #     embed.add_field(name="Service Annoucement", value=brc_message, inline=False)
-    #     embed.set_footer(text=f"- {ctx.author.name}#{ctx.author.discriminator}")
-        
-    #     result = await self.global_message(None, embed)
-    #     await ctx.send(result)
-
-
-    # @commands.command()
-    # @commands.is_owner()
-    # async def spoms(self, ctx):
-    #     brc_message = ctx.message.content[(len(f"{ctx.prefix}{ctx.command} ")):]
-    #     if not brc_message:
-    #         await ctx.send("Message is empty")
-    #         return
-
-    #     brc_list = brc_message.split("\n\n")
-    #     embed=discord.Embed(color=0x0aff00, title="Sponsored Message")
-    #     # embed.add_field(name="Sponsored Message", value="⠀", inline=False)
-
-    #     # check for images
-    #     if ctx.message.attachments:
-    #         attachment_url = ""
-    #         for a in ctx.message.attachments:
-    #             if a.url.endswith(".png") or a.url.endswith(".jpg") or a.url.endswith(".jpeg"):
-    #                 attachment_url = a.url
-    #                 break
-
-    #         if attachment_url:
-    #             embed.set_image(url=attachment_url)
-
-    #     for part in brc_list:
-    #         name = part.split("\n")[0]
-    #         value = part.replace(f"{name}\n", "")
-    #         if name == part.replace(f"{name}\n", ""):
-    #             value = "⠀"
-    #         embed.add_field(name=("⠀\n" + name), value=value, inline=False)
-        
-    #     result = await self.global_message(None, embed)
-    #     await ctx.send(result)
-
 
     @commands.command()
     async def invite(self, ctx):
