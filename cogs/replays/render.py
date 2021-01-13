@@ -12,6 +12,9 @@ from re import compile, sub
 
 from math import ceil, floor
 
+import requests
+import rapidjson
+
 
 class Render():
     def __init__(self, replay_data, replay_id, stats=None, stats_bottom=None):
@@ -216,8 +219,12 @@ class Render():
         if bg == 1:
             solid_bg = Image.new('RGB', (frame_w, frame_h), (255, 255, 255))
             try:
-                bg_image = Image.open(
-                    f'./cogs/replays/render/bg_frames_named/{self.protagonist_id}.jpg')
+                # Get background link
+                res = requests.get(f"https://api.aftermath.link/players/id/{self.protagonist_id}")
+                bg_url = rapidjson.loads(res.text).get("bg_url")
+
+                # Get custom background
+                bg_image = Image.open(requests.get(bg_url, stream=True).raw)
             except:
                 bg_image = Image.open('./cogs/replays/render/bg_frame.png')
 

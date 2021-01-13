@@ -294,9 +294,13 @@ class blitz_aftermath_replays(commands.Cog):
         if len(new_enabled_channels) > 2 and not guild_is_premium:
             channel_names = []
             for channel in enabled_channels:
-                channel_names.append(self.client.get_channel(channel).name)
+                channel_data = self.client.get_channel(channel)
+                if channel_data:
+                    channel_names.append(channel_data.name)
+                else:
+                    channel_names.append("unknown")
             try:
-                await ctx.send(f"It looks like you already have me watching {channel_names[0]} and {channel_names[1]}. You will need to be a premium member to enable more channels.")
+                await ctx.send(f"It looks like you already have me watching {len(channel_names)} channels. You will need to be a premium member to enable more channels.")
             except:
                 await ctx.send(f"It looks like you already have me watching multiple channels. You will need to be a premium member to enable more channels.")
 
