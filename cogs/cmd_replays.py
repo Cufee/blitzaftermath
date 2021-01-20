@@ -10,7 +10,7 @@ from cogs.replays.render import Render
 from cogs.api.guild_settings_api import API_v2
 
 Guilds_API = API_v2()
-
+API_KEY = "3699b3a1-335a-4b6e-b7ad-3e7180048c18"
 
 def get_image(urls, rating=None, stats=None, stats_bottom=None, bg=1, brand=1, darken=1, mapname=0, raw=0):
     # Send replay to WoTInspector
@@ -93,7 +93,7 @@ class blitz_aftermath_replays(commands.Cog):
                     rating = 'mBRT1_1A'
                     try:
                         # Check if user is banned
-                        res = requests.get(f'{self.api_domain}/users/{message.author.id}')
+                        res = requests.get(f'{self.api_domain}/users/id/{message.author.id}', headers={"x-api-key": API_KEY})
                         res_data = rapidjson.loads(res.text)
                         if res_data.get("banned", False):
                             if not res_data.get("ban_notified", False):

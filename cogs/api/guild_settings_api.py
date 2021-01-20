@@ -1,9 +1,5 @@
-import rapidjson
-import requests
-
 # API V2
 from pymongo import MongoClient
-from datetime import datetime, timezone
 
 
 class API_v2():
