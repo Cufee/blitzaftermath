@@ -15,6 +15,7 @@ TOKEN = settings["TOKEN"]
 prefix = settings["prefix"]
 default_game = settings["default_game"]
 client = commands.Bot(command_prefix=prefix, case_insensitive=False, activity=discord.Game(name=default_game))
+client.remove_command('help')
 
 # Load cogs
 for filename in os.listdir(f'{os.path.dirname(os.path.realpath(__file__))}/cogs'):
