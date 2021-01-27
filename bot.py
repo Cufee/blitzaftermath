@@ -39,6 +39,11 @@ for filename in os.listdir(f'{os.path.dirname(os.path.realpath(__file__))}/cogs'
 async def on_ready():
     logger.log(f'{client.user.name} online!')
 
+# Errors
+@client.event
+async def on_command_error(ctx, error):
+    pass
+
 # Cog managment
 @client.command(hidden=True)
 @commands.is_owner()
