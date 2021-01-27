@@ -45,31 +45,17 @@ class blitz_aftermath_replays(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.api_domain = "https://api.aftermath.link"
-        self.emoji_01 = self.client.get_emoji(
-            733729140611612722)
-        self.emoji_02 = self.client.get_emoji(
-            733730453084700693)
-        self.emoji_03 = self.client.get_emoji(
-            737794899721846804)
-        self.emoji_10 = self.client.get_emoji(
-            733729140234256436)
-        self.replay_emoji = self.client.get_emoji(
-            804120758690250773)
+        self.emoji_01 = "<:01:733729140611612722>"
+        self.emoji_02 = "<:02:733730453084700693>"
+        self.emoji_03 = "<:03:737794899721846804>"
+        self.emoji_10 = "<:20:733729140234256436>"
+        self.replay_emoji = "<:replay:804120758690250773>"
+
 
     # Events
     # @commands.Cog.listener()
     @commands.Cog.listener()
     async def on_ready(self):
-        self.emoji_01 = self.client.get_emoji(
-            733729140611612722)
-        self.emoji_02 = self.client.get_emoji(
-            733730453084700693)
-        self.emoji_03 = self.client.get_emoji(
-            737794899721846804)
-        self.emoji_10 = self.client.get_emoji(
-            733729140234256436)
-        self.replay_emoji = self.client.get_emoji(
-            804120758690250773)
         print(f'[Beta] Aftermath Replays cog is ready.')
 
 
@@ -111,12 +97,15 @@ class blitz_aftermath_replays(commands.Cog):
         except:
             # No perms
             return
+        
+        # Convert payload emoji to str
+        payload.emoji = str(payload.emoji)
 
         # Replay reaction
         if payload.emoji == self.replay_emoji:
             # Remove reaction
             for reaction in message.reactions:
-                if reaction.emoji == self.replay_emoji:
+                if str(reaction.emoji) == self.replay_emoji:
                     if self.client.user not in await reaction.users().flatten():
                         # No reaction by a bot - return to avoid spam
                         return
@@ -198,9 +187,13 @@ class blitz_aftermath_replays(commands.Cog):
 
         # Detailed Rating reaction
         if payload.emoji == self.emoji_01:
+            # Remove reaction
             for reaction in message.reactions:
-                if reaction.emoji == self.emoji_01:
-                    await reaction.clear()
+                if str(reaction.emoji) == self.emoji_01:
+                    if self.client.user not in await reaction.users().flatten():
+                        # No reaction by a bot - return to avoid spam
+                        return
+                    await reaction.remove(self.client.user)
 
             replays = []
             stats = ['damage_rating', 'kill_rating', 'travel_rating',
@@ -215,9 +208,13 @@ class blitz_aftermath_replays(commands.Cog):
 
         # Detailed performance reaction
         if payload.emoji == self.emoji_03:
+            # Remove reaction
             for reaction in message.reactions:
-                if reaction.emoji == self.emoji_03:
-                    await reaction.clear()
+                if str(reaction.emoji) == self.emoji_03:
+                    if self.client.user not in await reaction.users().flatten():
+                        # No reaction by a bot - return to avoid spam
+                        return
+                    await reaction.remove(self.client.user)
 
             replays = []
             stats = ['player_wr', 'damage_made', 'kills', 'damage_blocked', 'damage_assisted',
