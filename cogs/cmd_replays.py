@@ -84,7 +84,7 @@ class blitz_aftermath_replays(commands.Cog):
                 # Check if a reaction is possible
                 if self.replay_emoji == None:
                     # Bot not ready
-                    await message.send("It looks like Discord is having some issues and I am not able to react to messages right now. Please try again later.")
+                    await message.channel.send("It looks like Discord is having some issues and I am not able to react to messages right now. Please try again later.")
                     return
 
                 # React with Replay Emoji
