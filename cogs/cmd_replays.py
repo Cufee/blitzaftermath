@@ -104,9 +104,13 @@ class blitz_aftermath_replays(commands.Cog):
         if member == self.client.user:
             return
 
-        guild_id = str(guild.id)
-        channel = self.client.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
+        try:
+            guild_id = str(guild.id)
+            channel = self.client.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+        except:
+            # No perms
+            return
 
         # Replay reaction
         if payload.emoji == self.replay_emoji:
