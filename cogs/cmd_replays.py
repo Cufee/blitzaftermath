@@ -53,6 +53,8 @@ class blitz_aftermath_replays(commands.Cog):
             737794899721846804)
         self.emoji_10 = self.client.get_emoji(
             733729140234256436)
+        self.replay_emoji = self.client.get_emoji(
+            804120758690250773)
 
     # Events
     # @commands.Cog.listener()
@@ -66,89 +68,20 @@ class blitz_aftermath_replays(commands.Cog):
             737794899721846804)
         self.emoji_10 = self.client.get_emoji(
             733729140234256436)
+        self.replay_emoji = self.client.get_emoji(
+            804120758690250773)
         print(f'[Beta] Aftermath Replays cog is ready.')
 
-    # Events
-    # @commands.Cog.listener()
+
+    # Adding reactions to messages with a replay
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user or isinstance(message.channel, discord.channel.DMChannel):
+        if message.author == self.client.user:
             return
-        attachments = message.attachments
-        replays = []
-        if attachments:
-            guild_id = str(message.guild.id)
-            enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
-            if status_code != 200:
-                return
-
-            # Verify channel
-            if str(message.channel.id) in enabled_channels:
-                for attachment in attachments:
-                    if attachment.url.endswith('.wotbreplay'):
-                        replays.append(attachment.url)
-
-                if replays:
-                    print(f'valid message - {message.guild.name}')
-                    rating = 'mBRT1_1A'
-                    try:
-                        # Check if user is banned
-                        res = requests.get(f'{self.api_domain}/users/id/{message.author.id}', headers={"x-api-key": API_KEY})
-                        res_data = rapidjson.loads(res.text)
-                        if res_data.get("banned", False):
-                            if not res_data.get("ban_notified", False):
-                                raise Exception("You are currently banned from using Aftermath.")
-                            return
-
-                        image_file, replay_id, replay_link, room_type_mod = get_image(
-                            replays, rating=rating)
-
-                        if self.emoji_02:
-                            embed_desc = f'React with {self.emoji_02} for a transparent picture'
-                            embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
-                            if room_type_mod == 0:
-                                embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
-                            embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
-                        else:
-                            embed_desc = "It looks like Discord is having some issues, I am not able to add any reactions to this message, please try again later."
-
-                        embed = discord.Embed(
-                            title='Download replay', url=replay_link, description=embed_desc)
-                        embed.set_footer(text=f"MD5: {replay_id}")
-
-                        # Send final message
-                        image_message = await message.channel.send(embed=embed, file=image_file)
-
-                        if not self.emoji_02:
-                            return
-
-                        await image_message.add_reaction(self.emoji_02)
-                        await image_message.add_reaction(self.emoji_03)
-                        if room_type_mod == 0:
-                            await image_message.add_reaction(self.emoji_01)
-                        await image_message.add_reaction(self.emoji_10)
-
-                    except Exception as e:
-                        image_file = None
-                        embed = discord.Embed()
-                        embed.set_author(name='Aftermath')
-                        embed.add_field(
-                            name="Something failed...", value="This may occur when a replay file is incomplete or Wargaming API is not accessible, please try again in a few minutes.", inline=False)
-                        embed.set_footer(
-                            text=f"I ran into an issue processing this replay, this will be reported automatically.")
-                        embed.set_footer(
-                            text=f"{e}\nThis was reported automatically.")
-                        await message.channel.send(embed=embed, file=image_file, delete_after=60)
-
-                        # Report the error
-                        channel_invite = await message.channel.create_invite(max_age=300)
-                        owner_member = self.client.get_user(202905960405139456)
-                        dm_channel = await owner_member.create_dm()
-                        try:
-                            await dm_channel.send(f'An error occured in {guild_id} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
-                        except:
-                            pass
-            else:
+        for attachment in message.attachments:
+            if attachment.url.endswith('.wotbreplay'):
+                # React with Replay Emoji
+                await message.add_reaction(self.replay_emoji)
                 return
 
     @commands.Cog.listener()
@@ -166,84 +99,158 @@ class blitz_aftermath_replays(commands.Cog):
 
         guild_id = str(guild.id)
         channel = self.client.get_channel(payload.channel_id)
-        enabled_channels, status_code = Guilds_API.get_one_guild_setting(guild_id=guild_id, key="guild_channels_replays")
-        if status_code != 200:
-            await channel.send(f'Hmmm... Something did not go as planned, please try again in a few seconds. {status_code}', delete_after=30)
-            return
+        message = await channel.fetch_message(payload.message_id)
 
-        # guild_is_premium = guild_settings.get('guild_is_premium')     # Not used
+        # Replay reaction
+        if payload.emoji == self.replay_emoji:
+            # Remove reaction
+            for reaction in message.reactions:
+                if reaction.emoji == self.replay_emoji:
+                    if self.client.user not in await reaction.users().flatten():
+                        # No reaction by a bot - return to avoid spam
+                        return
+                    await reaction.remove(self.client.user)
 
-        if str(payload.channel_id) in enabled_channels:
-            message = await channel.fetch_message(payload.message_id)
+            # Get message
+            attachments = message.attachments
+            replays = []
 
-            # Detailed Rating reaction
-            if payload.emoji == self.emoji_01:
-                for reaction in message.reactions:
-                    if reaction.emoji == self.emoji_01:
-                        await reaction.clear()
+            for attachment in attachments:
+                if attachment.url.endswith('.wotbreplay'):
+                    replays.append(attachment.url)
 
-                replays = []
-                stats = ['damage_rating', 'kill_rating', 'travel_rating',
-                         'shot_rating', 'spotting_rating', 'assist_rating', 'blocked_rating']
-
-                replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, _ = get_image(
-                    replays, rating='mBRT1_1', stats=stats)
-
-                await channel.send('Here is a Rating breakdown for this battle:', file=image_file)
+            if not replays:
+                # No replays found
+                # TODO - notify user
+                print("no valid replay found")
                 return
+            
+            print(f'valid message - {message.guild.name}')
+            rating = 'mBRT1_1A'
+            try:
+                # Check if user is banned
+                res = requests.get(f'{self.api_domain}/users/id/{payload.user_id}', headers={"x-api-key": API_KEY})
+                res_data = rapidjson.loads(res.text)
+                if res_data.get("banned", False):
+                    if not res_data.get("ban_notified", False):
+                        raise Exception("You are currently banned from using Aftermath.")
+                    return
 
-            # Detailed performance reaction
-            if payload.emoji == self.emoji_03:
-                for reaction in message.reactions:
-                    if reaction.emoji == self.emoji_03:
-                        await reaction.clear()
+                image_file, replay_id, replay_link, room_type_mod = get_image(
+                    replays, rating=rating)
 
-                replays = []
-                stats = ['player_wr', 'damage_made', 'kills', 'damage_blocked', 'damage_assisted',
-                         'enemies_spotted', 'distance_travelled', 'time_alive']
-
-                replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, _ = get_image(
-                    replays, rating='mBRT1_1', stats=stats, raw=1)
-
-                await channel.send('Here is a detailed performance breakdown for each player:', file=image_file)
-                return
-
-            # Transparent picture reaction
-            elif payload.emoji == self.emoji_02:
-                print('Sending DM')
-                replays = []
-                replays.append(message.embeds[0].url)
-                image_file, replay_id, replay_link, _ = get_image(
-                    replays, bg=0, brand=1, darken=0, mapname=0)
+                if self.emoji_02:
+                    embed_desc = f'React with {self.emoji_02} for a transparent picture'
+                    embed_desc += f'\nReact with {self.emoji_03} for a detailed performance breakdown of each player'
+                    if room_type_mod == 0:
+                        embed_desc += f'\nReact with {self.emoji_01} for a detailed Rating breakdown\n'
+                    embed_desc += f'\nReact with {self.emoji_10} to learn more about Aftermath Rating'
+                else:
+                    embed_desc = "It looks like Discord is having some issues, I am not able to add any reactions to this message, please try again later."
 
                 embed = discord.Embed(
-                    title='Download replay', url=replay_link)
+                    title='Download replay', url=replay_link, description=embed_desc)
                 embed.set_footer(text=f"MD5: {replay_id}")
 
-                dm_channel = await member.create_dm()
-                try:
-                    await dm_channel.send(embed=embed, file=image_file)
-                except:
-                    print('DM failed')
-                    await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
-                return
+                # Send final message
+                image_message = await message.channel.send(embed=embed, file=image_file)
 
-            elif payload.emoji == self.emoji_10:
+                if not self.emoji_02:
+                    return
+
+                await image_message.add_reaction(self.emoji_02)
+                await image_message.add_reaction(self.emoji_03)
+                if room_type_mod == 0:
+                    await image_message.add_reaction(self.emoji_01)
+                await image_message.add_reaction(self.emoji_10)
+
+            except Exception as e:
+                image_file = None
                 embed = discord.Embed()
+                embed.set_author(name='Aftermath')
                 embed.add_field(
-                    name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_01} to the original message.", inline=False)
+                    name="Something failed...", value="This may occur when a replay file is incomplete or Wargaming API is not accessible, please try again in a few minutes.", inline=False)
+                embed.set_footer(
+                    text=f"I ran into an issue processing this replay, this will be reported automatically.")
+                embed.set_footer(
+                    text=f"{e}\nThis was reported automatically.")
+                await message.channel.send(embed=embed, file=image_file, delete_after=60)
 
-                dm_channel = await member.create_dm()
+                # Report the error
+                channel_invite = await message.channel.create_invite(max_age=300)
+                owner_member = self.client.get_user(202905960405139456)
+                dm_channel = await owner_member.create_dm()
                 try:
-                    await dm_channel.send(embed=embed)
+                    await dm_channel.send(f'An error occured in {guild_id} ({message.channel})\n```{replays[0]}```\n```{str(traceback.format_exc())}```\n{channel_invite}')
                 except:
-                    print('DM failed')
-                    await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
-                return
-            else:
-                return
+                    pass
+
+        # Detailed Rating reaction
+        if payload.emoji == self.emoji_01:
+            for reaction in message.reactions:
+                if reaction.emoji == self.emoji_01:
+                    await reaction.clear()
+
+            replays = []
+            stats = ['damage_rating', 'kill_rating', 'travel_rating',
+                        'shot_rating', 'spotting_rating', 'assist_rating', 'blocked_rating']
+
+            replays.append(message.embeds[0].url)
+            image_file, replay_id, replay_link, _ = get_image(
+                replays, rating='mBRT1_1', stats=stats)
+
+            await channel.send('Here is a Rating breakdown for this battle:', file=image_file)
+            return
+
+        # Detailed performance reaction
+        if payload.emoji == self.emoji_03:
+            for reaction in message.reactions:
+                if reaction.emoji == self.emoji_03:
+                    await reaction.clear()
+
+            replays = []
+            stats = ['player_wr', 'damage_made', 'kills', 'damage_blocked', 'damage_assisted',
+                        'enemies_spotted', 'distance_travelled', 'time_alive']
+
+            replays.append(message.embeds[0].url)
+            image_file, replay_id, replay_link, _ = get_image(
+                replays, rating='mBRT1_1', stats=stats, raw=1)
+
+            await channel.send('Here is a detailed performance breakdown for each player:', file=image_file)
+            return
+
+        # Transparent picture reaction
+        elif payload.emoji == self.emoji_02:
+            print('Sending DM')
+            replays = []
+            replays.append(message.embeds[0].url)
+            image_file, replay_id, replay_link, _ = get_image(
+                replays, bg=0, brand=1, darken=0, mapname=0)
+
+            embed = discord.Embed(
+                title='Download replay', url=replay_link)
+            embed.set_footer(text=f"MD5: {replay_id}")
+
+            dm_channel = await member.create_dm()
+            try:
+                await dm_channel.send(embed=embed, file=image_file)
+            except:
+                print('DM failed')
+                await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
+            return
+
+        elif payload.emoji == self.emoji_10:
+            embed = discord.Embed()
+            embed.add_field(
+                name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_01} to the original message.", inline=False)
+
+            dm_channel = await member.create_dm()
+            try:
+                await dm_channel.send(embed=embed)
+            except:
+                print('DM failed')
+                await channel.send(f"Oh no! I can't send DMs to you {member.mention}. Please adjust your settings.", delete_after=30)
+            return
         else:
             return
 
