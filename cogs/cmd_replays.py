@@ -78,6 +78,11 @@ class blitz_aftermath_replays(commands.Cog):
     async def on_message(self, message):
         if message.author == self.client.user:
             return
+
+        if self.replay_emoji == None:
+            # Bot not ready
+            return
+
         for attachment in message.attachments:
             if attachment.url.endswith('.wotbreplay'):
                 # React with Replay Emoji
