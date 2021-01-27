@@ -79,12 +79,14 @@ class blitz_aftermath_replays(commands.Cog):
         if message.author == self.client.user:
             return
 
-        if self.replay_emoji == None:
-            # Bot not ready
-            return
-
         for attachment in message.attachments:
             if attachment.url.endswith('.wotbreplay'):
+                # Check if a reaction is possible
+                if self.replay_emoji == None:
+                    # Bot not ready
+                    await message.send("It looks like Discord is having some issues and I am not able to react to messages right now. Please try again later.")
+                    return
+
                 # React with Replay Emoji
                 await message.add_reaction(self.replay_emoji)
                 return
