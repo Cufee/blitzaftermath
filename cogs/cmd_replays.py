@@ -82,10 +82,8 @@ class blitz_aftermath_replays(commands.Cog):
         if not payload.guild_id:
             return
 
-        guild = discord.utils.find(
-            lambda g: g.id == payload.guild_id, self.client.guilds)
-        member = discord.utils.find(
-            lambda m: m.id == payload.user_id, guild.members)
+        guild = await self.client.fetch_guild(payload.guild_id)
+        member = await self.client.fetch_user(payload.user_id)
 
         if member == self.client.user:
             return
@@ -239,8 +237,8 @@ class blitz_aftermath_replays(commands.Cog):
                 title='Download replay', url=replay_link)
             embed.set_footer(text=f"MD5: {replay_id}")
 
-            dm_channel = await member.create_dm()
             try:
+                dm_channel = await member.create_dm()
                 await dm_channel.send(embed=embed, file=image_file)
             except:
                 print('DM failed')
@@ -252,8 +250,8 @@ class blitz_aftermath_replays(commands.Cog):
             embed.add_field(
                 name="Aftermath Rating", value=f"Our Rating is calculated based on the performance of each individual player, comparing them to the battle average.\n\nWhile we take many factors into account, your Damage, Accuracy, Spotting and Blocked Damage will give you the most points.\n\nYou can see a detailed rating breakdown by reacting with {self.emoji_01} to the original message.", inline=False)
 
-            dm_channel = await member.create_dm()
             try:
+                dm_channel = await member.create_dm()
                 await dm_channel.send(embed=embed)
             except:
                 print('DM failed')
