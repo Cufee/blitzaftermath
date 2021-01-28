@@ -82,7 +82,7 @@ class blitz_aftermath_replays(commands.Cog):
         if not payload.guild_id:
             return
 
-        guild = await self.client.fetch_guild(payload.guild_id)
+        guild = self.client.get_guild(payload.guild_id)
         member = await self.client.fetch_user(payload.user_id)
 
         if member == self.client.user:
@@ -98,6 +98,25 @@ class blitz_aftermath_replays(commands.Cog):
         
         # Convert payload emoji to str
         payload.emoji = str(payload.emoji)
+
+        # Check perms
+        if payload.emoji in [self.replay_emoji, self.emoji_01, self.emoji_02, self.emoji_03, self.emoji_10]:
+            permsCode = 0x4000000 | 0x400 | 0x4000 | 0x10000 | 0x40000 | 0x800 | 0x2000 | 0x8000 | 0x40
+            perms = channel.permissions_for(guild.me).value
+
+            if perms & permsCode != permsCode:
+                print("bad perms")
+
+                notify = False
+                for reaction in message.reactions:
+                    if self.client.user in await reaction.users().flatten():
+                        notify = True
+                        break
+                # Message user
+                if notify:
+                    await channel.send("Aftermath is missing some required permissions in this channel. Please use `v-perms` if you are an administrator.")
+                return
+                        
 
         # Replay reaction
         if payload.emoji == self.replay_emoji:
@@ -152,9 +171,6 @@ class blitz_aftermath_replays(commands.Cog):
 
                 # Send final message
                 image_message = await message.channel.send(embed=embed, file=image_file)
-
-                if not self.emoji_02:
-                    return
 
                 await image_message.add_reaction(self.emoji_02)
                 await image_message.add_reaction(self.emoji_03)
