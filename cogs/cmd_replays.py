@@ -105,8 +105,6 @@ class blitz_aftermath_replays(commands.Cog):
             perms = channel.permissions_for(guild.me).value
 
             if perms & permsCode != permsCode:
-                print("bad perms")
-
                 notify = False
                 for reaction in message.reactions:
                     if self.client.user in await reaction.users().flatten():
@@ -115,6 +113,9 @@ class blitz_aftermath_replays(commands.Cog):
                 # Message user
                 if notify:
                     await channel.send("Aftermath is missing some required permissions in this channel. Please use `v-perms` if you are an administrator.")
+                    for reaction in message.reactions:
+                        if self.client.user in await reaction.users().flatten():
+                            await reaction.remove(self.client.user)
                 return
                         
 
