@@ -93,7 +93,7 @@ class blitz_aftermath_replays(commands.Cog):
             channel = self.client.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
         except:
-            # No perms
+            print("missing perms")
             return
         
         # Convert payload emoji to str
@@ -188,7 +188,7 @@ class blitz_aftermath_replays(commands.Cog):
                 embed.set_footer(
                     text=f"I ran into an issue processing this replay, this will be reported automatically.")
                 embed.set_footer(
-                    text=f"{e}\nThis was reported automatically.")
+                    text=f"This was reported automatically.")
                 await message.channel.send(embed=embed, file=image_file, delete_after=60)
 
                 # Report the error

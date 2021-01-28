@@ -132,9 +132,9 @@ class Replay:
             'allies') + replay_summary.get('enemies')
         player_ids_all_str = ','.join((str(player)
                                        for player in player_ids_all))
-        wg_api_domain, player_realm = self.get_wg_api_domain(protagonist_id)
+        wg_api_domain, _ = self.get_wg_api_domain(protagonist_id)
 
-        res = requests.get(self.proxy_url, json={"url": wg_api_domain + self.wg_api_url_end + player_ids_all_str})
+        res = requests.get(wg_api_domain + self.wg_api_url_end + player_ids_all_str)
 
         if not res:
             raise Exception('Unable to reach Wargaming servers. Please try again later.')
