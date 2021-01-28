@@ -9,6 +9,8 @@ class Replay:
         self.wg_tanks_api_url_end = f'/wotb/encyclopedia/vehicles/?&application_id={self.wg_app_token}&fields=tier,is_premium,type,name,nation,default_profile&tank_id='
         self.wg_tank_stats_api_url_end = f'/wotb/tanks/stats/?&application_id={self.wg_app_token}&fields=all&account_id='
 
+        self.proxy_url = "https://am-wg-proxy-eu.herokuapp.com/get"
+
         self.base_view_url = 'https://replays.wotinspector.com/en/view/'
         self.base_api_url = 'https://wotinspector.com/api/replay/upload/?details=full&private=1&title=Aftermath&url='
 
@@ -132,7 +134,7 @@ class Replay:
                                        for player in player_ids_all))
         wg_api_domain, player_realm = self.get_wg_api_domain(protagonist_id)
 
-        res = requests.get(wg_api_domain + self.wg_api_url_end + player_ids_all_str)
+        res = requests.get(self.proxy_url, json={"url": wg_api_domain + self.wg_api_url_end + player_ids_all_str})
 
         if not res:
             raise Exception('Unable to reach Wargaming servers. Please try again later.')
