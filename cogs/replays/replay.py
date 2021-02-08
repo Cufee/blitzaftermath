@@ -136,6 +136,9 @@ class Replay:
 
         res = requests.get(wg_api_domain + self.wg_api_url_end + player_ids_all_str)
 
+        if not res or not res.text:
+            res = requests.get(self.proxy_url, json={"url":wg_api_domain + self.wg_api_url_end + player_ids_all_str})
+
         if not res:
             raise Exception('Unable to reach Wargaming servers. Please try again later.')
 
@@ -155,6 +158,9 @@ class Replay:
 
         res = requests.get(
             wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str)
+
+        if not res or not res.text:
+            res = requests.get(self.proxy_url, json={"url":wg_api_domain + self.wg_tanks_api_url_end + vehicles_all_str})
 
         if not res:
             raise Exception('Unable to reach Wargaming servers. Please try again later.')
@@ -194,7 +200,10 @@ class Replay:
             try:
                 res = requests.get(
                     wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}')
-
+            
+                if not res or not res.text:
+                    res = requests.get(self.proxy_url, json={"url":wg_api_domain + self.wg_tank_stats_api_url_end + player_id + f'&tank_id={vehicle_id}'})
+        
                 if not res:
                     raise Exception('Unable to reach Wargaming servers. Please try again later.')
 
